@@ -4,10 +4,8 @@ import { Player } from '../player';
 
 export class Game extends Scene {
     private player: Player;
-    private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     private bullets: Phaser.Physics.Arcade.Group;
     private enemies: Phaser.Physics.Arcade.Group;
-    private speed: number = 200;
 
     constructor() {
         super('Game');
