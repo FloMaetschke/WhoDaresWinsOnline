@@ -79,7 +79,10 @@ export class Game extends Scene {
 
     update() {
         this.player.update();
+        
     }
+
+
 
     private shoot() {
         const bullet = this.bullets.get(this.player.x, this.player.y, 'sprites','ammo-0');
@@ -105,7 +108,7 @@ export class Game extends Scene {
 
         this.enemies.add(enemy);
         // const enemy = this.enemies.create(x, y, 'enemy');
-        enemy.setVelocityY(50);
+        //enemy.setVelocityY(50);
         
         // Gegner nach 5 Sekunden zerstören
         this.time.delayedCall(5000, () => {
