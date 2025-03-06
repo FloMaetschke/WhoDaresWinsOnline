@@ -17,10 +17,10 @@ export class Game extends Scene {
         this.load.setPath('assets');
         
         // Spritesheet laden
-        this.load.image('player', 'player/player.png');
-        this.load.atlas('a-player', 'player/player.png', 'player/player.json');
+        this.load.image('sprites', 'sprites/sprites.png');
+        this.load.atlas('a-player', 'sprites/sprites.png', 'sprites/sprites.json');
 
-        this.load.image('bullet', 'bullet.png');
+        this.load.image('bullet', 'star.png');
         this.load.image('background', 'bg.png');
 
     }
@@ -82,35 +82,7 @@ export class Game extends Scene {
     }
 
     update() {
-
         this.player.update();
-        // // Spieler-Bewegung
-        // const diagonalSpeed = this.speed * 0.7071; // ca. 1/√2 für diagonale Bewegung
-
-        // if (this.cursors.left.isDown && this.cursors.up.isDown) {
-        //     this.player.setVelocity(-diagonalSpeed, -diagonalSpeed);
-        //     this.player.play('move-up', true);
-        // } else if (this.cursors.left.isDown && this.cursors.down.isDown) {
-        //     this.player.setVelocity(-diagonalSpeed, diagonalSpeed);
-        // } else if (this.cursors.right.isDown && this.cursors.up.isDown) {
-        //     this.player.setVelocity(diagonalSpeed, -diagonalSpeed);
-        //     this.player.play('move-up', true);
-        // } else if (this.cursors.right.isDown && this.cursors.down.isDown) {
-        //     this.player.setVelocity(diagonalSpeed, diagonalSpeed);
-        // } else if (this.cursors.left.isDown) {
-        //     this.player.setVelocity(-this.speed, 0);
-        // } else if (this.cursors.right.isDown) {
-        //     this.player.setVelocity(this.speed, 0);
-        // } else if (this.cursors.up.isDown) {
-        //     this.player.setVelocity(0, -this.speed);
-        //     this.player.play('move-up', true);
-        // } else if (this.cursors.down.isDown) {
-        //     this.player.setVelocity(0, this.speed);
-        // } else {
-        //     this.player.setVelocity(0, 0);
-        //     this.player.stop();
-        //     this.player.setFrame(0);
-        // }
     }
 
     private shoot() {

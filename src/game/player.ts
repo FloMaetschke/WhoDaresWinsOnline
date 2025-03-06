@@ -17,34 +17,16 @@ export class Player extends Actor {
         this.getBody().setOffset(8, 0);
 
         // Setze das Startframe auf 'up0'
-        this.setFrame('up0');
+        this.setFrame('player-down-right-0');
 
         this.initAnimations();
     }
 
     private initAnimations(): void {
-        // this.scene.anims.create({
-        //   key: 'run',
-        //   frames: this.scene.anims.generateFrameNames('a-king', {
-        //     prefix: 'run-',
-        //     end: 7,
-        //   }),
-        //   frameRate: 8,
-        // });
-        // this.scene.anims.create({
-        //   key: 'attack',
-        //   frames: this.scene.anims.generateFrameNames('a-king', {
-        //     prefix: 'attack-',
-        //     end: 2,
-        //   }),
-        //   frameRate: 8,
-        // });
-
-        // Animation für Aufwärtsbewegung definieren
         this.scene.anims.create({
             key: "up",
             frames: this.anims.generateFrameNames("a-player", {
-                prefix: "up",
+                prefix: "player-up-",
                 end: 2,
             }),
             frameRate: 10,
@@ -53,7 +35,7 @@ export class Player extends Actor {
         this.scene.anims.create({
             key: "down",
             frames: this.anims.generateFrameNames("a-player", {
-                prefix: "down",
+                prefix: "player-down-",
                 end: 2,
             }),
             frameRate: 10,
@@ -62,7 +44,7 @@ export class Player extends Actor {
         this.scene.anims.create({
             key: "left",
             frames: this.anims.generateFrameNames("a-player", {
-                prefix: "left",
+                prefix: "player-left-",
                 end: 2,
             }),
             frameRate: 10,
@@ -71,7 +53,7 @@ export class Player extends Actor {
         this.scene.anims.create({
             key: "right",
             frames: this.anims.generateFrameNames("a-player", {
-                prefix: "right",
+                prefix: "player-right-",
                 end: 2,
             }),
             frameRate: 10,
@@ -80,7 +62,7 @@ export class Player extends Actor {
         this.scene.anims.create({
             key: "up-left",
             frames: this.anims.generateFrameNames("a-player", {
-                prefix: "up-left",
+                prefix: "player-up-left-",
                 end: 2,
             }),
             frameRate: 10,
@@ -89,7 +71,7 @@ export class Player extends Actor {
         this.scene.anims.create({
             key: "up-right",
             frames: this.anims.generateFrameNames("a-player", {
-                prefix: "up-right",
+                prefix: "player-up-right-",
                 end: 2,
             }),
             frameRate: 10,
@@ -98,7 +80,7 @@ export class Player extends Actor {
         this.scene.anims.create({
             key: "down-left",
             frames: this.anims.generateFrameNames("a-player", {
-                prefix: "down-left",
+                prefix: "player-down-left-",
                 end: 2,
             }),
             frameRate: 10,
@@ -107,7 +89,7 @@ export class Player extends Actor {
         this.scene.anims.create({
             key: "down-right",
             frames: this.anims.generateFrameNames("a-player", {
-                prefix: "down-right",
+                prefix: "player-down-right-",
                 end: 2,
             }),
             frameRate: 10,
