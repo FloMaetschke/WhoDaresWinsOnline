@@ -17,8 +17,8 @@ export class Game extends Scene {
         this.load.setPath('assets');
         
         // Spritesheet laden
-        this.load.image('sprites', 'sprites/sprites.png');
-        this.load.atlas('a-player', 'sprites/sprites.png', 'sprites/sprites.json');
+        this.load.image('sprites', 'sprites.png');
+        this.load.atlas('a-player', 'sprites.png', 'sprites.json');
 
         this.load.image('bullet', 'star.png');
         this.load.image('background', 'bg.png');
