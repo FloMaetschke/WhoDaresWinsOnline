@@ -16,7 +16,7 @@ export class Game extends Scene {
         
         // Spritesheet laden
         //this.load.image('sprites', 'sprites.png');
-        this.load.atlas('a-player', 'sprites.png', 'sprites.json');
+        this.load.atlas('sprites', 'sprites.png', 'sprites.json');
 
         this.load.image('bullet', 'star.png');
         this.load.image('background', 'bg.png');
@@ -84,7 +84,7 @@ export class Game extends Scene {
     }
 
     private shoot() {
-        const bullet = this.bullets.get(this.player.x, this.player.y, 'bullet');
+        const bullet = this.bullets.get(this.player.x, this.player.y, 'sprites','ammo-0');
         
         if (bullet) {
             bullet.setActive(true);

@@ -9,7 +9,7 @@ export class Player extends Actor {
     public currentDirectionY = 0;
 
     constructor(scene: Phaser.Scene, x: number, y: number) {
-        super(scene, x, y, "a-player");
+        super(scene, x, y, "sprites");
         // KEYS
         this.keyW = this.scene.input.keyboard!.addKey("W");
         this.keyA = this.scene.input.keyboard!.addKey("A");
@@ -28,7 +28,7 @@ export class Player extends Actor {
     private initAnimations(): void {
         this.scene.anims.create({
             key: "up",
-            frames: this.anims.generateFrameNames("a-player", {
+            frames: this.anims.generateFrameNames("sprites", {
                 prefix: "player-up-",
                 end: 2,
             }),
@@ -37,7 +37,7 @@ export class Player extends Actor {
         });
         this.scene.anims.create({
             key: "down",
-            frames: this.anims.generateFrameNames("a-player", {
+            frames: this.anims.generateFrameNames("sprites", {
                 prefix: "player-down-",
                 end: 2,
             }),
@@ -46,7 +46,7 @@ export class Player extends Actor {
         });
         this.scene.anims.create({
             key: "left",
-            frames: this.anims.generateFrameNames("a-player", {
+            frames: this.anims.generateFrameNames("sprites", {
                 prefix: "player-left-",
                 end: 2,
             }),
@@ -55,7 +55,7 @@ export class Player extends Actor {
         });
         this.scene.anims.create({
             key: "right",
-            frames: this.anims.generateFrameNames("a-player", {
+            frames: this.anims.generateFrameNames("sprites", {
                 prefix: "player-right-",
                 end: 2,
             }),
@@ -64,7 +64,7 @@ export class Player extends Actor {
         });
         this.scene.anims.create({
             key: "up-left",
-            frames: this.anims.generateFrameNames("a-player", {
+            frames: this.anims.generateFrameNames("sprites", {
                 prefix: "player-up-left-",
                 end: 2,
             }),
@@ -73,7 +73,7 @@ export class Player extends Actor {
         });
         this.scene.anims.create({
             key: "up-right",
-            frames: this.anims.generateFrameNames("a-player", {
+            frames: this.anims.generateFrameNames("sprites", {
                 prefix: "player-up-right-",
                 end: 2,
             }),
@@ -82,7 +82,7 @@ export class Player extends Actor {
         });
         this.scene.anims.create({
             key: "down-left",
-            frames: this.anims.generateFrameNames("a-player", {
+            frames: this.anims.generateFrameNames("sprites", {
                 prefix: "player-down-left-",
                 end: 2,
             }),
@@ -91,7 +91,7 @@ export class Player extends Actor {
         });
         this.scene.anims.create({
             key: "down-right",
-            frames: this.anims.generateFrameNames("a-player", {
+            frames: this.anims.generateFrameNames("sprites", {
                 prefix: "player-down-right-",
                 end: 2,
             }),
