@@ -5,6 +5,9 @@ export class Player extends Actor {
     private keyS: Phaser.Input.Keyboard.Key;
     private keyD: Phaser.Input.Keyboard.Key;
 
+    public currentDirectionX = 0;
+    public currentDirectionY = 0;
+
     constructor(scene: Phaser.Scene, x: number, y: number) {
         super(scene, x, y, "a-player");
         // KEYS
@@ -103,16 +106,34 @@ export class Player extends Actor {
         let directionX = 0;
         let directionY = 0;
 
+        // Y-Richtung prüfen
         if (this.keyW?.isDown) {
             directionY = -1;
+            this.currentDirectionY = directionY;
+            if (!this.keyA?.isDown && !this.keyD?.isDown) {
+                this.currentDirectionX = 0;
+            }
         } else if (this.keyS?.isDown) {
             directionY = 1;
+            this.currentDirectionY = directionY;
+            if (!this.keyA?.isDown && !this.keyD?.isDown) {
+                this.currentDirectionX = 0;
+            }
         }
 
+        // X-Richtung prüfen
         if (this.keyA?.isDown) {
             directionX = -1;
+            this.currentDirectionX = directionX;
+            if (!this.keyW?.isDown && !this.keyS?.isDown) {
+                this.currentDirectionY = 0;
+            }
         } else if (this.keyD?.isDown) {
             directionX = 1;
+            this.currentDirectionX = directionX;
+            if (!this.keyW?.isDown && !this.keyS?.isDown) {
+                this.currentDirectionY = 0;
+            }
         }
 
         const speed = 110;

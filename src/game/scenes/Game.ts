@@ -15,7 +15,7 @@ export class Game extends Scene {
         this.load.setPath('assets');
         
         // Spritesheet laden
-        this.load.image('sprites', 'sprites.png');
+        //this.load.image('sprites', 'sprites.png');
         this.load.atlas('a-player', 'sprites.png', 'sprites.json');
 
         this.load.image('bullet', 'star.png');
@@ -89,7 +89,8 @@ export class Game extends Scene {
         if (bullet) {
             bullet.setActive(true);
             bullet.setVisible(true);
-            bullet.setVelocityY(-400);
+            bullet.setVelocityX(this.player.currentDirectionX * 400);
+            bullet.setVelocityY(this.player.currentDirectionY * 400);
             
             // Projektil nach 1 Sekunde zerstören
             this.time.delayedCall(1000, () => {
