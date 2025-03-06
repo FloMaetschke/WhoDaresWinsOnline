@@ -1,6 +1,7 @@
 import { Scene } from 'phaser';
 import { EventBus } from '../EventBus';
 import { Player } from '../player';
+import { Enemy } from '../enemy';
 
 export class Game extends Scene {
     private player: Player;
@@ -13,11 +14,7 @@ export class Game extends Scene {
 
     preload() {
         this.load.setPath('assets');
-        
-        // Spritesheet laden
-        //this.load.image('sprites', 'sprites.png');
         this.load.atlas('sprites', 'sprites.png', 'sprites.json');
-
         this.load.image('bullet', 'star.png');
         this.load.image('background', 'bg.png');
 
@@ -76,6 +73,7 @@ export class Game extends Scene {
             loop: true
         });
 
+        Enemy.initAnimations(this);
         EventBus.emit('current-scene-ready', this);
     }
 
@@ -103,7 +101,10 @@ export class Game extends Scene {
         const x = Phaser.Math.Between(50, this.cameras.main.width - 50);
         const y = this.player.y - 400;
         
-        const enemy = this.enemies.create(x, y, 'enemy');
+        const enemy = new Enemy(this,x,y,this.player);
+
+        this.enemies.add(enemy);
+        // const enemy = this.enemies.create(x, y, 'enemy');
         enemy.setVelocityY(50);
         
         // Gegner nach 5 Sekunden zerstören
@@ -118,3 +119,4 @@ export class Game extends Scene {
         enemy.destroy();
     }
 }
+
