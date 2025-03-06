@@ -15,14 +15,24 @@ export class Game extends Scene {
     preload() {
         this.load.setPath('assets');
         
-        // Platzhalter-Assets laden
-        this.load.image('player', 'star.png');
+        // Spritesheet laden
+        this.load.image('sprites', 'sprites-atlas.png');
+        this.load.atlas('sprites-atlas', 'sprites-atlas.png', 'sprites-atlas.json');
+
         this.load.image('bullet', 'bullet.png');
-        this.load.image('enemy', 'star.png');
         this.load.image('background', 'bg.png');
+
     }
 
     create() {
+        // Animation für Aufwärtsbewegung definieren
+        this.anims.create({
+            key: 'move-up',
+            frames: this.anims.generateFrameNumbers('sprites-atlas', { start: 0, end: 2 }),
+            frameRate: 10,
+            repeat: -1
+        });
+
         // Endlos scrollender Hintergrund
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const background = this.add.tileSprite(0, 0, this.cameras.main.width, 
@@ -34,8 +44,8 @@ export class Game extends Scene {
         this.physics.world.setBounds(0, 0, this.cameras.main.width, 
             this.cameras.main.height);
 
-        // Spieler erstellen
-        this.player = this.physics.add.sprite(400, 500, 'player');
+        // Spieler mit Spritesheet erstellen
+        this.player = this.physics.add.sprite(400, 500, 'sprites', 0);
         this.player.setCollideWorldBounds(true);
 
         // Kamera folgt dem Spieler
@@ -86,10 +96,12 @@ export class Game extends Scene {
 
         if (this.cursors.left.isDown && this.cursors.up.isDown) {
             this.player.setVelocity(-diagonalSpeed, -diagonalSpeed);
+            this.player.play('move-up', true);
         } else if (this.cursors.left.isDown && this.cursors.down.isDown) {
             this.player.setVelocity(-diagonalSpeed, diagonalSpeed);
         } else if (this.cursors.right.isDown && this.cursors.up.isDown) {
             this.player.setVelocity(diagonalSpeed, -diagonalSpeed);
+            this.player.play('move-up', true);
         } else if (this.cursors.right.isDown && this.cursors.down.isDown) {
             this.player.setVelocity(diagonalSpeed, diagonalSpeed);
         } else if (this.cursors.left.isDown) {
@@ -98,10 +110,13 @@ export class Game extends Scene {
             this.player.setVelocity(this.speed, 0);
         } else if (this.cursors.up.isDown) {
             this.player.setVelocity(0, -this.speed);
+            this.player.play('move-up', true);
         } else if (this.cursors.down.isDown) {
             this.player.setVelocity(0, this.speed);
         } else {
             this.player.setVelocity(0, 0);
+            this.player.stop();
+            this.player.setFrame(0);
         }
     }
 
