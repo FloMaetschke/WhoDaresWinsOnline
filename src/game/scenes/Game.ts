@@ -1,8 +1,9 @@
 import { Scene } from 'phaser';
 import { EventBus } from '../EventBus';
+import { Player } from '../player';
 
 export class Game extends Scene {
-    private player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+    private player: Player;
     private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     private bullets: Phaser.Physics.Arcade.Group;
     private enemies: Phaser.Physics.Arcade.Group;
@@ -16,8 +17,8 @@ export class Game extends Scene {
         this.load.setPath('assets');
         
         // Spritesheet laden
-        this.load.image('sprites', 'sprites-atlas.png');
-        this.load.atlas('sprites-atlas', 'sprites-atlas.png', 'sprites-atlas.json');
+        this.load.image('player', 'player/player.png');
+        this.load.atlas('a-player', 'player/player.png', 'player/player.json');
 
         this.load.image('bullet', 'bullet.png');
         this.load.image('background', 'bg.png');
@@ -25,35 +26,25 @@ export class Game extends Scene {
     }
 
     create() {
-        // Animation für Aufwärtsbewegung definieren
-        this.anims.create({
-            key: 'move-up',
-            frames: this.anims.generateFrameNumbers('sprites-atlas', { start: 0, end: 2 }),
-            frameRate: 10,
-            repeat: -1
-        });
+
 
         // Endlos scrollender Hintergrund
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const background = this.add.tileSprite(0, 0, this.cameras.main.width, 
             this.cameras.main.height, 'background')
             .setOrigin(0, 0)
-            .setScrollFactor(0);
+            .setScrollFactor(1);
 
         // Physik-System aktivieren
         this.physics.world.setBounds(0, 0, this.cameras.main.width, 
             this.cameras.main.height);
 
         // Spieler mit Spritesheet erstellen
-        this.player = this.physics.add.sprite(400, 500, 'sprites', 0);
-        this.player.setCollideWorldBounds(true);
+        this.player = new Player(this,50,50);
 
         // Kamera folgt dem Spieler
         this.cameras.main.startFollow(this.player);
         this.cameras.main.setFollowOffset(0, 100);
-
-        // Steuerung einrichten
-        this.cursors = this.input.keyboard!.createCursorKeys();
 
         // Projektile-Gruppe erstellen
         this.bullets = this.physics.add.group({
@@ -91,33 +82,35 @@ export class Game extends Scene {
     }
 
     update() {
-        // Spieler-Bewegung
-        const diagonalSpeed = this.speed * 0.7071; // ca. 1/√2 für diagonale Bewegung
 
-        if (this.cursors.left.isDown && this.cursors.up.isDown) {
-            this.player.setVelocity(-diagonalSpeed, -diagonalSpeed);
-            this.player.play('move-up', true);
-        } else if (this.cursors.left.isDown && this.cursors.down.isDown) {
-            this.player.setVelocity(-diagonalSpeed, diagonalSpeed);
-        } else if (this.cursors.right.isDown && this.cursors.up.isDown) {
-            this.player.setVelocity(diagonalSpeed, -diagonalSpeed);
-            this.player.play('move-up', true);
-        } else if (this.cursors.right.isDown && this.cursors.down.isDown) {
-            this.player.setVelocity(diagonalSpeed, diagonalSpeed);
-        } else if (this.cursors.left.isDown) {
-            this.player.setVelocity(-this.speed, 0);
-        } else if (this.cursors.right.isDown) {
-            this.player.setVelocity(this.speed, 0);
-        } else if (this.cursors.up.isDown) {
-            this.player.setVelocity(0, -this.speed);
-            this.player.play('move-up', true);
-        } else if (this.cursors.down.isDown) {
-            this.player.setVelocity(0, this.speed);
-        } else {
-            this.player.setVelocity(0, 0);
-            this.player.stop();
-            this.player.setFrame(0);
-        }
+        this.player.update();
+        // // Spieler-Bewegung
+        // const diagonalSpeed = this.speed * 0.7071; // ca. 1/√2 für diagonale Bewegung
+
+        // if (this.cursors.left.isDown && this.cursors.up.isDown) {
+        //     this.player.setVelocity(-diagonalSpeed, -diagonalSpeed);
+        //     this.player.play('move-up', true);
+        // } else if (this.cursors.left.isDown && this.cursors.down.isDown) {
+        //     this.player.setVelocity(-diagonalSpeed, diagonalSpeed);
+        // } else if (this.cursors.right.isDown && this.cursors.up.isDown) {
+        //     this.player.setVelocity(diagonalSpeed, -diagonalSpeed);
+        //     this.player.play('move-up', true);
+        // } else if (this.cursors.right.isDown && this.cursors.down.isDown) {
+        //     this.player.setVelocity(diagonalSpeed, diagonalSpeed);
+        // } else if (this.cursors.left.isDown) {
+        //     this.player.setVelocity(-this.speed, 0);
+        // } else if (this.cursors.right.isDown) {
+        //     this.player.setVelocity(this.speed, 0);
+        // } else if (this.cursors.up.isDown) {
+        //     this.player.setVelocity(0, -this.speed);
+        //     this.player.play('move-up', true);
+        // } else if (this.cursors.down.isDown) {
+        //     this.player.setVelocity(0, this.speed);
+        // } else {
+        //     this.player.setVelocity(0, 0);
+        //     this.player.stop();
+        //     this.player.setFrame(0);
+        // }
     }
 
     private shoot() {
