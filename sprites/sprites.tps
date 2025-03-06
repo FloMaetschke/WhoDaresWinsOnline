@@ -293,6 +293,8 @@
             <key type="filename">sprites/enemy-down-left-1.png</key>
             <key type="filename">sprites/enemy-down-left-2.png</key>
             <key type="filename">sprites/enemy-up-0.png</key>
+            <key type="filename">sprites/enemy-up-1.png</key>
+            <key type="filename">sprites/enemy-up-2.png</key>
             <key type="filename">sprites/enemy-up-left-0.png</key>
             <key type="filename">sprites/enemy-up-left-1.png</key>
             <key type="filename">sprites/enemy-up-left-2.png</key>
