@@ -111,9 +111,9 @@ export class Game extends Scene {
         //enemy.setVelocityY(50);
         
         // Gegner nach 5 Sekunden zerstören
-        this.time.delayedCall(5000, () => {
-            enemy.destroy();
-        });
+        // this.time.delayedCall(5000, () => {
+        //     enemy.destroy();
+        // });
     }
 
     private handleBulletEnemyCollision(bullet: Phaser.Physics.Arcade.Image, 
