@@ -34,10 +34,7 @@ export class Game extends Scene {
         this.load.audio("music", "music.mp3");
 
         this.load.image("tiles", "tileset.png");
-        
-        // NPM-Installation: npm install simplex-noise
-        // Falls nicht möglich, kann auch die inline-Version verwendet werden
-        //this.load.script('perlin', 'https://cdn.jsdelivr.net/npm/simplex-noise@2.4.0/simplex-noise.min.js');
+
     }
 
     create() {
@@ -76,8 +73,8 @@ export class Game extends Scene {
         entityContainer.setDepth(1);
         
         // Spielwelt und Physik-Grenzen setzen (sehr groß für "endlos"-Effekt)
-        const worldWidth = 100000;
-        const worldHeight = 100000;
+        const worldWidth = 1000000;
+        const worldHeight = 1000000;
         this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
         
         // Simplex-Noise initialisieren - Angepasst für neue API
@@ -392,19 +389,14 @@ export class Game extends Scene {
             bullet.setActive(true);
             bullet.setVisible(true);
             
-            // Komplett zufällige Schussrichtung
-            // Zufälliger Winkel zwischen 0 und 2π (voller Kreis)
-            const randomAngle = Phaser.Math.FloatBetween(0, Math.PI * 2);
+            // Die Schussrichtung entspricht der Bewegungsrichtung des Gegners
+            const speed = 150;
             
-            // Geschwindigkeit setzen (x und y-Komponenten aus dem Winkel)
-            const speed = 100;
-            const normalizedX = Math.cos(randomAngle);
-            const normalizedY = Math.sin(randomAngle);
-            
-            bullet.setVelocityX(normalizedX * speed);
-            bullet.setVelocityY(normalizedY * speed);
+            // Verwende die aktuelle Bewegungsrichtung des Gegners
+            bullet.setVelocityX(enemy.currentDirectionX * speed);
+            bullet.setVelocityY(enemy.currentDirectionY * speed);
 
-            // Nach 1,5 Sekunden zerstören
+            // Nach 1 Sekunde zerstören
             this.time.delayedCall(1000, () => {
                 bullet.destroy();
             });

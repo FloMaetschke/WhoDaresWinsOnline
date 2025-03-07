@@ -5,8 +5,8 @@ import { Game } from "./scenes/Game"; // Importiere die Game-Szene
 export class Enemy extends Actor {
     private target: Player;
     private AGRESSOR_RADIUS = 500;
-    private currentDirectionX = 0;
-    private currentDirectionY = 0;
+    public currentDirectionX = 0;
+    public currentDirectionY = 0;
     private wanderTimer: number = 0;
     private isWandering: boolean = false;
     private wanderDirection = { x: 0, y: 0 };
