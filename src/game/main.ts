@@ -3,7 +3,7 @@ import { AUTO, Game, Types } from 'phaser';
 
 // Debug-Konfiguration als globale Variable
 export const DEBUG_CONFIG = {
-    showDebugBoxes: true  // Standard: ausgeschaltet
+    showDebugBoxes: false  // Standard: ausgeschaltet
 };
 
 const config: Types.Core.GameConfig = {
@@ -19,7 +19,7 @@ const config: Types.Core.GameConfig = {
                 y: 0,
                 x: 0
             },
-            debug: DEBUG_CONFIG.showDebugBoxes,
+            debug: false,  // Wird dynamisch gesetzt
             debugBodyColor: 0x9900ff  // Lila Farbe für Debug-Boxen
         }
     },
@@ -28,8 +28,19 @@ const config: Types.Core.GameConfig = {
     ]
 };
 
-const StartGame = (parent) => {
-    return new Game({ ...config, parent });
+const StartGame = (parent: string) => {
+    const gameConfig = { 
+        ...config, 
+        parent,
+        physics: {
+            ...config.physics,
+            arcade: {
+                ...config.physics.arcade,
+                debug: DEBUG_CONFIG.showDebugBoxes
+            }
+        }
+    };
+    return new Game(gameConfig);
 }
 
 export default StartGame;

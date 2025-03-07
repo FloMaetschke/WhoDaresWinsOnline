@@ -1,9 +1,9 @@
-import { Scene } from 'phaser';
-import { EventBus } from '../EventBus';
-import { Player } from '../player';
+import { Scene } from "phaser";
+import { EventBus } from "../EventBus";
+import { Player } from "../player";
 import { initAnimations } from "../animations";
-import { Enemy } from '../enemy';
-import { DEBUG_CONFIG } from '../main';
+import { Enemy } from "../enemy";
+import { DEBUG_CONFIG } from "../main";
 
 export class Game extends Scene {
     private player: Player;
@@ -11,33 +11,39 @@ export class Game extends Scene {
     private enemies: Phaser.Physics.Arcade.Group;
 
     constructor() {
-        super('Game');
+        super("Game");
     }
 
     preload() {
-        this.load.setPath('assets');
-        this.load.atlas('sprites', 'sprites.png', 'sprites.json');
-        this.load.image('bullet', 'star.png');
-        this.load.image('background', 'bg.png');
-
+        this.load.setPath("assets");
+        this.load.atlas("sprites", "sprites.png", "sprites.json");
+        this.load.image("background", "bg.png");
     }
 
     create() {
-
-
         // Endlos scrollender Hintergrund
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const background = this.add.tileSprite(0, 0, this.cameras.main.width, 
-            this.cameras.main.height, 'background')
+        const background = this.add
+            .tileSprite(
+                0,
+                0,
+                this.cameras.main.width,
+                this.cameras.main.height,
+                "background"
+            )
             .setOrigin(0, 0)
             .setScrollFactor(1);
 
         // Physik-System aktivieren
-        this.physics.world.setBounds(0, 0, this.cameras.main.width, 
-            this.cameras.main.height);
+        this.physics.world.setBounds(
+            0,
+            0,
+            this.cameras.main.width,
+            this.cameras.main.height
+        );
 
         // Spieler mit Spritesheet erstellen
-        this.player = new Player(this,50,50);
+        this.player = new Player(this, 500, 500);
 
         // Kamera folgt dem Spieler
         this.cameras.main.startFollow(this.player);
@@ -46,72 +52,93 @@ export class Game extends Scene {
         // Projektile-Gruppe erstellen
         this.bullets = this.physics.add.group({
             classType: Phaser.Physics.Arcade.Image,
-            maxSize: 3
+            maxSize: 3,
         });
 
         // Gegner-Gruppe erstellen
         this.enemies = this.physics.add.group({
-            classType: Phaser.Physics.Arcade.Sprite
+            classType: Phaser.Physics.Arcade.Sprite,
         });
 
         // Schießen mit Leertaste
-        this.input.keyboard!.on('keydown-SPACE', () => {
+        this.input.keyboard!.on("keydown-SPACE", () => {
             this.shoot();
         });
 
         // Kollisionen einrichten
-        this.physics.add.collider(this.bullets, this.enemies, 
+        this.physics.add.collider(
+            this.bullets,
+            this.enemies,
             (object1, object2) => {
                 const bullet = object1 as Phaser.Physics.Arcade.Image;
                 const enemy = object2 as Phaser.Physics.Arcade.Sprite;
                 this.handleBulletEnemyCollision(bullet, enemy);
-            }, undefined, this);
+            },
+            undefined,
+            this
+        );
 
         // Gegner spawnen
         this.time.addEvent({
             delay: 2000,
             callback: this.spawnEnemy,
             callbackScope: this,
-            loop: true
+            loop: true,
         });
 
         initAnimations(this);
-        EventBus.emit('current-scene-ready', this);
+        EventBus.emit("current-scene-ready", this);
 
-        // Debug-Hotkey hinzufügen (F9)
-        this.input.keyboard.on('keydown-F9', () => {
-            DEBUG_CONFIG.showDebugBoxes = !DEBUG_CONFIG.showDebugBoxes;
-            this.physics.world.debugGraphic.clear();
-            (this.physics.world as any).drawDebug = DEBUG_CONFIG.showDebugBoxes;
+        // Debug-Toggle-Event-Listener hinzufügen
+        EventBus.on('toggle-debug', (debugEnabled: boolean) => {
+            // Debug-Einstellungen aktualisieren
+            const world = this.physics.world;
             
-            // Debug-Text anzeigen
-            if (DEBUG_CONFIG.showDebugBoxes) {
-                this.add.text(10, 10, 'Debug Mode: ON', { 
-                    color: '#ff00ff',
-                    backgroundColor: '#000000'
-                }).setScrollFactor(0).setDepth(1000);
+            // Debug-Modus setzen
+            (world as any).drawDebug = debugEnabled;
+            (this.game.config.physics.arcade as any).debug = debugEnabled;
+
+            // Wenn Debug deaktiviert wird und Debug-Grafik existiert
+            if (!debugEnabled && world.debugGraphic) {
+                world.debugGraphic.clear();
+                world.debugGraphic.destroy();
+                world.debugGraphic = null;
+            }
+
+            // Wenn Debug aktiviert wird
+            if (debugEnabled) {
+                // Alte Debug-Grafik aufräumen falls vorhanden
+                if (world.debugGraphic) {
+                    world.debugGraphic.clear();
+                    world.debugGraphic.destroy();
+                    world.debugGraphic = null;
+                }
+                // Neue Debug-Grafik erstellen
+                (world as any).createDebugGraphic();
             }
         });
     }
 
     update() {
         this.player.update();
-        
     }
 
-
-
     private shoot() {
-        const bullet = this.bullets.get(this.player.x, this.player.y, 'sprites','ammo-0');
-        
+        const bullet = this.bullets.get(
+            this.player.x,
+            this.player.y,
+            "sprites",
+            "ammo-0"
+        );
+
         if (bullet) {
             bullet.setActive(true);
             bullet.setVisible(true);
             bullet.setVelocityX(this.player.currentDirectionX * 400);
             bullet.setVelocityY(this.player.currentDirectionY * 400);
-            
+
             // Projektil nach 1 Sekunde zerstören
-            this.time.delayedCall(1000, () => {
+            this.time.delayedCall(3000, () => {
                 bullet.destroy();
             });
         }
@@ -120,23 +147,30 @@ export class Game extends Scene {
     private spawnEnemy() {
         const x = Phaser.Math.Between(50, this.cameras.main.width - 50);
         const y = this.player.y - 400;
-        
-        const enemy = new Enemy(this,x,y,this.player);
+
+        const enemy = new Enemy(this, x, y, this.player);
 
         this.enemies.add(enemy);
         // const enemy = this.enemies.create(x, y, 'enemy');
         //enemy.setVelocityY(50);
-        
+
         // Gegner nach 5 Sekunden zerstören
         // this.time.delayedCall(5000, () => {
         //     enemy.destroy();
         // });
     }
 
-    private handleBulletEnemyCollision(bullet: Phaser.Physics.Arcade.Image, 
-        enemy: Phaser.Physics.Arcade.Sprite) {
+    private handleBulletEnemyCollision(
+        bullet: Phaser.Physics.Arcade.Image,
+        enemy: Phaser.Physics.Arcade.Sprite
+    ) {
         bullet.destroy();
         enemy.destroy();
     }
-}
 
+    // Optional: Cleanup im destroy
+    destroy() {
+        EventBus.removeListener('toggle-debug');
+        super.destroy();
+    }
+}
