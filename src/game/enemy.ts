@@ -164,6 +164,7 @@ export class Enemy extends Actor {
         this.dead = true;
         const dieSound = this.scene.sound.add("enemy_die");
         dieSound.play();
+        this.getBody().enable = false;
         this.anims.play("enemy-die");
         this.scene.time.delayedCall(1000, () => {
             this.destroy();
