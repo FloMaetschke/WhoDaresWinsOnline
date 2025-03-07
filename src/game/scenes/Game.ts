@@ -39,6 +39,32 @@ export class Game extends Scene {
     }
 
     create() {
+        // Definiere virtuelle Größe
+        const virtualWidth = 304;
+        const virtualHeight = 192;
+
+        // Konfiguriere die Kamera für "Pixelart"-Look
+        this.cameras.main.setSize(virtualWidth, virtualHeight);
+        
+        // Skaliere die Kamera um die Browserhöhe auszunutzen
+        const scale = window.innerHeight / virtualHeight;
+        
+        // Setze den Zoom so, dass das Bild die Browserhöhe ausfüllt
+        this.cameras.main.setZoom(1); // Zurücksetzen, falls vorher geändert wurde
+        
+        // Scale Manager konfigurieren
+        this.scale.setGameSize(virtualWidth, virtualHeight);
+        this.scale.setZoom(scale);
+        
+        // Zentriere das Spiel im Browser
+        this.scale.autoCenter = Phaser.Scale.CENTER_BOTH;
+        
+        // Anpassen beim Ändern der Fenstergröße
+        window.addEventListener('resize', () => {
+            const newScale = window.innerHeight / virtualHeight;
+            this.scale.setZoom(newScale);
+        });
+
         // Erstelle zuerst einen Container für die Karte
         const mapContainer = this.add.container(0, 0);
         mapContainer.setDepth(0); // Karte im Hintergrund

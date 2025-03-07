@@ -8,10 +8,16 @@ export const DEBUG_CONFIG = {
 
 const config: Types.Core.GameConfig = {
     type: AUTO,
-    width: 1024,
-    height: 768,
+    width: 304,
+    height: 192,
+    pixelArt: true,
     parent: 'game-container',
+    antialias: false,
     backgroundColor: '#red',
+    // scale: {
+    //     mode: Phaser.Scale.FIT,
+    //     autoCenter: Phaser.Scale.CENTER_BOTH
+    // },
     physics: {
         default: 'arcade',
         arcade: {
