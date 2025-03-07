@@ -3,6 +3,7 @@ import { EventBus } from '../EventBus';
 import { Player } from '../player';
 import { initAnimations } from "../animations";
 import { Enemy } from '../enemy';
+import { DEBUG_CONFIG } from '../main';
 
 export class Game extends Scene {
     private player: Player;
@@ -76,6 +77,21 @@ export class Game extends Scene {
 
         initAnimations(this);
         EventBus.emit('current-scene-ready', this);
+
+        // Debug-Hotkey hinzufügen (F9)
+        this.input.keyboard.on('keydown-F9', () => {
+            DEBUG_CONFIG.showDebugBoxes = !DEBUG_CONFIG.showDebugBoxes;
+            this.physics.world.debugGraphic.clear();
+            (this.physics.world as any).drawDebug = DEBUG_CONFIG.showDebugBoxes;
+            
+            // Debug-Text anzeigen
+            if (DEBUG_CONFIG.showDebugBoxes) {
+                this.add.text(10, 10, 'Debug Mode: ON', { 
+                    color: '#ff00ff',
+                    backgroundColor: '#000000'
+                }).setScrollFactor(0).setDepth(1000);
+            }
+        });
     }
 
     update() {

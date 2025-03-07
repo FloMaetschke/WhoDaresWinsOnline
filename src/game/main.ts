@@ -1,6 +1,11 @@
 import { Game as MainGame } from './scenes/Game';
 import { AUTO, Game, Types } from 'phaser';
 
+// Debug-Konfiguration als globale Variable
+export const DEBUG_CONFIG = {
+    showDebugBoxes: true  // Standard: ausgeschaltet
+};
+
 const config: Types.Core.GameConfig = {
     type: AUTO,
     width: 1024,
@@ -14,7 +19,8 @@ const config: Types.Core.GameConfig = {
                 y: 0,
                 x: 0
             },
-            debug: false
+            debug: DEBUG_CONFIG.showDebugBoxes,
+            debugBodyColor: 0x9900ff  // Lila Farbe für Debug-Boxen
         }
     },
     scene: [

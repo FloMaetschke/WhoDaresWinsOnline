@@ -16,11 +16,16 @@ export class Enemy extends Actor {
         this.target = target;
         scene.add.existing(this);
         scene.physics.add.existing(this);
+        
+        // Kollisionsbox anpassen
         this.getBody().setSize(30, 30);
         this.getBody().setOffset(8, 0);
         
-        // Starte mit einer Standard-Animation
-        //this.play('enemy-down', true);
+        // Physik aktivieren
+        this.body.enable = true;
+        
+        // Initial animation starten
+        this.anims.play('enemy-down');
         
         this.startWandering();
     }
@@ -126,7 +131,7 @@ export class Enemy extends Actor {
             const directionX = dx / length;
             const directionY = dy / length;
 
-            const speed = 100;
+            const speed = 0;
             this.getBody().setVelocityX(directionX * speed);
             this.getBody().setVelocityY(directionY * speed);
 
