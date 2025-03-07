@@ -1,4 +1,3 @@
-import { Scene } from "phaser";
 import { Actor } from "./actor";
 import { Player } from "./player";
 
@@ -19,83 +18,11 @@ export class Enemy extends Actor {
         scene.physics.add.existing(this);
         this.getBody().setSize(30, 30);
         this.getBody().setOffset(8, 0);
-        this.setFrame("enemy-down-right-0");
+        
+        // Starte mit einer Standard-Animation
+        //this.play('enemy-down', true);
+        
         this.startWandering();
-    }
-
-    public static initAnimations(scene: Scene): void {
-        scene.anims.create({
-            key: "enemy-up",
-            frames: scene.anims.generateFrameNames("sprites", {
-                prefix: "enemy-up-",
-                end: 2,
-            }),
-            frameRate: 10,
-            repeat: -1,
-        });
-        scene.anims.create({
-            key: "enemy-down",
-            frames: scene.anims.generateFrameNames("sprites", {
-                prefix: "enemy-down-",
-                end: 2,
-            }),
-            frameRate: 10,
-            repeat: -1,
-        });
-        scene.anims.create({
-            key: "enemy-left",
-            frames: scene.anims.generateFrameNames("sprites", {
-                prefix: "enemy-left-",
-                end: 2,
-            }),
-            frameRate: 10,
-            repeat: -1,
-        });
-        scene.anims.create({
-            key: "enemy-right",
-            frames: scene.anims.generateFrameNames("sprites", {
-                prefix: "enemy-right-",
-                end: 2,
-            }),
-            frameRate: 10,
-            repeat: -1,
-        });
-        scene.anims.create({
-            key: "enemy-up-left",
-            frames: scene.anims.generateFrameNames("sprites", {
-                prefix: "enemy-up-left-",
-                end: 2,
-            }),
-            frameRate: 10,
-            repeat: -1,
-        });
-        scene.anims.create({
-            key: "enemy-up-right",
-            frames: scene.anims.generateFrameNames("sprites", {
-                prefix: "enemy-up-right-",
-                end: 2,
-            }),
-            frameRate: 10,
-            repeat: -1,
-        });
-        scene.anims.create({
-            key: "enemy-down-left",
-            frames: scene.anims.generateFrameNames("sprites", {
-                prefix: "enemy-down-left-",
-                end: 2,
-            }),
-            frameRate: 10,
-            repeat: -1,
-        });
-        scene.anims.create({
-            key: "enemy-down-right",
-            frames: scene.anims.generateFrameNames("sprites", {
-                prefix: "enemy-down-right-",
-                end: 2,
-            }),
-            frameRate: 10,
-            repeat: -1,
-        });
     }
 
     private startWandering(): void {
@@ -144,33 +71,39 @@ export class Enemy extends Actor {
     }
 
     private updateAnimation(): void {
-        let animationKey = "";
+        let animationKey = '';
+        
+        // Bestimme die Animations-Richtung basierend auf der aktuellen Bewegung
         if (this.currentDirectionY < 0) {
-            animationKey =
-                this.currentDirectionX < 0
-                    ? "enemy-up-left"
-                    : this.currentDirectionX > 0
-                    ? "enemy-up-right"
-                    : "enemy-up";
+            animationKey = this.currentDirectionX < 0 
+                ? 'enemy-up-left' 
+                : this.currentDirectionX > 0 
+                    ? 'enemy-up-right' 
+                    : 'enemy-up';
         } else if (this.currentDirectionY > 0) {
-            animationKey =
-                this.currentDirectionX < 0
-                    ? "enemy-down-left"
-                    : this.currentDirectionX > 0
-                    ? "enemy-down-right"
-                    : "enemy-down";
+            animationKey = this.currentDirectionX < 0 
+                ? 'enemy-down-left' 
+                : this.currentDirectionX > 0 
+                    ? 'enemy-down-right' 
+                    : 'enemy-down';
+        } else if (this.currentDirectionX !== 0) {
+            animationKey = this.currentDirectionX < 0 ? 'enemy-left' : 'enemy-right';
         } else {
-            animationKey =
-                this.currentDirectionX < 0 ? "enemy-left" : "enemy-right";
+            // Wenn keine Bewegung, behalte die letzte Richtung bei
+            if (this.anims.currentAnim) {
+                animationKey = this.anims.currentAnim.key;
+            } else {
+                animationKey = 'enemy-down'; // Standardanimation
+            }
         }
 
-        if (
-            !this.anims.isPlaying ||
-            this.anims.currentAnim?.key !== animationKey
-        ) {
-            this.anims.play(animationKey, true);
+        // Spiele die Animation nur ab, wenn sich die Richtung geändert hat
+        // oder wenn keine Animation läuft
+        if (!this.anims.isPlaying || this.anims.currentAnim?.key !== animationKey) {
+            this.play(animationKey, true);
         }
 
+        // Aktualisiere den Offset basierend auf der Richtung
         if (this.currentDirectionX < 0) {
             this.getBody().setOffset(48, 15);
         } else if (this.currentDirectionX > 0) {
@@ -184,7 +117,7 @@ export class Enemy extends Actor {
             { x: this.target.x, y: this.target.y }
         );
 
-        if (distanceToPlayer < this.AGRESSOR_RADIUS && distanceToPlayer > 150) {
+        if (distanceToPlayer < this.AGRESSOR_RADIUS && distanceToPlayer > 250) {
             this.isWandering = false;
             const dx = this.target.x - this.x;
             const dy = this.target.y - this.y;

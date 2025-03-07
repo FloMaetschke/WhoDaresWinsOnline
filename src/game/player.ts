@@ -22,84 +22,9 @@ export class Player extends Actor {
         // Setze das Startframe auf 'up0'
         this.setFrame('player-down-right-0');
 
-        this.initAnimations();
     }
 
-    private initAnimations(): void {
-        this.scene.anims.create({
-            key: "up",
-            frames: this.anims.generateFrameNames("sprites", {
-                prefix: "player-up-",
-                end: 2,
-            }),
-            frameRate: 10,
-            repeat: -1,
-        });
-        this.scene.anims.create({
-            key: "down",
-            frames: this.anims.generateFrameNames("sprites", {
-                prefix: "player-down-",
-                end: 2,
-            }),
-            frameRate: 10,
-            repeat: -1,
-        });
-        this.scene.anims.create({
-            key: "left",
-            frames: this.anims.generateFrameNames("sprites", {
-                prefix: "player-left-",
-                end: 2,
-            }),
-            frameRate: 10,
-            repeat: -1,
-        });
-        this.scene.anims.create({
-            key: "right",
-            frames: this.anims.generateFrameNames("sprites", {
-                prefix: "player-right-",
-                end: 2,
-            }),
-            frameRate: 10,
-            repeat: -1,
-        });
-        this.scene.anims.create({
-            key: "up-left",
-            frames: this.anims.generateFrameNames("sprites", {
-                prefix: "player-up-left-",
-                end: 2,
-            }),
-            frameRate: 10,
-            repeat: -1,
-        });
-        this.scene.anims.create({
-            key: "up-right",
-            frames: this.anims.generateFrameNames("sprites", {
-                prefix: "player-up-right-",
-                end: 2,
-            }),
-            frameRate: 10,
-            repeat: -1,
-        });
-        this.scene.anims.create({
-            key: "down-left",
-            frames: this.anims.generateFrameNames("sprites", {
-                prefix: "player-down-left-",
-                end: 2,
-            }),
-            frameRate: 10,
-            repeat: -1,
-        });
-        this.scene.anims.create({
-            key: "down-right",
-            frames: this.anims.generateFrameNames("sprites", {
-                prefix: "player-down-right-",
-                end: 2,
-            }),
-            frameRate: 10,
-            repeat: -1,
-        });
-
-    }
+ 
 
     update(): void {
         this.getBody().setVelocity(0);
@@ -151,7 +76,7 @@ export class Player extends Actor {
             }
 
             if (!this.anims.isPlaying || this.anims.currentAnim!.key !== animationKey) {
-                this.anims.play(animationKey, true);
+                this.anims.play('player-' + animationKey, true);
             }
 
             if (directionX === -1) {

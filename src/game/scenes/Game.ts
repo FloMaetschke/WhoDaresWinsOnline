@@ -1,6 +1,7 @@
 import { Scene } from 'phaser';
 import { EventBus } from '../EventBus';
 import { Player } from '../player';
+import { initAnimations } from "../animations";
 import { Enemy } from '../enemy';
 
 export class Game extends Scene {
@@ -73,7 +74,7 @@ export class Game extends Scene {
             loop: true
         });
 
-        Enemy.initAnimations(this);
+        initAnimations(this);
         EventBus.emit('current-scene-ready', this);
     }
 
