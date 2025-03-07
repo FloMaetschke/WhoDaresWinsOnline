@@ -18,7 +18,7 @@ export class Enemy extends Actor {
         scene.physics.add.existing(this);
         
         // Kollisionsbox anpassen
-        this.getBody().setSize(14, 20);
+        this.getBody().setSize(13, 20);
         this.getBody().setOffset(1, 0);
         
         // Physik aktivieren

@@ -16,7 +16,7 @@ export class Player extends Actor {
         this.keyS = this.scene.input.keyboard!.addKey("S");
         this.keyD = this.scene.input.keyboard!.addKey("D");
         // PHYSICS
-        this.getBody().setSize(14, 20);
+        this.getBody().setSize(13, 20);
         this.getBody().setOffset(1, 0);
 
         // Setze das Startframe auf 'up0'

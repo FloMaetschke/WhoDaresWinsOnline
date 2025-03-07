@@ -138,7 +138,7 @@ export class Game extends Scene {
             bullet.setVelocityY(this.player.currentDirectionY * 400);
 
             // Projektil nach 1 Sekunde zerstören
-            this.time.delayedCall(3000, () => {
+            this.time.delayedCall(1200, () => {
                 bullet.destroy();
             });
         }

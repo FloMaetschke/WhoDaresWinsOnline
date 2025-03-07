@@ -35,7 +35,7 @@ const StartGame = (parent: string) => {
         physics: {
             ...config.physics,
             arcade: {
-                ...config.physics.arcade,
+                ...config.physics!.arcade,
                 debug: DEBUG_CONFIG.showDebugBoxes
             }
         }
