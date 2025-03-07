@@ -2,6 +2,7 @@ import { Actor } from "./actor";
 import { Player } from "./player";
 
 export class Enemy extends Actor {
+
     private target: Player;
     private AGRESSOR_RADIUS = 500;
     private currentDirectionX = 0;
@@ -35,7 +36,7 @@ export class Enemy extends Actor {
             this.wanderEvent.destroy();
         }
 
-        this.wanderTimer = Math.random() * 9000 + 1000;
+        this.wanderTimer = Math.random() * 4000 + 1000;
         this.isWandering = true;
 
         const directions = [
@@ -115,11 +116,11 @@ export class Enemy extends Actor {
             { x: this.target.x, y: this.target.y }
         );
 
-        if (distanceToPlayer < this.AGRESSOR_RADIUS && distanceToPlayer > 250) {
+        if (distanceToPlayer < this.AGRESSOR_RADIUS && distanceToPlayer > 150) {
             this.isWandering = false;
             const dx = this.target.x - this.x;
             const dy = this.target.y - this.y;
-
+ 
             const length = Math.sqrt(dx * dx + dy * dy);
             const directionX = dx / length;
             const directionY = dy / length;
@@ -139,5 +140,12 @@ export class Enemy extends Actor {
 
     public setTarget(target: Player): void {
         this.target = target;
+    }
+
+    public die() {
+        const dieSound = this.scene.sound.add('enemy_die');
+        dieSound.play();
+        this.anims.play('enemy-die');
+        this.destroy();
     }
 }

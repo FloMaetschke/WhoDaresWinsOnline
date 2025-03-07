@@ -3,7 +3,6 @@ import { EventBus } from "../EventBus";
 import { Player } from "../player";
 import { initAnimations } from "../animations";
 import { Enemy } from "../enemy";
-import { DEBUG_CONFIG } from "../main";
 
 export class Game extends Scene {
     private player: Player;
@@ -18,6 +17,9 @@ export class Game extends Scene {
         this.load.setPath("assets");
         this.load.atlas("sprites", "sprites.png", "sprites.json");
         this.load.image("background", "bg.png");
+        this.load.audio('bullet', 'shot.wav');
+        this.load.audio('enemy_die', 'enemy_die.wav');
+        this.load.audio('music', 'music.mp3');
     }
 
     create() {
@@ -117,6 +119,9 @@ export class Game extends Scene {
                 (world as any).createDebugGraphic();
             }
         });
+
+        //const music = this.sound.add('music');
+        //music.play();
     }
 
     update() {
@@ -130,6 +135,9 @@ export class Game extends Scene {
             "sprites",
             "ammo-0"
         );
+
+        let bulletSound = this.sound.add('bullet');
+        bulletSound.play();
 
         if (bullet) {
             bullet.setActive(true);
@@ -162,10 +170,10 @@ export class Game extends Scene {
 
     private handleBulletEnemyCollision(
         bullet: Phaser.Physics.Arcade.Image,
-        enemy: Phaser.Physics.Arcade.Sprite
+        enemy: Enemy
     ) {
         bullet.destroy();
-        enemy.destroy();
+        enemy.die();
     }
 
     // Optional: Cleanup im destroy
