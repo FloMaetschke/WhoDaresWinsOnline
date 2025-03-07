@@ -16,8 +16,8 @@ export class Player extends Actor {
         this.keyS = this.scene.input.keyboard!.addKey("S");
         this.keyD = this.scene.input.keyboard!.addKey("D");
         // PHYSICS
-        this.getBody().setSize(30, 30);
-        this.getBody().setOffset(8, 0);
+        this.getBody().setSize(14, 20);
+        this.getBody().setOffset(1, 0);
 
         // Setze das Startframe auf 'up0'
         this.setFrame('player-down-right-0');
@@ -79,11 +79,6 @@ export class Player extends Actor {
                 this.anims.play('player-' + animationKey, true);
             }
 
-            if (directionX === -1) {
-                this.getBody().setOffset(48, 15);
-            } else if (directionX === 1) {
-                this.getBody().setOffset(15, 15);
-            }
         } else {
             this.anims.stop();
         }

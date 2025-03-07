@@ -18,11 +18,11 @@ export class Enemy extends Actor {
         scene.physics.add.existing(this);
         
         // Kollisionsbox anpassen
-        this.getBody().setSize(30, 30);
-        this.getBody().setOffset(8, 0);
+        this.getBody().setSize(14, 20);
+        this.getBody().setOffset(1, 0);
         
         // Physik aktivieren
-        this.body.enable = true;
+        this.body!.enable = true;
         
         // Initial animation starten
         this.anims.play('enemy-down');
@@ -107,13 +107,6 @@ export class Enemy extends Actor {
         if (!this.anims.isPlaying || this.anims.currentAnim?.key !== animationKey) {
             this.play(animationKey, true);
         }
-
-        // Aktualisiere den Offset basierend auf der Richtung
-        if (this.currentDirectionX < 0) {
-            this.getBody().setOffset(48, 15);
-        } else if (this.currentDirectionX > 0) {
-            this.getBody().setOffset(15, 15);
-        }
     }
 
     preUpdate(): void {
@@ -131,7 +124,7 @@ export class Enemy extends Actor {
             const directionX = dx / length;
             const directionY = dy / length;
 
-            const speed = 0;
+            const speed = 100;
             this.getBody().setVelocityX(directionX * speed);
             this.getBody().setVelocityY(directionY * speed);
 
