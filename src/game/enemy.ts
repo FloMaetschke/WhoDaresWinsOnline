@@ -119,8 +119,9 @@ export class Enemy extends Actor {
     preUpdate(time: number, delta: number): void {
         super.preUpdate(time, delta);
         if (this.dead) {
+            // Ändere die Transparenz des Sprites jedes Frame von 100% auf 50% und zurück
+            this.alpha = 0.5 + Math.abs(Math.sin(time / 100)) * 0.2;
 
-            
             this.getBody().setVelocityX(0);
             this.getBody().setVelocityY(0);
             return;
@@ -164,7 +165,7 @@ export class Enemy extends Actor {
         const dieSound = this.scene.sound.add("enemy_die");
         dieSound.play();
         this.anims.play("enemy-die");
-        this.scene.time.delayedCall(1500, () => {
+        this.scene.time.delayedCall(1000, () => {
             this.destroy();
         });
     }
