@@ -3,6 +3,8 @@ import { EventBus } from "../EventBus";
 import { Player } from "../player";
 import { initAnimations } from "../animations";
 import { Enemy } from "../enemy";
+// Importiere SimplexNoise für die Terrain-Generation
+import { createNoise2D } from "simplex-noise";
 
 export class Game extends Scene {
     private player: Player;
@@ -10,6 +12,12 @@ export class Game extends Scene {
     private enemies: Phaser.Physics.Arcade.Group;
     private mapData: number[][] = [];
     private map: Phaser.Tilemaps.Tilemap;
+    
+    // Für endlose Map
+    private noise: (x: number, y: number) => number;
+    private chunkSize = 32; // Größe eines Chunks in Tiles
+    private activeChunks: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
+    private loadedChunks: Set<string> = new Set();
 
     constructor() {
         super("Game");
@@ -24,47 +32,65 @@ export class Game extends Scene {
         this.load.audio("music", "music.mp3");
 
         this.load.image("tiles", "tileset.png");
+        
+        // NPM-Installation: npm install simplex-noise
+        // Falls nicht möglich, kann auch die inline-Version verwendet werden
+        //this.load.script('perlin', 'https://cdn.jsdelivr.net/npm/simplex-noise@2.4.0/simplex-noise.min.js');
     }
 
     create() {
-        // Endlos scrollender Hintergrund
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const background = this.add
-            .tileSprite(
-                0,
-                0,
-                this.cameras.main.width,
-                this.cameras.main.height,
-                "background"
-            )
-            .setOrigin(0, 0)
-            .setScrollFactor(1);
+        // Erstelle zuerst einen Container für die Karte
+        const mapContainer = this.add.container(0, 0);
+        mapContainer.setDepth(0); // Karte im Hintergrund
+        
+        // Container für Spieler und Gegner (über der Karte)
+        const entityContainer = this.add.container(0, 0);
+        entityContainer.setDepth(1);
+        
+        // Spielwelt und Physik-Grenzen setzen (sehr groß für "endlos"-Effekt)
+        const worldWidth = 100000;
+        const worldHeight = 100000;
+        this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
+        
+        // Simplex-Noise initialisieren - Angepasst für neue API
+        this.noise = createNoise2D(Math.random);
+        
+        // Definiere Tiles-Array für die Map
+        const tiles = [4, 5, 6, 7, 8, 9, 13, 14, 64];
 
-        // Physik-System aktivieren
-        this.physics.world.setBounds(
-            0,
-            0,
-            this.cameras.main.width,
-            this.cameras.main.height
-        );
+        // Leere Basistilemap erstellen
+        this.map = this.make.tilemap({
+            tileWidth: 8,
+            tileHeight: 8,
+            width: this.chunkSize,
+            height: this.chunkSize
+        });
+        
+        const tileset = this.map.addTilesetImage("tiles");
 
-        // Spieler mit Spritesheet erstellen
-        this.player = new Player(this, 500, 500);
-
-        // Kamera folgt dem Spieler
-        this.cameras.main.startFollow(this.player);
-        this.cameras.main.setFollowOffset(0, 100);
-
-        // Projektile-Gruppe erstellen
+        // Spieler erstellen und in der Mitte platzieren
+        const startX = worldWidth / 2;
+        const startY = worldHeight / 2;
+        this.player = new Player(this, startX, startY);
+        
+        // Spieler-Tiefe anpassen, damit er über der Tilemap liegt
+        this.player.setDepth(10);
+        
+        // Auch für Gegner und Projektile
+        this.enemies = this.physics.add.group({
+            classType: Phaser.Physics.Arcade.Sprite,
+        });
+        this.enemies.setDepth(10);
+        
         this.bullets = this.physics.add.group({
             classType: Phaser.Physics.Arcade.Image,
             maxSize: 3,
         });
+        this.bullets.setDepth(11); // Projektile über allem
 
-        // Gegner-Gruppe erstellen
-        this.enemies = this.physics.add.group({
-            classType: Phaser.Physics.Arcade.Sprite,
-        });
+        // Kamera folgt dem Spieler in der Mitte des Bildschirms
+        this.cameras.main.startFollow(this.player, true, 0.09, 0.09);
+        this.cameras.main.setFollowOffset(0, 0);
 
         // Schießen mit Leertaste
         this.input.keyboard!.on("keydown-SPACE", () => {
@@ -93,31 +119,11 @@ export class Game extends Scene {
         });
 
         initAnimations(this);
-        const mapWidth = 51;
-        const mapHeight = 37;
-        const  tiles = [ 7, 7, 7, 6, 6, 6, 0, 0, 0, 1, 1, 2, 3, 4, 5 ];
-        for (let y = 0; y < mapHeight; y++) {
-            const row: number[] = [];
-
-            for (let x = 0; x < mapWidth; x++) {
-                //  Scatter the tiles so we get more mud and less stones
-                const tileIndex = Phaser.Math.RND.weightedPick(tiles);
-
-                row.push(tileIndex);
-            }
-
-            this.mapData.push(row);
-        }
-
-        this.map = this.make.tilemap({
-            data: this.mapData,
-            tileWidth: 8,
-            tileHeight: 8,
-        });
-
-        this.map.addTilesetImage("tiles");
-        this.map.createLayer(0, "tiles", 0, 0);
-
+        
+        // Erste Chunks um Spieler laden
+        this.updateChunks();
+        
+        // Rest des Codes wie zuvor
         EventBus.emit("current-scene-ready", this);
 
         // Debug-Toggle-Event-Listener hinzufügen
@@ -148,13 +154,103 @@ export class Game extends Scene {
                 (world as any).createDebugGraphic();
             }
         });
-
-        const music = this.sound.add("music");
-        music.play();
     }
 
     update() {
         this.player.update();
+        
+        // Prüfen, ob neue Chunks geladen werden müssen
+        this.updateChunks();
+    }
+
+    // Generiert und verwaltet die Chunks um den Spieler herum
+    private updateChunks() {
+        // Bestimme, in welchem Chunk der Spieler ist
+        const playerChunkX = Math.floor(this.player.x / (this.chunkSize * 8));
+        const playerChunkY = Math.floor(this.player.y / (this.chunkSize * 8));
+        
+        // Entferne Chunks, die zu weit entfernt sind
+        for (const [key, layer] of this.activeChunks.entries()) {
+            const [chunkX, chunkY] = key.split(',').map(Number);
+            const distance = Phaser.Math.Distance.Between(
+                playerChunkX, playerChunkY, chunkX, chunkY
+            );
+            
+            if (distance > 3) { // Chunks, die zu weit weg sind, entfernen
+                layer.destroy();
+                this.activeChunks.delete(key);
+                // Behalte die Chunk-ID, damit wir wissen, dass wir diesen Chunk schon generiert haben
+            }
+        }
+        
+        // Generiere neue Chunks in der Nähe des Spielers
+        const renderDistance = 2; // Chunks in jeder Richtung
+        
+        for (let y = playerChunkY - renderDistance; y <= playerChunkY + renderDistance; y++) {
+            for (let x = playerChunkX - renderDistance; x <= playerChunkX + renderDistance; x++) {
+                const key = `${x},${y}`;
+                
+                // Wenn dieser Chunk noch nicht existiert, erstelle ihn
+                if (!this.activeChunks.has(key)) {
+                    this.createChunk(x, y);
+                }
+            }
+        }
+    }
+    
+    // Erstellt einen einzelnen Tilemap-Chunk an der angegebenen Position
+    private createChunk(chunkX: number, chunkY: number) {
+        const tiles = [4, 5, 6, 7, 8, 9, 13, 14, 64]; // Deine vordefinierten Tile-Indizes
+        const tileScale = 0.02; // Skalierungsfaktor für Perlin Noise (höher = größere Muster)
+        
+        // Erstelle Layer für den Chunk
+        const layer = this.map.createBlankLayer(
+            `chunk_${chunkX}_${chunkY}`,
+            'tiles',
+            chunkX * this.chunkSize * 8,
+            chunkY * this.chunkSize * 8,
+            this.chunkSize,
+            this.chunkSize
+        );
+        
+        // Fülle den Layer mit Tiles basierend auf Perlin Noise
+        for (let y = 0; y < this.chunkSize; y++) {
+            for (let x = 0; x < this.chunkSize; x++) {
+                // Berechne globale Position für konsistenten Noise
+                const worldX = chunkX * this.chunkSize + x;
+                const worldY = chunkY * this.chunkSize + y;
+                
+                // Generiere Perlin Noise-Wert zwischen 0 und 1
+                const noiseValue = this.generateNoiseValue(worldX, worldY, tileScale);
+                
+                // Wähle einen Tile-Index basierend auf dem Noise-Wert
+                const tileIndex = this.getTileFromNoise(noiseValue, tiles);
+                
+                // Setze den Tile
+                layer.putTileAt(tileIndex, x, y);
+            }
+        }
+        
+        // Setze explizit die Tiefe des Layers niedriger als die des Spielers
+        layer.setDepth(0);
+        
+        // Speichere den Layer
+        this.activeChunks.set(`${chunkX},${chunkY}`, layer);
+        this.loadedChunks.add(`${chunkX},${chunkY}`);
+    }
+    
+    // Erzeugt einen Perlin-Noise-Wert für die gegebenen Koordinaten
+    private generateNoiseValue(x: number, y: number, scale: number): number {
+        // Angepasst an die neue API
+        //return (this.noise(x * scale, y * scale) + 1) / 2;
+        return (this.noise(x , y ) + 1) / 2;
+    }
+    
+    // Wählt einen Tile basierend auf dem Noise-Wert aus
+    private getTileFromNoise(noiseValue: number, tileOptions: number[]): number {
+        // Skaliere den Wert auf den Bereich des Arrays
+        const index = Math.floor(noiseValue * tileOptions.length);
+        return tileOptions[index];
     }
 
     private shoot() {
@@ -182,19 +278,35 @@ export class Game extends Scene {
     }
 
     private spawnEnemy() {
-        const x = Phaser.Math.Between(50, this.cameras.main.width - 50);
-        const y = this.player.y - 400;
+        // Gegner um den Spieler herum spawnen, aber außerhalb des Bildschirms
+        const camera = this.cameras.main;
+        
+        // Zufällige Position am Rand des Sichtfelds der Kamera
+        let x, y;
+        const side = Phaser.Math.Between(0, 3); // 0: oben, 1: rechts, 2: unten, 3: links
+        
+        switch(side) {
+            case 0: // Oben
+                x = Phaser.Math.Between(this.player.x - camera.width/2, this.player.x + camera.width/2);
+                y = this.player.y - camera.height/2 - 50; // Etwas außerhalb des Bildschirms
+                break;
+            case 1: // Rechts
+                x = this.player.x + camera.width/2 + 50;
+                y = Phaser.Math.Between(this.player.y - camera.height/2, this.player.y + camera.height/2);
+                break;
+            case 2: // Unten
+                x = Phaser.Math.Between(this.player.x - camera.width/2, this.player.x + camera.width/2);
+                y = this.player.y + camera.height/2 + 50;
+                break;
+            case 3: // Links
+                x = this.player.x - camera.width/2 - 50;
+                y = Phaser.Math.Between(this.player.y - camera.height/2, this.player.y + camera.height/2);
+                break;
+        }
 
         const enemy = new Enemy(this, x, y, this.player);
-
+        enemy.setDepth(10); // Gleiche Tiefe wie Spieler
         this.enemies.add(enemy);
-        // const enemy = this.enemies.create(x, y, 'enemy');
-        //enemy.setVelocityY(50);
-
-        // Gegner nach 5 Sekunden zerstören
-        // this.time.delayedCall(5000, () => {
-        //     enemy.destroy();
-        // });
     }
 
     private handleBulletEnemyCollision(
