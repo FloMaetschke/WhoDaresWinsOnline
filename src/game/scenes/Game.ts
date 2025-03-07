@@ -326,6 +326,8 @@ export class Game extends Scene {
     }
 
     private spawnEnemy() {
+        if(this.enemies.countActive(true) >= 5) return;
+
         // Gegner um den Spieler herum spawnen, aber außerhalb des Bildschirms
         const camera = this.cameras.main;
         
