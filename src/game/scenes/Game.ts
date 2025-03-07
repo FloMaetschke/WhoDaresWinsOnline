@@ -8,6 +8,8 @@ export class Game extends Scene {
     private player: Player;
     private bullets: Phaser.Physics.Arcade.Group;
     private enemies: Phaser.Physics.Arcade.Group;
+    private mapData: number[][] = [];
+    private map: Phaser.Tilemaps.Tilemap;
 
     constructor() {
         super("Game");
@@ -17,9 +19,11 @@ export class Game extends Scene {
         this.load.setPath("assets");
         this.load.atlas("sprites", "sprites.png", "sprites.json");
         this.load.image("background", "bg.png");
-        this.load.audio('bullet', 'shot.wav');
-        this.load.audio('enemy_die', 'enemy_die.wav');
-        this.load.audio('music', 'music.mp3');
+        this.load.audio("bullet", "shot.wav");
+        this.load.audio("enemy_die", "enemy_die.wav");
+        this.load.audio("music", "music.mp3");
+
+        this.load.image("tiles", "tileset.png");
     }
 
     create() {
@@ -89,13 +93,38 @@ export class Game extends Scene {
         });
 
         initAnimations(this);
+        const mapWidth = 51;
+        const mapHeight = 37;
+        const  tiles = [ 7, 7, 7, 6, 6, 6, 0, 0, 0, 1, 1, 2, 3, 4, 5 ];
+        for (let y = 0; y < mapHeight; y++) {
+            const row: number[] = [];
+
+            for (let x = 0; x < mapWidth; x++) {
+                //  Scatter the tiles so we get more mud and less stones
+                const tileIndex = Phaser.Math.RND.weightedPick(tiles);
+
+                row.push(tileIndex);
+            }
+
+            this.mapData.push(row);
+        }
+
+        this.map = this.make.tilemap({
+            data: this.mapData,
+            tileWidth: 8,
+            tileHeight: 8,
+        });
+
+        this.map.addTilesetImage("tiles");
+        this.map.createLayer(0, "tiles", 0, 0);
+
         EventBus.emit("current-scene-ready", this);
 
         // Debug-Toggle-Event-Listener hinzufügen
-        EventBus.on('toggle-debug', (debugEnabled: boolean) => {
+        EventBus.on("toggle-debug", (debugEnabled: boolean) => {
             // Debug-Einstellungen aktualisieren
             const world = this.physics.world;
-            
+
             // Debug-Modus setzen
             (world as any).drawDebug = debugEnabled;
             (this.game.config.physics.arcade as any).debug = debugEnabled;
@@ -120,7 +149,7 @@ export class Game extends Scene {
             }
         });
 
-        const music = this.sound.add('music');
+        const music = this.sound.add("music");
         music.play();
     }
 
@@ -136,7 +165,7 @@ export class Game extends Scene {
             "ammo-0"
         );
 
-        let bulletSound = this.sound.add('bullet');
+        let bulletSound = this.sound.add("bullet");
         bulletSound.play();
 
         if (bullet) {
@@ -178,7 +207,7 @@ export class Game extends Scene {
 
     // Optional: Cleanup im destroy
     destroy() {
-        EventBus.removeListener('toggle-debug');
+        EventBus.removeListener("toggle-debug");
         super.destroy();
     }
 }

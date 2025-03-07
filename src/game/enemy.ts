@@ -119,7 +119,7 @@ export class Enemy extends Actor {
     preUpdate(time: number, delta: number): void {
         super.preUpdate(time, delta);
         if (this.dead) {
-            // Ändere die Transparenz des Sprites jedes Frame von 100% auf 50% und zurück
+            // Ändere die Transparenz des Sprites jedes Frame von 100% auf 20% und zurück
             this.alpha = 0.5 + Math.abs(Math.sin(time / 100)) * 0.2;
 
             this.getBody().setVelocityX(0);
