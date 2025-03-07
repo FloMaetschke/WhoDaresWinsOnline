@@ -145,7 +145,7 @@ export class Enemy extends Actor {
     public die() {
         const dieSound = this.scene.sound.add('enemy_die');
         dieSound.play();
-        this.anims.play('enemy-die');
+        //this.anims.play('enemy-die');
         this.destroy();
     }
 }
