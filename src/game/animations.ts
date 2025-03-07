@@ -155,4 +155,13 @@ function initEnemyAnimations(scene: Scene): void {
         frameRate: 10,
         repeat: -1,
     });
+    scene.anims.create({
+        key: "enemy-die",
+        frames: scene.anims.generateFrameNames("sprites", {
+            prefix: "enemy-die-",
+            end: 2,
+        }),
+        frameRate: 10,
+        repeat: -1,
+    });
 }
