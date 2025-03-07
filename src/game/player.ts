@@ -7,6 +7,7 @@ export class Player extends Actor {
 
     public currentDirectionX = 0;
     public currentDirectionY = 0;
+    private speed = 60;
 
     constructor(scene: Phaser.Scene, x: number, y: number) {
         super(scene, x, y, "sprites");
@@ -20,14 +21,11 @@ export class Player extends Actor {
         this.getBody().setOffset(1, 0);
 
         // Setze das Startframe auf 'up0'
-        this.setFrame('player-down-right-0');
-
+        this.setFrame("player-down-right-0");
     }
 
- 
-
     update(): void {
-        this.getBody().setVelocity(0);
+        this.getBody()?.setVelocity(0);
         let directionX = 0;
         let directionY = 0;
 
@@ -61,26 +59,44 @@ export class Player extends Actor {
             }
         }
 
-        const speed = 110;
-        this.body!.velocity.x = directionX * speed;
-        this.body!.velocity.y = directionY * speed;
 
-        if (directionX !== 0 || directionY !== 0) {
-            let animationKey = '';
-            if (directionY === -1) {
-                animationKey = directionX === -1 ? 'up-left' : (directionX === 1 ? 'up-right' : 'up');
-            } else if (directionY === 1) {
-                animationKey = directionX === -1 ? 'down-left' : (directionX === 1 ? 'down-right' : 'down');
-            } else {
-                animationKey = directionX === -1 ? 'left' : 'right';
-            }
-
-            if (!this.anims.isPlaying || this.anims.currentAnim!.key !== animationKey) {
-                this.anims.play('player-' + animationKey, true);
-            }
-
-        } else {
-            this.anims.stop();
+        if (this.body) {
+            this.body.velocity.x = directionX * this.speed;
+            this.body.velocity.y = directionY * this.speed;
         }
+        if (directionX !== 0 || directionY !== 0) {
+            let animationKey = "";
+            if (directionY === -1) {
+                animationKey =
+                    directionX === -1
+                        ? "up-left"
+                        : directionX === 1
+                        ? "up-right"
+                        : "up";
+            } else if (directionY === 1) {
+                animationKey =
+                    directionX === -1
+                        ? "down-left"
+                        : directionX === 1
+                        ? "down-right"
+                        : "down";
+            } else {
+                animationKey = directionX === -1 ? "left" : "right";
+            }
+
+            if (
+                !this.anims.isPlaying ||
+                this.anims.currentAnim!.key !== animationKey
+            ) {
+                this.anims.play("player-" + animationKey, true);
+            }
+        } else {
+            this.anims?.stop();
+        }
+    }
+
+    public die() {
+        console.log("Spieler ist tot");
+        this.destroy();
     }
 }

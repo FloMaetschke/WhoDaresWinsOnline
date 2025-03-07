@@ -10,6 +10,8 @@ export class Game extends Scene {
     private player: Player;
     private bullets: Phaser.Physics.Arcade.Group;
     private enemies: Phaser.Physics.Arcade.Group;
+    // Neue Gruppe für Feind-Kugeln
+    private enemyBullets: Phaser.Physics.Arcade.Group;
     private mapData: number[][] = [];
     private map: Phaser.Tilemaps.Tilemap;
     
@@ -114,6 +116,13 @@ export class Game extends Scene {
         });
         this.bullets.setDepth(11); // Projektile über allem
 
+        // Nach der Erstellung der anderen Gruppen
+        this.enemyBullets = this.physics.add.group({
+            classType: Phaser.Physics.Arcade.Image,
+            maxSize: 10,
+        });
+        this.enemyBullets.setDepth(11); // Gleiche Tiefe wie Spieler-Projektile
+
         // Kamera folgt dem Spieler in der Mitte des Bildschirms
         this.cameras.main.startFollow(this.player, true, 0.09, 0.09);
         this.cameras.main.setFollowOffset(0, 0);
@@ -131,6 +140,19 @@ export class Game extends Scene {
                 const bullet = object1 as Phaser.Physics.Arcade.Image;
                 const enemy = object2 as Phaser.Physics.Arcade.Sprite;
                 this.handleBulletEnemyCollision(bullet, enemy);
+            },
+            undefined,
+            this
+        );
+
+        // Kollision zwischen Feindkugeln und Spieler einrichten
+        this.physics.add.collider(
+            this.enemyBullets,
+            this.player,
+            (object1, object2) => {
+                const bullet = object1 as Phaser.Physics.Arcade.Image;
+                const player = object2 as Player;
+                this.handleEnemyBulletPlayerCollision(bullet, player);
             },
             undefined,
             this
@@ -293,8 +315,8 @@ export class Game extends Scene {
         if (bullet) {
             bullet.setActive(true);
             bullet.setVisible(true);
-            bullet.setVelocityX(this.player.currentDirectionX * 400);
-            bullet.setVelocityY(this.player.currentDirectionY * 400);
+            bullet.setVelocityX(this.player.currentDirectionX * 150);
+            bullet.setVelocityY(this.player.currentDirectionY * 150);
 
             // Projektil nach 1 Sekunde zerstören
             this.time.delayedCall(1200, () => {
@@ -341,6 +363,50 @@ export class Game extends Scene {
     ) {
         bullet.destroy();
         enemy.die();
+    }
+
+    // Neue Methode für Feindkugel-Spieler-Kollision
+    private handleEnemyBulletPlayerCollision(
+        bullet: Phaser.Physics.Arcade.Image,
+        player: Player
+    ) {
+        bullet.destroy();
+        this.player.die(); //Spieler tötenw
+    }
+    
+    // Methode für Gegner, damit sie schießen können
+    public enemyShoot(enemy: Enemy) {
+        const bullet = this.enemyBullets.get(
+            enemy.x,
+            enemy.y,
+            "sprites",
+            "ammo-0" // Gleiche Munition wie Spieler verwenden
+        );
+
+        let bulletSound = this.sound.add("bullet");
+        bulletSound.play();
+
+        if (bullet) {
+            bullet.setActive(true);
+            bullet.setVisible(true);
+            
+            // Komplett zufällige Schussrichtung
+            // Zufälliger Winkel zwischen 0 und 2π (voller Kreis)
+            const randomAngle = Phaser.Math.FloatBetween(0, Math.PI * 2);
+            
+            // Geschwindigkeit setzen (x und y-Komponenten aus dem Winkel)
+            const speed = 100;
+            const normalizedX = Math.cos(randomAngle);
+            const normalizedY = Math.sin(randomAngle);
+            
+            bullet.setVelocityX(normalizedX * speed);
+            bullet.setVelocityY(normalizedY * speed);
+
+            // Nach 1,5 Sekunden zerstören
+            this.time.delayedCall(1000, () => {
+                bullet.destroy();
+            });
+        }
     }
 
     // Optional: Cleanup im destroy
