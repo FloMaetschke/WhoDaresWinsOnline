@@ -120,8 +120,8 @@ export class Game extends Scene {
             }
         });
 
-        //const music = this.sound.add('music');
-        //music.play();
+        const music = this.sound.add('music');
+        music.play();
     }
 
     update() {
