@@ -37,7 +37,7 @@ export class Game extends Scene {
         const { startX, startY } = this.gameMap.getPlayerStartPosition();
         this.player = new Player(this, startX, startY);
 
-        this.keyboardController = new KeyboardController(this);
+        this.keyboardController = new KeyboardController(this, this.player);
         // Auch für Gegner und Projektile
         this.enemies = this.physics.add.group({
             classType: Phaser.Physics.Arcade.Sprite,
