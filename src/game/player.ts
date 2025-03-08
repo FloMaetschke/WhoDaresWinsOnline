@@ -110,17 +110,10 @@ export class Player extends Actor {
         // Tod-Animation abspielen
         this.anims.play("player-dead");
         
-        this.scene.time.delayedCall(5000, () => {
-            this.scene.scene.stop();
-            // start das spiel neu:
+        this.scene.time.delayedCall(2000, () => {
+            // Scene neustart mit korrektem Reset
+            this.scene.scene.stop('Game');
             this.scene.scene.start('Game');
-            
-
-
-
-            this.destroy();
-
-            
         });
     }
 }

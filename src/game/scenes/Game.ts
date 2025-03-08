@@ -1,7 +1,7 @@
 import { Scene } from "phaser";
 import { EventBus } from "../EventBus";
 import { Player } from "../player";
-import { initAnimations } from "../animations";
+import { initAnimations, clearAnimations } from "../animations";
 import { Enemy } from "../enemy";
 // Importiere SimplexNoise für die Terrain-Generation
 import { createNoise2D } from "simplex-noise";
@@ -20,9 +20,22 @@ export class Game extends Scene {
     private chunkSize = 32; // Größe eines Chunks in Tiles
     private activeChunks: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
     private loadedChunks: Set<string> = new Set();
+    
+    // Tracking Variable für Animationen
+    private animationsInitialized: boolean = false;
 
     constructor() {
         super("Game");
+    }
+
+    // Neue init-Methode zum Zurücksetzen des Zustands beim Neustart
+    init() {
+        // Zurücksetzen der Chunk-Verwaltung
+        this.activeChunks = new Map();
+        this.loadedChunks = new Set();
+        
+        // NICHT die Animationen zurücksetzen! Das passiert später
+        this.animationsInitialized = false;
     }
 
     preload() {
@@ -164,7 +177,14 @@ export class Game extends Scene {
             loop: true,
         });
 
-        initAnimations(this);
+        // Initialisiere Animationen nur einmal oder wenn sie explizit zurückgesetzt wurden
+        if (!this.animationsInitialized) {
+            // Optional: Vorhandene Animationen löschen, falls es Probleme gibt
+            // clearAnimations(this);
+            
+            initAnimations(this);
+            this.animationsInitialized = true;
+        }
         
         // Erste Chunks um Spieler laden
         this.updateChunks();
@@ -407,6 +427,15 @@ export class Game extends Scene {
 
     // Optional: Cleanup im destroy
     destroy() {
+        // Chunks aufräumen
+        for (const layer of this.activeChunks.values()) {
+            layer.destroy();
+        }
+        this.activeChunks.clear();
+        this.loadedChunks.clear();
+        
+        // Animationen NICHT löschen beim Destroy
+        
         EventBus.removeListener("toggle-debug");
         super.destroy();
     }
