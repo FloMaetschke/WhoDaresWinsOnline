@@ -6,6 +6,7 @@ import { GameMap } from "../GameMap";
 import { EnemySpawner } from "../EnemySpawner";
 import { ShootingController } from "../ShootingController";
 import { DebugController } from "../DebugController";
+import { ScreenSetup } from "../ScreenSetup";
 
 export class Game extends Scene {
     player: Player;
@@ -14,37 +15,15 @@ export class Game extends Scene {
     enemySpawner: EnemySpawner;
     shootingController: ShootingController;
     debugController: DebugController;
+    screenSetup: ScreenSetup;
 
     constructor() {
         super("Game");
     }
 
     create() {
-        // Definiere virtuelle Größe
-        const virtualWidth = 304;
-        const virtualHeight = 192;
-
-        // Konfiguriere die Kamera für "Pixelart"-Look
-        this.cameras.main.setSize(virtualWidth, virtualHeight);
-
-        // Skaliere die Kamera um die Browserhöhe auszunutzen
-        const scale = window.innerHeight / virtualHeight;
-
-        // Setze den Zoom so, dass das Bild die Browserhöhe ausfüllt
-        this.cameras.main.setZoom(1); // Zurücksetzen, falls vorher geändert wurde
-
-        // Scale Manager konfigurieren
-        this.scale.setGameSize(virtualWidth, virtualHeight);
-        this.scale.setZoom(scale);
-
-        // Zentriere das Spiel im Browser
-        this.scale.autoCenter = Phaser.Scale.CENTER_BOTH;
-
-        // Anpassen beim Ändern der Fenstergröße
-        window.addEventListener("resize", () => {
-            const newScale = window.innerHeight / virtualHeight;
-            this.scale.setZoom(newScale);
-        });
+        // Bildschirm-Setup initialisieren
+        this.screenSetup = new ScreenSetup(this);
 
         // Container für Spieler und Gegner (über der Karte)
         const entityContainer = this.add.container(0, 0);
@@ -55,7 +34,6 @@ export class Game extends Scene {
         const { startX, startY } = this.gameMap.getPlayerStartPosition();
         this.player = new Player(this, startX, startY);
 
-        
         // Auch für Gegner und Projektile
         this.enemies = this.physics.add.group({
             classType: Phaser.Physics.Arcade.Sprite,
@@ -100,8 +78,6 @@ export class Game extends Scene {
 
     destroy() {
         this.gameMap.destroy();
-        // Debug Controller aufräumen
         this.debugController.destroy();
-
     }
 }
