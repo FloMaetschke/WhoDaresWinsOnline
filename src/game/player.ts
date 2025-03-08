@@ -9,7 +9,7 @@ export class Player extends Actor {
 
     public currentDirectionX = 0;
     public currentDirectionY = 0;
-    private speed = 60;
+    public speed = 60;
     dead: boolean;
 
     constructor(public scene: Game, x: number, y: number) {
@@ -31,18 +31,27 @@ export class Player extends Actor {
 
         // Schießen mit Leertaste
         this.scene.input.keyboard!.on("keydown-SPACE", () => {
-            this.scene.shootingController.shoot(
-                this,
-                "enemy",
-                this.currentDirectionX,
-                this.currentDirectionY
-            );
+            this.shoot();
            
         });
     }
 
+    public shoot() {
+        this.scene.shootingController.shoot(
+            this,
+            "enemy",
+            this.currentDirectionX,
+            this.currentDirectionY
+        );
+    }
+
     update(): void {
         if (this.dead) return;
+        this.updateKeyboardMovement();
+    }
+
+    private updateKeyboardMovement() {
+        if(this.scene.disableKeyboard) return;
         this.getBody()?.setVelocity(0);
         let directionX = 0;
         let directionY = 0;
@@ -77,6 +86,10 @@ export class Player extends Actor {
             }
         }
 
+        this.move(directionX, directionY);
+    }
+
+    public move(directionX: number, directionY: number) {
         if (this.body) {
             this.body.velocity.x = directionX * this.speed;
             this.body.velocity.y = directionY * this.speed;
@@ -88,23 +101,21 @@ export class Player extends Actor {
                     directionX === -1
                         ? "up-left"
                         : directionX === 1
-                        ? "up-right"
-                        : "up";
+                            ? "up-right"
+                            : "up";
             } else if (directionY === 1) {
                 animationKey =
                     directionX === -1
                         ? "down-left"
                         : directionX === 1
-                        ? "down-right"
-                        : "down";
+                            ? "down-right"
+                            : "down";
             } else {
                 animationKey = directionX === -1 ? "left" : "right";
             }
 
-            if (
-                !this.anims.isPlaying ||
-                this.anims.currentAnim!.key !== animationKey
-            ) {
+            if (!this.anims.isPlaying ||
+                this.anims.currentAnim!.key !== animationKey) {
                 this.anims.play("player-" + animationKey, true);
             }
         } else {

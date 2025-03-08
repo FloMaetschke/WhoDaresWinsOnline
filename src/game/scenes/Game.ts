@@ -16,7 +16,7 @@ export class Game extends Scene {
     shootingController: ShootingController;
     debugController: DebugController;
     screenSetup: ScreenSetup;
-
+    disableKeyboard = false;
     constructor() {
         super("Game");
     }
@@ -79,5 +79,6 @@ export class Game extends Scene {
     destroy() {
         this.gameMap.destroy();
         this.debugController.destroy();
+        this.screenSetup.cleanup(); // Wichtig: Touch-Controls aufräumen
     }
 }
