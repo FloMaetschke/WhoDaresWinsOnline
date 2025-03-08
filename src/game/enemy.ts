@@ -1,5 +1,5 @@
 import { Actor } from "./actor";
-import { Player } from "./player";
+import { Player } from "./Player";
 import { Game } from "./scenes/Game"; // Importiere die Game-Szene
 
 export class Enemy extends Actor {
@@ -15,7 +15,7 @@ export class Enemy extends Actor {
     private dead = false;
     private speed = 50;
 
-    constructor(scene: Phaser.Scene, x: number, y: number, target: Player) {
+    constructor(public scene: Game, x: number, y: number, target: Player) {
         super(scene, x, y, "sprites");
         this.target = target;
         scene.add.existing(this);
@@ -57,7 +57,7 @@ export class Enemy extends Actor {
         });
     }
 
-    // Methode zum Überprüfen der Entfernung zum Spieler
+    // Methode zum Überprüfen der Entfernung zum Spieler 
     private distanceToPlayer(): number {
         return Phaser.Math.Distance.BetweenPoints(
             { x: this.x, y: this.y },
@@ -68,9 +68,8 @@ export class Enemy extends Actor {
     // Versuche zu schießen (mit etwas Wahrscheinlichkeit)
     private tryToShoot(): void {
         // Nur schießen, wenn in Sicht und mit 30% Wahrscheinlichkeit
-        if (Phaser.Math.Between(1, 100) <= 30) {
-            // Verwende die enemyShoot-Methode aus der Game-Szene
-            (this.scene as Game).enemyShoot(this);
+        if (Phaser.Math.Between(1, 100) <= 80) {
+            this.scene.shootingController.shoot(this,'player',this.currentDirectionX,this.currentDirectionY);
         }
     }
 
@@ -164,10 +163,7 @@ export class Enemy extends Actor {
             return;
         }
 
-        const distanceToPlayer = Phaser.Math.Distance.BetweenPoints(
-            { x: this.x, y: this.y },
-            { x: this.target.x, y: this.target.y }
-        );
+        const distanceToPlayer = this.distanceToPlayer();
 
         if (distanceToPlayer < this.AGRESSOR_RADIUS && distanceToPlayer > 150) {
             // Verfolge den Spieler mit 45°-Bewegung
@@ -250,7 +246,7 @@ export class Enemy extends Actor {
             });
 
             // Zufällige Richtung basierend auf Gewichtung wählen
-            let totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+            const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
             let randomValue = Math.random() * totalWeight;
             let selectedIndex = 0;
 

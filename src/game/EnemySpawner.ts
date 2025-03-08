@@ -1,6 +1,6 @@
 import { Scene } from "phaser";
-import { Player } from "./player";
-import { Enemy } from "./enemy";
+import { Player } from "./Player";
+import { Enemy } from "./Enemy";
 
 export class EnemySpawner {
     private scene: Scene;

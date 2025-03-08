@@ -1,5 +1,5 @@
 import { createNoise2D } from "simplex-noise";
-import { Player } from "./player";
+import { Player } from "./Player";
 
 export class GameMap {
     noise: (x: number, y: number) => number;
@@ -153,5 +153,15 @@ export class GameMap {
         // Skaliere den Wert auf den Bereich des Arrays
         const index = Math.floor(noiseValue * tileOptions.length);
         return tileOptions[index];
+    }
+
+    destroy() {
+        // Chunks aufräumen
+        for (const layer of this.activeChunks.values()) {
+            layer.destroy();
+        }
+        this.activeChunks.clear();
+        this.loadedChunks.clear();
+        this.map.destroy();
     }
 }

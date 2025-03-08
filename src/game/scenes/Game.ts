@@ -1,19 +1,19 @@
 import { Scene } from "phaser";
 import { EventBus } from "../EventBus";
-import { Player } from "../player";
-import { Enemy } from "../enemy";
+import { Player } from "../Player";
+import { Enemy } from "../Enemy";
 import { GameMap } from "../GameMap";
 import { EnemySpawner } from "../EnemySpawner";
 import { ShootingController } from "../ShootingController";
 import { DebugController } from "../DebugController";
 
 export class Game extends Scene {
-    private player: Player;
-    private enemies: Phaser.Physics.Arcade.Group;
-    private gameMap: any;
-    private enemySpawner: EnemySpawner;
-    private shootingController: ShootingController;
-    private debugController: DebugController;
+    player: Player;
+    enemies: Phaser.Physics.Arcade.Group;
+    gameMap: GameMap;
+    enemySpawner: EnemySpawner;
+    shootingController: ShootingController;
+    debugController: DebugController;
 
     constructor() {
         super("Game");
@@ -64,41 +64,13 @@ export class Game extends Scene {
 
         // ShootingController initialisieren
         this.shootingController = new ShootingController(this);
-
+        
         // Kollisionen einrichten
-        this.physics.add.collider(
-            this.shootingController.getBullets(),
-            this.enemies,
-            (object1, object2) => {
-                const bullet = object1 as Phaser.Physics.Arcade.Image;
-                const enemy = object2 as Phaser.Physics.Arcade.Sprite;
-                this.handleBulletEnemyCollision(bullet, enemy);
-            },
-            undefined,
-            this
-        );
-
-        // Kollision zwischen Feindkugeln und Spieler einrichten
-        this.physics.add.collider(
-            this.shootingController.getEnemyBullets(),
-            this.player,
-            (object1, object2) => {
-                const bullet = object1 as Phaser.Physics.Arcade.Image;
-                const player = object2 as Player;
-                this.handleEnemyBulletPlayerCollision(bullet, player);
-            },
-            undefined,
-            this
-        );
+        this.shootingController.setupCollisions(this.player, this.enemies);
 
         // Kamera folgt dem Spieler in der Mitte des Bildschirms
         this.cameras.main.startFollow(this.player, true, 0.09, 0.09);
         this.cameras.main.setFollowOffset(0, 0);
-
-        // Schießen mit Leertaste
-        this.input.keyboard!.on("keydown-SPACE", () => {
-            this.shoot();
-        });
 
         // Gegner-Spawner initialisieren
         this.enemySpawner = new EnemySpawner(this, this.player, this.enemies);
@@ -123,60 +95,13 @@ export class Game extends Scene {
 
     update() {
         this.player.update();
-
-        // Prüfen, ob neue Chunks geladen werden müssen
         this.gameMap.updateChunks(this.player);
     }
 
-    private shoot() {
-        this.shootingController.shoot(
-            this.player,
-            'enemy',
-            this.player.currentDirectionX,
-            this.player.currentDirectionY
-        );
-    }
-
-    private handleBulletEnemyCollision(
-        bullet: Phaser.Physics.Arcade.Image,
-        enemy: Enemy
-    ) {
-        bullet.destroy();
-        enemy.die();
-    }
-
-    // Neue Methode für Feindkugel-Spieler-Kollision
-    private handleEnemyBulletPlayerCollision(
-        player: Player,
-        bullet: Phaser.Physics.Arcade.Image
-    ) {
-        bullet.destroy();
-        player.die(); //Spieler töten
-    }
-
-    public enemyShoot(enemy: Enemy) {
-        this.shootingController.shoot(
-            enemy,
-            'player',
-            enemy.currentDirectionX,
-            enemy.currentDirectionY
-        );
-    }
-
-    // Optional: Cleanup im destroy
     destroy() {
-        // Chunks aufräumen
-        for (const layer of this.activeChunks.values()) {
-            layer.destroy();
-        }
-        this.activeChunks.clear();
-        this.loadedChunks.clear();
-
-        // Animationen NICHT löschen beim Destroy
-
+        this.gameMap.destroy();
         // Debug Controller aufräumen
         this.debugController.destroy();
 
-        super.destroy();
     }
 }

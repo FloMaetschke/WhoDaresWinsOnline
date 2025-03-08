@@ -1,6 +1,6 @@
 import { Scene } from "phaser";
-import { Player } from "./player";
-import { Enemy } from "./enemy";
+import { Player } from "./Player";
+import { Enemy } from "./Enemy";
 
 export class ShootingController {
     private scene: Scene;
@@ -9,7 +9,7 @@ export class ShootingController {
 
     constructor(scene: Scene) {
         this.scene = scene;
-        
+
         // Projektile für Spieler
         this.bullets = this.scene.physics.add.group({
             classType: Phaser.Physics.Arcade.Image,
@@ -23,10 +23,67 @@ export class ShootingController {
             maxSize: 10,
         });
         this.enemyBullets.setDepth(11);
+
+
     }
 
-    public shoot(shooter: Player | Enemy, target: 'player' | 'enemy', directionX: number, directionY: number) {
-        const bulletGroup = target === 'enemy' ? this.bullets : this.enemyBullets;
+    public setupCollisions(
+        player: Player,
+        enemies: Phaser.Physics.Arcade.Group
+    ): void {
+        // Kollision zwischen Spielerkugeln und Gegnern
+        this.scene.physics.add.collider(
+            this.bullets,
+            enemies,
+            (bullet, enemy) => {
+                this.handleBulletEnemyCollision(
+                    bullet as Phaser.Physics.Arcade.Image,
+                    enemy as Enemy
+                );
+            },
+            undefined,
+            this
+        );
+
+        // Kollision zwischen Feindkugeln und Spieler
+        this.scene.physics.add.collider(
+            this.enemyBullets,
+            player,
+            (bullet, playerObj) => {
+                this.handleEnemyBulletPlayerCollision(
+                    bullet as Phaser.Physics.Arcade.Image,
+                    playerObj as Player
+                );
+            },
+            undefined,
+            this
+        );
+    }
+
+    private handleBulletEnemyCollision(
+        bullet: Phaser.Physics.Arcade.Image,
+        enemy: Enemy
+    ): void {
+        bullet.destroy();
+        enemy.die();
+    }
+
+    private handleEnemyBulletPlayerCollision(
+        player: Player,
+        bullet: Phaser.Physics.Arcade.Image
+    ): void {
+        bullet.destroy();
+        player.die();
+    }
+
+    public shoot(
+        shooter: Player | Enemy,
+        target: "player" | "enemy",
+        directionX: number,
+        directionY: number
+    ) {
+        const bulletGroup =
+            target === "enemy" ? this.bullets : this.enemyBullets;
         const speed = 150;
 
         const bullet = bulletGroup.get(
@@ -46,7 +103,7 @@ export class ShootingController {
             bullet.setVelocityY(directionY * speed);
 
             // Projektil nach Zeit zerstören
-            const lifetime = target === 'enemy' ? 1200 : 1000;
+            const lifetime = target === "enemy" ? 1200 : 1000;
             this.scene.time.delayedCall(lifetime, () => {
                 bullet.destroy();
             });

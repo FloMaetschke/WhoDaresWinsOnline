@@ -1,4 +1,6 @@
 import { Actor } from "./actor";
+import { Game } from "./scenes/Game";
+
 export class Player extends Actor {
     private keyW: Phaser.Input.Keyboard.Key;
     private keyA: Phaser.Input.Keyboard.Key;
@@ -10,7 +12,7 @@ export class Player extends Actor {
     private speed = 60;
     dead: boolean;
 
-    constructor(scene: Phaser.Scene, x: number, y: number) {
+    constructor(public scene: Game, x: number, y: number) {
         super(scene, x, y, "sprites");
         // KEYS
         this.keyW = this.scene.input.keyboard!.addKey("W");
@@ -26,6 +28,17 @@ export class Player extends Actor {
 
         // Spieler-Tiefe anpassen, damit er über der Tilemap liegt
         this.setDepth(10);
+
+        // Schießen mit Leertaste
+        this.scene.input.keyboard!.on("keydown-SPACE", () => {
+            this.scene.shootingController.shoot(
+                this,
+                "enemy",
+                this.currentDirectionX,
+                this.currentDirectionY
+            );
+           
+        });
     }
 
     update(): void {
