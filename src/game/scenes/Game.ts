@@ -367,11 +367,12 @@ export class Game extends Scene {
 
     // Neue Methode für Feindkugel-Spieler-Kollision
     private handleEnemyBulletPlayerCollision(
+        player: Player,
         bullet: Phaser.Physics.Arcade.Image,
-        player: Player
+       
     ) {
         bullet.destroy();
-        this.player.die(); //Spieler tötenw
+        player.die(); //Spieler töten
     }
     
     // Methode für Gegner, damit sie schießen können
@@ -383,7 +384,7 @@ export class Game extends Scene {
             "ammo-0" // Gleiche Munition wie Spieler verwenden
         );
 
-        let bulletSound = this.sound.add("bullet");
+        const bulletSound = this.sound.add("bullet");
         bulletSound.play();
 
         if (bullet) {

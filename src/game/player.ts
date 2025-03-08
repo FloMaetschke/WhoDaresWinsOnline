@@ -96,20 +96,21 @@ export class Player extends Actor {
 
     public die() {
         console.log("Spieler ist tot");
+
         // Sound abspielen
-        const dieSound = this.scene.sound?.add("player_die");
-        if (dieSound) {
-            dieSound.play();
-        }
+        const dieSound = this.scene.sound.add("player_die");
+        dieSound.play();
 
         // Kollisionen deaktivieren
         this.getBody().enable = false;
 
         // Tod-Animation abspielen
         this.anims.play("player-dead");
-
+        
         this.scene.time.delayedCall(5000, () => {
             this.destroy();
+
+            // Starte die Scene neu!
         });
     }
 }
