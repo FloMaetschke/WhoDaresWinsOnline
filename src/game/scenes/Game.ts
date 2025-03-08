@@ -3,15 +3,15 @@ import { EventBus } from "../EventBus";
 import { Player } from "../player";
 import { Enemy } from "../enemy";
 import { GameMap } from "../GameMap";
-import { EnemySpawner } from "../EnemySpawner"; // Neue Import-Anweisung
+import { EnemySpawner } from "../EnemySpawner";
+import { ShootingController } from "../ShootingController";
 
 export class Game extends Scene {
     private player: Player;
-    private bullets: Phaser.Physics.Arcade.Group;
     private enemies: Phaser.Physics.Arcade.Group;
-    private enemyBullets: Phaser.Physics.Arcade.Group;
     private gameMap: any;
-    private enemySpawner: EnemySpawner; // Neue Eigenschaft
+    private enemySpawner: EnemySpawner;
+    private shootingController: ShootingController;
 
     constructor() {
         super("Game");
@@ -60,31 +60,12 @@ export class Game extends Scene {
         });
         this.enemies.setDepth(10);
 
-        this.bullets = this.physics.add.group({
-            classType: Phaser.Physics.Arcade.Image,
-            maxSize: 3,
-        });
-        this.bullets.setDepth(11); // Projektile über allem
-
-        // Nach der Erstellung der anderen Gruppen
-        this.enemyBullets = this.physics.add.group({
-            classType: Phaser.Physics.Arcade.Image,
-            maxSize: 10,
-        });
-        this.enemyBullets.setDepth(11); // Gleiche Tiefe wie Spieler-Projektile
-
-        // Kamera folgt dem Spieler in der Mitte des Bildschirms
-        this.cameras.main.startFollow(this.player, true, 0.09, 0.09);
-        this.cameras.main.setFollowOffset(0, 0);
-
-        // Schießen mit Leertaste
-        this.input.keyboard!.on("keydown-SPACE", () => {
-            this.shoot();
-        });
+        // ShootingController initialisieren
+        this.shootingController = new ShootingController(this);
 
         // Kollisionen einrichten
         this.physics.add.collider(
-            this.bullets,
+            this.shootingController.getBullets(),
             this.enemies,
             (object1, object2) => {
                 const bullet = object1 as Phaser.Physics.Arcade.Image;
@@ -97,7 +78,7 @@ export class Game extends Scene {
 
         // Kollision zwischen Feindkugeln und Spieler einrichten
         this.physics.add.collider(
-            this.enemyBullets,
+            this.shootingController.getEnemyBullets(),
             this.player,
             (object1, object2) => {
                 const bullet = object1 as Phaser.Physics.Arcade.Image;
@@ -107,6 +88,15 @@ export class Game extends Scene {
             undefined,
             this
         );
+
+        // Kamera folgt dem Spieler in der Mitte des Bildschirms
+        this.cameras.main.startFollow(this.player, true, 0.09, 0.09);
+        this.cameras.main.setFollowOffset(0, 0);
+
+        // Schießen mit Leertaste
+        this.input.keyboard!.on("keydown-SPACE", () => {
+            this.shoot();
+        });
 
         // Gegner-Spawner initialisieren
         this.enemySpawner = new EnemySpawner(this, this.player, this.enemies);
@@ -163,27 +153,12 @@ export class Game extends Scene {
     }
 
     private shoot() {
-        const bullet = this.bullets.get(
-            this.player.x,
-            this.player.y,
-            "sprites",
-            "ammo-0"
+        this.shootingController.shoot(
+            this.player,
+            'enemy',
+            this.player.currentDirectionX,
+            this.player.currentDirectionY
         );
-
-        let bulletSound = this.sound.add("bullet");
-        bulletSound.play();
-
-        if (bullet) {
-            bullet.setActive(true);
-            bullet.setVisible(true);
-            bullet.setVelocityX(this.player.currentDirectionX * 150);
-            bullet.setVelocityY(this.player.currentDirectionY * 150);
-
-            // Projektil nach 1 Sekunde zerstören
-            this.time.delayedCall(1200, () => {
-                bullet.destroy();
-            });
-        }
     }
 
     private handleBulletEnemyCollision(
@@ -203,34 +178,13 @@ export class Game extends Scene {
         player.die(); //Spieler töten
     }
 
-    // Methode für Gegner, damit sie schießen können
     public enemyShoot(enemy: Enemy) {
-        const bullet = this.enemyBullets.get(
-            enemy.x,
-            enemy.y,
-            "sprites",
-            "ammo-0" // Gleiche Munition wie Spieler verwenden
+        this.shootingController.shoot(
+            enemy,
+            'player',
+            enemy.currentDirectionX,
+            enemy.currentDirectionY
         );
-
-        const bulletSound = this.sound.add("bullet");
-        bulletSound.play();
-
-        if (bullet) {
-            bullet.setActive(true);
-            bullet.setVisible(true);
-
-            // Die Schussrichtung entspricht der Bewegungsrichtung des Gegners
-            const speed = 150;
-
-            // Verwende die aktuelle Bewegungsrichtung des Gegners
-            bullet.setVelocityX(enemy.currentDirectionX * speed);
-            bullet.setVelocityY(enemy.currentDirectionY * speed);
-
-            // Nach 1 Sekunde zerstören
-            this.time.delayedCall(1000, () => {
-                bullet.destroy();
-            });
-        }
     }
 
     // Optional: Cleanup im destroy
