@@ -2,15 +2,29 @@ import { Scene } from "phaser";
 import { Player } from "./Player";
 import { Enemy } from "./Enemy";
 
+const ENEMY_SPAWN_INTERVAL = 2000;
+
 export class EnemySpawner {
     private scene: Scene;
     private player: Player;
     private enemies: Phaser.Physics.Arcade.Group;
 
-    constructor(scene: Scene, player: Player, enemies: Phaser.Physics.Arcade.Group) {
+    constructor(
+        scene: Scene,
+        player: Player,
+        enemies: Phaser.Physics.Arcade.Group
+    ) {
         this.scene = scene;
         this.player = player;
         this.enemies = enemies;
+
+        // Gegner spawnen
+        this.scene.time.addEvent({
+            delay: ENEMY_SPAWN_INTERVAL,
+            callback: this.spawnEnemy,
+            callbackScope: this,
+            loop: true,
+        });
     }
 
     public spawnEnemy() {

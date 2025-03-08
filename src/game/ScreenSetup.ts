@@ -1,4 +1,4 @@
-import { Scale, Scene } from "phaser";
+import { Scale } from "phaser";
 import { Game } from "./scenes/Game";
 
 export class ScreenSetup {

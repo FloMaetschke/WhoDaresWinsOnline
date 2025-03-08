@@ -19,7 +19,7 @@ export class Game extends Scene {
     screenSetup: ScreenSetup;
     disableKeyboard = false;
     keyboardController: KeyboardController;
-    
+
     constructor() {
         super("Game");
     }
@@ -57,13 +57,7 @@ export class Game extends Scene {
         // Gegner-Spawner initialisieren
         this.enemySpawner = new EnemySpawner(this, this.player, this.enemies);
 
-        // Gegner spawnen
-        this.time.addEvent({
-            delay: 2000,
-            callback: this.enemySpawner.spawnEnemy,
-            callbackScope: this.enemySpawner,
-            loop: true,
-        });
+
 
         // Erste Chunks um Spieler laden
         this.gameMap.updateChunks(this.player);
