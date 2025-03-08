@@ -26,7 +26,7 @@ export class GameMap {
         );
 
         // Simplex-Noise initialisieren - Angepasst für neue API
-        this.noise = createNoise2D(Math.random);
+        this.noise = createNoise2D(() => 0.55337);//Math.random);
 
         // Definiere Tiles-Array für die Map
         const tiles = [4, 5, 6, 7, 8, 9, 13, 14, 64];

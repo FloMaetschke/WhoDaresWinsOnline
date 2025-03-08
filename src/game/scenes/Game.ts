@@ -7,6 +7,7 @@ import { EnemySpawner } from "../EnemySpawner";
 import { ShootingController } from "../ShootingController";
 import { DebugController } from "../DebugController";
 import { ScreenSetup } from "../ScreenSetup";
+import { KeyboardController } from "../KeboardController";
 
 export class Game extends Scene {
     player: Player;
@@ -17,6 +18,8 @@ export class Game extends Scene {
     debugController: DebugController;
     screenSetup: ScreenSetup;
     disableKeyboard = false;
+    keyboardController: KeyboardController;
+    
     constructor() {
         super("Game");
     }
@@ -34,6 +37,7 @@ export class Game extends Scene {
         const { startX, startY } = this.gameMap.getPlayerStartPosition();
         this.player = new Player(this, startX, startY);
 
+        this.keyboardController = new KeyboardController(this);
         // Auch für Gegner und Projektile
         this.enemies = this.physics.add.group({
             classType: Phaser.Physics.Arcade.Sprite,

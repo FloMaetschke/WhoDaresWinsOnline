@@ -2,10 +2,7 @@ import { Actor } from "./actor";
 import { Game } from "./scenes/Game";
 
 export class Player extends Actor {
-    private keyW: Phaser.Input.Keyboard.Key;
-    private keyA: Phaser.Input.Keyboard.Key;
-    private keyS: Phaser.Input.Keyboard.Key;
-    private keyD: Phaser.Input.Keyboard.Key;
+
 
     public currentDirectionX = 0;
     public currentDirectionY = 0;
@@ -14,11 +11,7 @@ export class Player extends Actor {
 
     constructor(public scene: Game, x: number, y: number) {
         super(scene, x, y, "sprites");
-        // KEYS
-        this.keyW = this.scene.input.keyboard!.addKey("W");
-        this.keyA = this.scene.input.keyboard!.addKey("A");
-        this.keyS = this.scene.input.keyboard!.addKey("S");
-        this.keyD = this.scene.input.keyboard!.addKey("D");
+
         // PHYSICS
         this.getBody().setSize(13, 20);
         this.getBody().setOffset(1, 0);
@@ -47,46 +40,7 @@ export class Player extends Actor {
 
     update(): void {
         if (this.dead) return;
-        this.updateKeyboardMovement();
-    }
-
-    private updateKeyboardMovement() {
-        if(this.scene.disableKeyboard) return;
-        this.getBody()?.setVelocity(0);
-        let directionX = 0;
-        let directionY = 0;
-
-        // Y-Richtung prüfen
-        if (this.keyW?.isDown) {
-            directionY = -1;
-            this.currentDirectionY = directionY;
-            if (!this.keyA?.isDown && !this.keyD?.isDown) {
-                this.currentDirectionX = 0;
-            }
-        } else if (this.keyS?.isDown) {
-            directionY = 1;
-            this.currentDirectionY = directionY;
-            if (!this.keyA?.isDown && !this.keyD?.isDown) {
-                this.currentDirectionX = 0;
-            }
-        }
-
-        // X-Richtung prüfen
-        if (this.keyA?.isDown) {
-            directionX = -1;
-            this.currentDirectionX = directionX;
-            if (!this.keyW?.isDown && !this.keyS?.isDown) {
-                this.currentDirectionY = 0;
-            }
-        } else if (this.keyD?.isDown) {
-            directionX = 1;
-            this.currentDirectionX = directionX;
-            if (!this.keyW?.isDown && !this.keyS?.isDown) {
-                this.currentDirectionY = 0;
-            }
-        }
-
-        this.move(directionX, directionY);
+        this.scene.keyboardController.updateKeyboardMovement(this);
     }
 
     public move(directionX: number, directionY: number) {
@@ -122,6 +76,7 @@ export class Player extends Actor {
             this.anims?.stop();
         }
     }
+
 
     public die() {
         this.dead = true;
