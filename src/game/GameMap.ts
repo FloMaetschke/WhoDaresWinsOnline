@@ -43,7 +43,7 @@ export class GameMap {
     }
 
     getPlayerStartPosition(): { x: number; y: number } {
-        return { x: this.worldWidth / 2, y: this.worldHeight / 2 };
+        return { startX: this.worldWidth / 2, startY: this.worldHeight / 2 };
     }
 
     // Generiert und verwaltet die Chunks um den Spieler herum

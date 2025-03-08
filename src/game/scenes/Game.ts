@@ -4,20 +4,12 @@ import { Player } from "../player";
 import { Enemy } from "../enemy";
 import { GameMap } from "../GameMap";
 
-
 export class Game extends Scene {
     private player: Player;
     private bullets: Phaser.Physics.Arcade.Group;
     private enemies: Phaser.Physics.Arcade.Group;
-    // Neue Gruppe für Feind-Kugeln
     private enemyBullets: Phaser.Physics.Arcade.Group;
-    
-    
-
-    gameMap: any;
-    
-    // Tracking Variable für Animationen
-    // private animationsInitialized: boolean = false; // Entfernt
+    private gameMap: any;
 
     constructor() {
         super("Game");
@@ -30,49 +22,44 @@ export class Game extends Scene {
 
         // Konfiguriere die Kamera für "Pixelart"-Look
         this.cameras.main.setSize(virtualWidth, virtualHeight);
-        
+
         // Skaliere die Kamera um die Browserhöhe auszunutzen
         const scale = window.innerHeight / virtualHeight;
-        
+
         // Setze den Zoom so, dass das Bild die Browserhöhe ausfüllt
         this.cameras.main.setZoom(1); // Zurücksetzen, falls vorher geändert wurde
-        
+
         // Scale Manager konfigurieren
         this.scale.setGameSize(virtualWidth, virtualHeight);
         this.scale.setZoom(scale);
-        
+
         // Zentriere das Spiel im Browser
         this.scale.autoCenter = Phaser.Scale.CENTER_BOTH;
-        
+
         // Anpassen beim Ändern der Fenstergröße
-        window.addEventListener('resize', () => {
+        window.addEventListener("resize", () => {
             const newScale = window.innerHeight / virtualHeight;
             this.scale.setZoom(newScale);
         });
 
-        
         // Container für Spieler und Gegner (über der Karte)
         const entityContainer = this.add.container(0, 0);
         entityContainer.setDepth(1);
-        
 
         this.gameMap = new GameMap(this);
-        
 
-        // Spieler erstellen und in der Mitte platzieren
-        const startX = this.gameMap.worldWidth / 2;
-        const startY = this.gameMap.worldHeight / 2;
-        this.player = new Player(...[this, startX, startY]);
-        
+        const { startX, startY } = this.gameMap.getPlayerStartPosition();
+        this.player = new Player(this, startX, startY);
+
         // Spieler-Tiefe anpassen, damit er über der Tilemap liegt
         this.player.setDepth(10);
-        
+
         // Auch für Gegner und Projektile
         this.enemies = this.physics.add.group({
             classType: Phaser.Physics.Arcade.Sprite,
         });
         this.enemies.setDepth(10);
-        
+
         this.bullets = this.physics.add.group({
             classType: Phaser.Physics.Arcade.Image,
             maxSize: 3,
@@ -131,7 +118,7 @@ export class Game extends Scene {
 
         // Erste Chunks um Spieler laden
         this.gameMap.updateChunks(this.player);
-        
+
         // Rest des Codes wie zuvor
         EventBus.emit("current-scene-ready", this);
 
@@ -167,17 +154,10 @@ export class Game extends Scene {
 
     update() {
         this.player.update();
-        
+
         // Prüfen, ob neue Chunks geladen werden müssen
         this.gameMap.updateChunks(this.player);
     }
-
-    
-    
-    
-    
-
-    
 
     private shoot() {
         const bullet = this.bullets.get(
@@ -204,31 +184,43 @@ export class Game extends Scene {
     }
 
     private spawnEnemy() {
-        if(this.enemies.countActive(true) >= 5) return;
+        if (this.enemies.countActive(true) >= 5) return;
 
         // Gegner um den Spieler herum spawnen, aber außerhalb des Bildschirms
         const camera = this.cameras.main;
-        
+
         // Zufällige Position am Rand des Sichtfelds der Kamera
         let x, y;
         const side = Phaser.Math.Between(0, 3); // 0: oben, 1: rechts, 2: unten, 3: links
-        
-        switch(side) {
+
+        switch (side) {
             case 0: // Oben
-                x = Phaser.Math.Between(this.player.x - camera.width/2, this.player.x + camera.width/2);
-                y = this.player.y - camera.height/2 - 50; // Etwas außerhalb des Bildschirms
+                x = Phaser.Math.Between(
+                    this.player.x - camera.width / 2,
+                    this.player.x + camera.width / 2
+                );
+                y = this.player.y - camera.height / 2 - 50; // Etwas außerhalb des Bildschirms
                 break;
             case 1: // Rechts
-                x = this.player.x + camera.width/2 + 50;
-                y = Phaser.Math.Between(this.player.y - camera.height/2, this.player.y + camera.height/2);
+                x = this.player.x + camera.width / 2 + 50;
+                y = Phaser.Math.Between(
+                    this.player.y - camera.height / 2,
+                    this.player.y + camera.height / 2
+                );
                 break;
             case 2: // Unten
-                x = Phaser.Math.Between(this.player.x - camera.width/2, this.player.x + camera.width/2);
-                y = this.player.y + camera.height/2 + 50;
+                x = Phaser.Math.Between(
+                    this.player.x - camera.width / 2,
+                    this.player.x + camera.width / 2
+                );
+                y = this.player.y + camera.height / 2 + 50;
                 break;
             case 3: // Links
-                x = this.player.x - camera.width/2 - 50;
-                y = Phaser.Math.Between(this.player.y - camera.height/2, this.player.y + camera.height/2);
+                x = this.player.x - camera.width / 2 - 50;
+                y = Phaser.Math.Between(
+                    this.player.y - camera.height / 2,
+                    this.player.y + camera.height / 2
+                );
                 break;
         }
 
@@ -248,13 +240,12 @@ export class Game extends Scene {
     // Neue Methode für Feindkugel-Spieler-Kollision
     private handleEnemyBulletPlayerCollision(
         player: Player,
-        bullet: Phaser.Physics.Arcade.Image,
-       
+        bullet: Phaser.Physics.Arcade.Image
     ) {
         bullet.destroy();
         player.die(); //Spieler töten
     }
-    
+
     // Methode für Gegner, damit sie schießen können
     public enemyShoot(enemy: Enemy) {
         const bullet = this.enemyBullets.get(
@@ -270,10 +261,10 @@ export class Game extends Scene {
         if (bullet) {
             bullet.setActive(true);
             bullet.setVisible(true);
-            
+
             // Die Schussrichtung entspricht der Bewegungsrichtung des Gegners
             const speed = 150;
-            
+
             // Verwende die aktuelle Bewegungsrichtung des Gegners
             bullet.setVelocityX(enemy.currentDirectionX * speed);
             bullet.setVelocityY(enemy.currentDirectionY * speed);
@@ -293,9 +284,9 @@ export class Game extends Scene {
         }
         this.activeChunks.clear();
         this.loadedChunks.clear();
-        
+
         // Animationen NICHT löschen beim Destroy
-        
+
         EventBus.removeListener("toggle-debug");
         super.destroy();
     }
