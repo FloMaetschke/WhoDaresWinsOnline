@@ -8,6 +8,7 @@ export class Player extends Actor {
     public currentDirectionX = 0;
     public currentDirectionY = 0;
     private speed = 60;
+    dead: boolean;
 
     constructor(scene: Phaser.Scene, x: number, y: number) {
         super(scene, x, y, "sprites");
@@ -25,6 +26,7 @@ export class Player extends Actor {
     }
 
     update(): void {
+        if(this.dead) return;
         this.getBody()?.setVelocity(0);
         let directionX = 0;
         let directionY = 0;
@@ -95,6 +97,7 @@ export class Player extends Actor {
     }
 
     public die() {
+        this.dead = true;
         console.log("Spieler ist tot");
 
         // Sound abspielen
@@ -108,9 +111,16 @@ export class Player extends Actor {
         this.anims.play("player-dead");
         
         this.scene.time.delayedCall(5000, () => {
+            this.scene.scene.stop();
+            // start das spiel neu:
+            this.scene.scene.start('Game');
+            
+
+
+
             this.destroy();
 
-            // Starte die Scene neu!
+            
         });
     }
 }
