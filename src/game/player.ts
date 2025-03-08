@@ -23,10 +23,13 @@ export class Player extends Actor {
 
         // Setze das Startframe auf 'up0'
         this.setFrame("player-down-right-0");
+
+        // Spieler-Tiefe anpassen, damit er über der Tilemap liegt
+        this.setDepth(10);
     }
 
     update(): void {
-        if(this.dead) return;
+        if (this.dead) return;
         this.getBody()?.setVelocity(0);
         let directionX = 0;
         let directionY = 0;
@@ -109,11 +112,11 @@ export class Player extends Actor {
 
         // Tod-Animation abspielen
         this.anims.play("player-dead");
-        
+
         this.scene.time.delayedCall(2000, () => {
             // Scene neustart mit korrektem Reset
-            this.scene.scene.stop('Game');
-            this.scene.scene.start('Game');
+            this.scene.scene.stop("Game");
+            this.scene.scene.start("Game");
         });
     }
 }

@@ -53,9 +53,7 @@ export class Game extends Scene {
         const { startX, startY } = this.gameMap.getPlayerStartPosition();
         this.player = new Player(this, startX, startY);
 
-        // Spieler-Tiefe anpassen, damit er über der Tilemap liegt
-        this.player.setDepth(10);
-
+        
         // Auch für Gegner und Projektile
         this.enemies = this.physics.add.group({
             classType: Phaser.Physics.Arcade.Sprite,
