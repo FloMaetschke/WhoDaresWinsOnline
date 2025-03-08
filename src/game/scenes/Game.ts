@@ -5,6 +5,7 @@ import { Enemy } from "../enemy";
 import { GameMap } from "../GameMap";
 import { EnemySpawner } from "../EnemySpawner";
 import { ShootingController } from "../ShootingController";
+import { DebugController } from "../DebugController";
 
 export class Game extends Scene {
     private player: Player;
@@ -12,6 +13,7 @@ export class Game extends Scene {
     private gameMap: any;
     private enemySpawner: EnemySpawner;
     private shootingController: ShootingController;
+    private debugController: DebugController;
 
     constructor() {
         super("Game");
@@ -112,37 +114,11 @@ export class Game extends Scene {
         // Erste Chunks um Spieler laden
         this.gameMap.updateChunks(this.player);
 
+        // Debug Controller initialisieren
+        this.debugController = new DebugController(this);
+
         // Rest des Codes wie zuvor
         EventBus.emit("current-scene-ready", this);
-
-        // Debug-Toggle-Event-Listener hinzufügen
-        EventBus.on("toggle-debug", (debugEnabled: boolean) => {
-            // Debug-Einstellungen aktualisieren
-            const world = this.physics.world;
-
-            // Debug-Modus setzen
-            (world as any).drawDebug = debugEnabled;
-            (this.game.config.physics.arcade as any).debug = debugEnabled;
-
-            // Wenn Debug deaktiviert wird und Debug-Grafik existiert
-            if (!debugEnabled && world.debugGraphic) {
-                world.debugGraphic.clear();
-                world.debugGraphic.destroy();
-                world.debugGraphic = null;
-            }
-
-            // Wenn Debug aktiviert wird
-            if (debugEnabled) {
-                // Alte Debug-Grafik aufräumen falls vorhanden
-                if (world.debugGraphic) {
-                    world.debugGraphic.clear();
-                    world.debugGraphic.destroy();
-                    world.debugGraphic = null;
-                }
-                // Neue Debug-Grafik erstellen
-                (world as any).createDebugGraphic();
-            }
-        });
     }
 
     update() {
@@ -198,7 +174,9 @@ export class Game extends Scene {
 
         // Animationen NICHT löschen beim Destroy
 
-        EventBus.removeListener("toggle-debug");
+        // Debug Controller aufräumen
+        this.debugController.destroy();
+
         super.destroy();
     }
 }
