@@ -31,6 +31,7 @@ export class Game extends Scene {
         this.load.image("background", "bg.png");
         this.load.audio("bullet", "shot.wav");
         this.load.audio("enemy_die", "enemy_die.wav");
+        this.load.audio("player_die", "player_die.wav");
         this.load.audio("music", "music.mp3");
 
         this.load.image("tiles", "tileset.png");

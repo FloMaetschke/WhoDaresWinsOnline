@@ -59,7 +59,6 @@ export class Player extends Actor {
             }
         }
 
-
         if (this.body) {
             this.body.velocity.x = directionX * this.speed;
             this.body.velocity.y = directionY * this.speed;
@@ -97,6 +96,20 @@ export class Player extends Actor {
 
     public die() {
         console.log("Spieler ist tot");
-        this.destroy();
+        // Sound abspielen
+        const dieSound = this.scene.sound?.add("player_die");
+        if (dieSound) {
+            dieSound.play();
+        }
+
+        // Kollisionen deaktivieren
+        this.getBody().enable = false;
+
+        // Tod-Animation abspielen
+        this.anims.play("player-dead");
+
+        this.scene.time.delayedCall(5000, () => {
+            this.destroy();
+        });
     }
 }

@@ -80,6 +80,16 @@ function initPlayerAnimations(scene: Scene): void {
         repeat: -1,
     });
 
+    scene.anims.create({
+        key: "player-dead",
+        frames: scene.anims.generateFrameNames("sprites", {
+            prefix: "player-dead-",
+            end: 0,
+        }),
+        frameRate: 10,
+        repeat: -1,
+    });
+
 }
 
 function initEnemyAnimations(scene: Scene): void {
