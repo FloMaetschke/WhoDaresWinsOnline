@@ -8,6 +8,7 @@ import { ShootingController } from "../ShootingController";
 import { DebugController } from "../DebugController";
 import { ScreenSetup } from "../ScreenSetup";
 import { KeyboardController } from "../KeboardController";
+import { TouchController } from "../TouchController";
 
 export class Game extends Scene {
     player: Player;
@@ -19,6 +20,7 @@ export class Game extends Scene {
     screenSetup: ScreenSetup;
     disableKeyboard = false;
     keyboardController: KeyboardController;
+    touchController: TouchController;
 
     constructor() {
         super("Game");
@@ -38,6 +40,7 @@ export class Game extends Scene {
         this.player = new Player(this, startX, startY);
 
         this.keyboardController = new KeyboardController(this, this.player);
+        this.touchController = new TouchController(this, this.player);
         // Auch für Gegner und Projektile
         this.enemies = this.physics.add.group({
             classType: Phaser.Physics.Arcade.Sprite,
@@ -78,5 +81,8 @@ export class Game extends Scene {
         this.gameMap.destroy();
         this.debugController.destroy();
         this.screenSetup.cleanup(); // Wichtig: Touch-Controls aufräumen
+        if (this.touchController) {
+            this.touchController.cleanup();
+        }
     }
 }
