@@ -3,6 +3,7 @@ import { EventBus } from "../EventBus";
 import { Player } from "../player";
 import { Enemy } from "../enemy";
 import { GameMap } from "../GameMap";
+import { EnemySpawner } from "../EnemySpawner"; // Neue Import-Anweisung
 
 export class Game extends Scene {
     private player: Player;
@@ -10,6 +11,7 @@ export class Game extends Scene {
     private enemies: Phaser.Physics.Arcade.Group;
     private enemyBullets: Phaser.Physics.Arcade.Group;
     private gameMap: any;
+    private enemySpawner: EnemySpawner; // Neue Eigenschaft
 
     constructor() {
         super("Game");
@@ -108,11 +110,14 @@ export class Game extends Scene {
             this
         );
 
+        // Gegner-Spawner initialisieren
+        this.enemySpawner = new EnemySpawner(this, this.player, this.enemies);
+
         // Gegner spawnen
         this.time.addEvent({
             delay: 2000,
-            callback: this.spawnEnemy,
-            callbackScope: this,
+            callback: this.enemySpawner.spawnEnemy,
+            callbackScope: this.enemySpawner,
             loop: true,
         });
 
@@ -181,52 +186,6 @@ export class Game extends Scene {
                 bullet.destroy();
             });
         }
-    }
-
-    private spawnEnemy() {
-        if (this.enemies.countActive(true) >= 5) return;
-
-        // Gegner um den Spieler herum spawnen, aber außerhalb des Bildschirms
-        const camera = this.cameras.main;
-
-        // Zufällige Position am Rand des Sichtfelds der Kamera
-        let x, y;
-        const side = Phaser.Math.Between(0, 3); // 0: oben, 1: rechts, 2: unten, 3: links
-
-        switch (side) {
-            case 0: // Oben
-                x = Phaser.Math.Between(
-                    this.player.x - camera.width / 2,
-                    this.player.x + camera.width / 2
-                );
-                y = this.player.y - camera.height / 2 - 50; // Etwas außerhalb des Bildschirms
-                break;
-            case 1: // Rechts
-                x = this.player.x + camera.width / 2 + 50;
-                y = Phaser.Math.Between(
-                    this.player.y - camera.height / 2,
-                    this.player.y + camera.height / 2
-                );
-                break;
-            case 2: // Unten
-                x = Phaser.Math.Between(
-                    this.player.x - camera.width / 2,
-                    this.player.x + camera.width / 2
-                );
-                y = this.player.y + camera.height / 2 + 50;
-                break;
-            case 3: // Links
-                x = this.player.x - camera.width / 2 - 50;
-                y = Phaser.Math.Between(
-                    this.player.y - camera.height / 2,
-                    this.player.y + camera.height / 2
-                );
-                break;
-        }
-
-        const enemy = new Enemy(this, x, y, this.player);
-        enemy.setDepth(10); // Gleiche Tiefe wie Spieler
-        this.enemies.add(enemy);
     }
 
     private handleBulletEnemyCollision(
