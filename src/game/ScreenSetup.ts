@@ -96,7 +96,7 @@ export class ScreenSetup {
         this.touchControls.joystickArea.style.cssText = `
             position: absolute;
             right: 10px;
-            bottom: 20px;
+            bottom: calc(50% - 55px);
             width: 110px;
             height: 110px;
             background: rgba(128, 128, 128, 0.3);
