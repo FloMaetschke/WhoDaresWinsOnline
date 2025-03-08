@@ -40,6 +40,7 @@ export class Preload extends Scene {
         this.load.audio("player_die", "audio/player_die.wav");
         this.load.audio("music", "audio/music.mp3");
         this.load.image("tiles", "tileset.png");
+        this.load.image("mute", "icons/mute.png");
     }
 
     create() {
