@@ -1,7 +1,6 @@
 import { Scene } from "phaser";
 import { EventBus } from "../EventBus";
 import { Player } from "../player";
-import { initAnimations, clearAnimations } from "../animations";
 import { Enemy } from "../enemy";
 // Importiere SimplexNoise für die Terrain-Generation
 import { createNoise2D } from "simplex-noise";
@@ -22,7 +21,7 @@ export class Game extends Scene {
     private loadedChunks: Set<string> = new Set();
     
     // Tracking Variable für Animationen
-    private animationsInitialized: boolean = false;
+    // private animationsInitialized: boolean = false; // Entfernt
 
     constructor() {
         super("Game");
@@ -33,22 +32,6 @@ export class Game extends Scene {
         // Zurücksetzen der Chunk-Verwaltung
         this.activeChunks = new Map();
         this.loadedChunks = new Set();
-        
-        // NICHT die Animationen zurücksetzen! Das passiert später
-        this.animationsInitialized = false;
-    }
-
-    preload() {
-        this.load.setPath("assets");
-        this.load.atlas("sprites", "sprites.png", "sprites.json");
-        this.load.image("background", "bg.png");
-        this.load.audio("bullet", "audio/shot.wav");
-        this.load.audio("enemy_die", "audio/enemy_die.wav");
-        this.load.audio("player_die", "audio/player_die.wav");
-        this.load.audio("music", "audio/music.mp3");
-
-        this.load.image("tiles", "tileset.png");
-
     }
 
     create() {
@@ -178,13 +161,13 @@ export class Game extends Scene {
         });
 
         // Initialisiere Animationen nur einmal oder wenn sie explizit zurückgesetzt wurden
-        if (!this.animationsInitialized) {
-            // Optional: Vorhandene Animationen löschen, falls es Probleme gibt
-            // clearAnimations(this);
+        // if (!this.animationsInitialized) { // Entfernt
+        //     // Optional: Vorhandene Animationen löschen, falls es Probleme gibt
+        //     // clearAnimations(this);
             
-            initAnimations(this);
-            this.animationsInitialized = true;
-        }
+        //     initAnimations(this);
+        //     this.animationsInitialized = true; // Entfernt
+        // }
         
         // Erste Chunks um Spieler laden
         this.updateChunks();

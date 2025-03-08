@@ -1,4 +1,5 @@
 import { Game as MainGame } from './scenes/Game';
+import { Preload } from './scenes/Preload';
 import { AUTO, Game, Types } from 'phaser';
 
 // Debug-Konfiguration als globale Variable
@@ -30,6 +31,7 @@ const config: Types.Core.GameConfig = {
         }
     },
     scene: [
+        Preload,
         MainGame
     ]
 };
