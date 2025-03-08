@@ -78,8 +78,7 @@ export class Player extends Actor {
         console.log("Spieler ist tot");
 
         // Sound abspielen
-        const dieSound = this.scene.sound.add("player_die");
-        dieSound.play();
+        (this.scene as Game).soundController.playSound("player_die");
 
         // Kollisionen deaktivieren
         this.getBody().enable = false;
@@ -88,7 +87,6 @@ export class Player extends Actor {
         this.anims.play("player-dead");
 
         this.scene.time.delayedCall(2000, () => {
-            // Scene neustart mit korrektem Reset
             this.scene.scene.stop("Game");
             this.scene.scene.start("Game");
         });

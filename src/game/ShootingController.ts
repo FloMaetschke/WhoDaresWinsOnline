@@ -93,8 +93,7 @@ export class ShootingController {
             "ammo-0"
         );
 
-        const bulletSound = this.scene.sound.add("bullet");
-        bulletSound.play();
+        (this.scene as Game).soundController.playSound("bullet");
 
         if (bullet) {
             bullet.setActive(true);

@@ -1,57 +1,64 @@
 # Changelog
 
-All notable changes to "Who Dares Wins Online" will be documented in this file.
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### March 9, 2025
-- Enhanced mobile controls with optimized joystick positioning and touch areas
-- Improved screen setup for better mobile user experience
-- Added visual elements for fire button and joystick areas
+### Added
+- Mobile touch controls with joystick and fire button
+- Visual indicators for touch control areas
+- Debug mode with hotkey toggle
+- New audio assets for projectiles and enemies
+- New tileset images
+- KeyboardController for input handling
+- TouchController for mobile controls
+- ScreenSetup for display configuration
+- DebugController for debug mode
+- ShootingController for shooting mechanics
+- EnemySpawner for enemy management
+- GameMap with chunk-based level generation using Perlin noise
+- Preload scene for resource management
+- Player death mechanics and game restart functionality
+- Player death sound effects
 
-### March 8, 2025
-- Added new map files and settings for improved game environment
-- Implemented game state reset logic for game restart
-- Added player death mechanics and game restart functionality
-- Updated player death sound effects
-- Enhanced screen configuration and enemy spawn logic
-- Added KeyboardController class for improved input handling
-- Added mobile touch controls and player movement optimization
-- Implemented ScreenSetup class for better display configuration
-- Added DebugController for managing debug mode
-- Implemented ShootingController for improved shooting mechanics
-- Added EnemySpawner class for better enemy management
-- Implemented GameMap class with chunk-based level generation using Perlin noise
-- Added Preload scene for better resource management
-
-### March 7, 2025
-- Added new audio assets for projectiles and enemies
-- Optimized enemy wandering behavior and death animation
+### Changed
+- Optimized joystick positioning and touch areas
+- Enhanced screen configuration for mobile devices
+- Improved enemy wandering behavior and death animation
 - Enhanced collision boxes for player and enemies
-- Added debug mode with hotkey toggle
 - Updated physics speed and collision detection
-- Added new tileset images
 - Moved animation initialization to separate file
 - Optimized player animation logic
-- Added tools/extracted to gitignore
 
-### March 6, 2025
-- Initial project setup with Phaser React template
-- Added basic game configuration and structure
-- Implemented player animations and sprite management
-- Added enemy class with animations
-- Implemented wandering logic and chase behavior for enemies
-- Added sprite assets for various game objects
-- Set up GitHub Pages deployment workflow
-- Added build configuration and deployment scripts
+### Fixed
+- Mobile touch control responsiveness
+- Screen scaling on different devices
+- Enemy pathfinding issues
+- Collision detection accuracy
 
 ## [0.1.0] - 2025-03-06
-- Initial release with basic game functionality
-- Phaser 3 integration with React
+
+### Added
+- Initial project setup with Phaser React template
+- Basic game configuration and structure
+- Player animations and sprite management
+- Enemy class with basic animations
+- Wandering logic and chase behavior for enemies
+- Basic sprite assets
+- GitHub Pages deployment workflow
+- Build configuration and deployment scripts
+- Tile-based map system
 - Basic player movement and animations
 - Simple enemy AI
-- Tile-based map system
-- GitHub Pages deployment setup
+
+### Infrastructure
+- Set up GitHub Pages deployment
+- Configured Vite build system
+- Established basic project structure
+- Added TypeScript configuration
 
 ## Notes
 - The game is still in early development

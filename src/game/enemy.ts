@@ -186,8 +186,7 @@ export class Enemy extends Actor {
         if (this.shootTimer) this.shootTimer.destroy();
 
         // Sound abspielen
-        const dieSound = this.scene.sound.add("enemy_die");
-        dieSound.play();
+        (this.scene as Game).soundController.playSound("enemy_die");
 
         // Kollisionen deaktivieren
         this.getBody().enable = false;
@@ -196,7 +195,6 @@ export class Enemy extends Actor {
         this.anims.play("enemy-die");
 
         // Nach 1 Sekunde zerstören
-
         this.scene.time.delayedCall(1000, () => {
             this.destroy();
         });

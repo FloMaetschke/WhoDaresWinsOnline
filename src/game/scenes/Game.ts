@@ -9,6 +9,7 @@ import { DebugController } from "../DebugController";
 import { ScreenSetup } from "../ScreenSetup";
 import { KeyboardController } from "../KeboardController";
 import { TouchController } from "../TouchController";
+import { SoundController } from "../SoundController";
 
 export class Game extends Scene {
     player: Player;
@@ -21,6 +22,7 @@ export class Game extends Scene {
     disableKeyboard = false;
     keyboardController: KeyboardController;
     touchController: TouchController;
+    soundController: SoundController;
 
     constructor() {
         super("Game");
@@ -60,7 +62,7 @@ export class Game extends Scene {
         // Gegner-Spawner initialisieren
         this.enemySpawner = new EnemySpawner(this, this.player, this.enemies);
 
-
+        this.soundController = new SoundController(this);
 
         // Erste Chunks um Spieler laden
         this.gameMap.updateChunks(this.player);
@@ -84,5 +86,6 @@ export class Game extends Scene {
         if (this.touchController) {
             this.touchController.cleanup();
         }
+        this.soundController.cleanup();
     }
 }
