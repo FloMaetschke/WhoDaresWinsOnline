@@ -3,12 +3,12 @@ import { Player } from "./Player";
 
 export class GameMap {
     noise: (x: number, y: number) => number;
-    chunkSize = 32; // Größe eines Chunks in Tiles
+    chunkSize = 64; // Größe eines Chunks in Tiles
     map: Phaser.Tilemaps.Tilemap;
     worldWidth = 1000000;
     worldHeight = 1000000;
     mapData: number[][] = [];
-    activeChunks: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
+    activeChunks: Map<string, Phaser.Tilemaps.TilemapLayer[]> = new Map();
     loadedChunks: Set<string> = new Set();
 
     constructor(private scene: Phaser.Scene) {
@@ -26,7 +26,7 @@ export class GameMap {
         );
 
         // Simplex-Noise initialisieren - Angepasst für neue API
-        this.noise = createNoise2D(() => 0.55337);//Math.random);
+        this.noise = createNoise2D(() => 0.55337); //Math.random);
 
         // Definiere Tiles-Array für die Map
         const tiles = [4, 5, 6, 7, 8, 9, 13, 14, 64];
@@ -53,7 +53,7 @@ export class GameMap {
         const playerChunkY = Math.floor(player.y / (this.chunkSize * 8));
 
         // Entferne Chunks, die zu weit entfernt sind
-        for (const [key, layer] of this.activeChunks.entries()) {
+        for (const [key, layers] of this.activeChunks.entries()) {
             const [chunkX, chunkY] = key.split(",").map(Number);
             const distance = Phaser.Math.Distance.Between(
                 playerChunkX,
@@ -64,7 +64,9 @@ export class GameMap {
 
             if (distance > 3) {
                 // Chunks, die zu weit weg sind, entfernen
-                layer.destroy();
+                for (const layer of layers) {
+                    layer.destroy();
+                }
                 this.activeChunks.delete(key);
                 // Behalte die Chunk-ID, damit wir wissen, dass wir diesen Chunk schon generiert haben
             }
@@ -108,6 +110,26 @@ export class GameMap {
             this.chunkSize
         );
 
+        // Erstelle Layer für den Chunk
+        const layer2 = this.map.createBlankLayer(
+            `chunk_${chunkX}_${chunkY}_2`,
+            "tiles",
+            chunkX * this.chunkSize * 8,
+            chunkY * this.chunkSize * 8,
+            this.chunkSize,
+            this.chunkSize
+        );
+
+        // Erstelle Layer für den Chunk
+        const layer3 = this.map.createBlankLayer(
+            `chunk_${chunkX}_${chunkY}_3}`,
+            "tiles",
+            chunkX * this.chunkSize * 8,
+            chunkY * this.chunkSize * 8,
+            this.chunkSize,
+            this.chunkSize
+        );
+
         // Fülle den Layer mit Tiles basierend auf Perlin Noise
         for (let y = 0; y < this.chunkSize; y++) {
             for (let x = 0; x < this.chunkSize; x++) {
@@ -132,9 +154,13 @@ export class GameMap {
 
         // Setze explizit die Tiefe des Layers niedriger als die des Spielers
         layer!.setDepth(0);
+        layer2!.setDepth(9);
+        layer3!.setDepth(100);
 
+        layer2!.putTileAt(18, 1, 0);
+        layer3!.putTileAt(15, 0, 0);
         // Speichere den Layer
-        this.activeChunks.set(`${chunkX},${chunkY}`, layer!);
+        this.activeChunks.set(`${chunkX},${chunkY}`, [layer!, layer2!, layer3!]);
         this.loadedChunks.add(`${chunkX},${chunkY}`);
     }
 
