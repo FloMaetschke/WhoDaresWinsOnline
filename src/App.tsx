@@ -6,9 +6,11 @@ import { EventBus } from './game/EventBus';
 function App() {
     const phaserRef = useRef<IRefPhaserGame | null>(null);
 
-    const toggleDebug = () => {
+    const toggleDebug = ($event) => {
         DEBUG_CONFIG.showDebugBoxes = !DEBUG_CONFIG.showDebugBoxes;
+        console.log("Toggling debug:", DEBUG_CONFIG.showDebugBoxes); // Debug-Log
         EventBus.emit('toggle-debug', DEBUG_CONFIG.showDebugBoxes);
+        $event.target?.blur();
     }
 
     return (
