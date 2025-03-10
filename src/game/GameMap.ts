@@ -1,5 +1,6 @@
 import { createNoise2D } from "simplex-noise";
 import { Player } from "./Player";
+import { createObject, treeTemplate } from "./Templates";
 
 export class GameMap {
     noise: (x: number, y: number) => number;
@@ -159,8 +160,15 @@ export class GameMap {
 
         layer2!.putTileAt(18, 1, 0);
         layer3!.putTileAt(15, 0, 0);
+
+        createObject(layer!, layer2!, layer3!, 10, 10, treeTemplate);
+
         // Speichere den Layer
-        this.activeChunks.set(`${chunkX},${chunkY}`, [layer!, layer2!, layer3!]);
+        this.activeChunks.set(`${chunkX},${chunkY}`, [
+            layer!,
+            layer2!,
+            layer3!,
+        ]);
         this.loadedChunks.add(`${chunkX},${chunkY}`);
     }
 
