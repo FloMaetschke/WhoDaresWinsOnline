@@ -10,6 +10,7 @@ import { ScreenSetup } from "../ScreenSetup";
 import { KeyboardController } from "../KeboardController";
 import { TouchController } from "../TouchController";
 import { SoundController } from "../SoundController";
+import { Entity } from "../Entity";
 
 export class Game extends Scene {
     player: Player;
@@ -72,6 +73,7 @@ export class Game extends Scene {
 
         // Rest des Codes wie zuvor
         EventBus.emit("current-scene-ready", this);
+        this.baum = new Entity(this, 5000, 5000);
     }
 
     update(time: number, delta: number) {
