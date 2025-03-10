@@ -16,20 +16,17 @@ export class Enemy extends Actor {
     private speed = 50;
 
     constructor(public scene: Game, x: number, y: number, target: Player) {
-        super(scene, x, y, "sprites");
+        super(scene, x, y, "enemy-down-right-0");
         this.target = target;
-        scene.add.existing(this);
-        scene.physics.add.existing(this);
 
-        // Kollisionsbox anpassen
         this.getBody().setSize(13, 20);
         this.getBody().setOffset(1, 0);
 
-        // Physik aktivieren
-        this.body!.enable = true;
+        // // Physik aktivieren
+        this.getBody().enable = true;
 
         // Initial animation starten
-        this.anims.play("enemy-down");
+        this.sprite.anims.play("enemy-down");
 
         this.startWandering();
 
@@ -137,8 +134,8 @@ export class Enemy extends Actor {
                 this.currentDirectionX < 0 ? "enemy-left" : "enemy-right";
         } else {
             // Wenn keine Bewegung, behalte die letzte Richtung bei
-            if (this.anims.currentAnim) {
-                animationKey = this.anims.currentAnim.key;
+            if (this.sprite.anims.currentAnim) {
+                animationKey = this.sprite.anims.currentAnim.key;
             } else {
                 animationKey = "enemy-down"; // Standardanimation
             }
@@ -147,15 +144,16 @@ export class Enemy extends Actor {
         // Spiele die Animation nur ab, wenn sich die Richtung geändert hat
         // oder wenn keine Animation läuft
         if (
-            !this.anims.isPlaying ||
-            this.anims.currentAnim?.key !== animationKey
+            !this.sprite.anims.isPlaying ||
+            this.sprite.anims.currentAnim?.key !== animationKey
         ) {
-            this.anims.play(animationKey, true);
+            this.sprite.anims.play(animationKey, true);
         }
     }
 
-    preUpdate(time: number, delta: number): void {
-        super.preUpdate(time, delta);
+    update(time: number, delta: number): void {
+        console.log("Enemy update");
+        super.update(time, delta);
         if (this.dead) {
             this.alpha = 0.5 + Math.abs(Math.sin(time / 100)) * 0.2;
             this.getBody().setVelocityX(0);
@@ -192,7 +190,7 @@ export class Enemy extends Actor {
         this.getBody().enable = false;
 
         // Tod-Animation abspielen
-        this.anims.play("enemy-die");
+        this.sprite.anims.play("enemy-die");
 
         // Nach 1 Sekunde zerstören
         this.scene.time.delayedCall(1000, () => {

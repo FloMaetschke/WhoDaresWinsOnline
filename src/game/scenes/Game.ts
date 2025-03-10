@@ -74,7 +74,10 @@ export class Game extends Scene {
         EventBus.emit("current-scene-ready", this);
     }
 
-    update() {
+    update(time: number, delta: number) {
+        this.enemies.getChildren().forEach((enemy) => {
+            (enemy as Enemy).update(time, delta);
+        });
         this.player.update();
         this.gameMap.updateChunks(this.player);
     }
@@ -82,7 +85,6 @@ export class Game extends Scene {
     destroy() {
         this.gameMap.destroy();
         this.debugController.destroy();
-        this.screenSetup.cleanup(); // Wichtig: Touch-Controls aufräumen
         if (this.touchController) {
             this.touchController.cleanup();
         }

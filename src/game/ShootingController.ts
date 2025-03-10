@@ -48,11 +48,11 @@ export class ShootingController {
         // Kollision zwischen Feindkugeln und Spieler
         this.scene.physics.add.collider(
             this.enemyBullets,
-            player,
-            (bullet, playerObj) => {
+            player.sprite,
+            (bullet, playerSprite) => {
                 this.handleEnemyBulletPlayerCollision(
                     bullet as Phaser.Physics.Arcade.Image,
-                    playerObj as Player
+                    playerSprite as Phaser.Physics.Arcade.Image
                 );
             },
             undefined,
@@ -69,11 +69,11 @@ export class ShootingController {
     }
 
     private handleEnemyBulletPlayerCollision(
-        player: Player,
+        player: Phaser.Physics.Arcade.Image,
         bullet: Phaser.Physics.Arcade.Image
     ): void {
         bullet.destroy();
-        player.die();
+        (player.getData('actor') as Player).die();
     }
 
     public shoot(
@@ -87,8 +87,8 @@ export class ShootingController {
         const speed = 150;
 
         const bullet = bulletGroup.get(
-            shooter.x,
-            shooter.y,
+            shooter.x + shooter.sprite.x,
+            shooter.y + shooter.sprite.y,
             "sprites",
             "ammo-0"
         );

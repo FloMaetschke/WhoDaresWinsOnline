@@ -8,14 +8,25 @@ export class Player extends Actor {
     dead: boolean;
 
     constructor(public scene: Game, x: number, y: number) {
-        super(scene, x, y, "sprites");
+        super(scene, x, y, 'player-down-right-0');
 
+
+
+        
+
+        this.getSpriteBody().setSize(13, 20);
+        this.getSpriteBody().setOffset(1, 0);
+        
         // PHYSICS
-        this.getBody().setSize(13, 20);
-        this.getBody().setOffset(1, 0);
+        // this.getBody().setSize(13, 20);
+        // this.getBody().setOffset(1, 0);
+
+        // Collision für die Füße
+        this.getBody().setSize(13, 5);
+        this.getBody().setOffset(0, 14);
 
         // Setze das Startframe auf 'up0'
-        this.setFrame("player-down-right-0");
+        //this.sprite.setFrame("player-down-right-0");
 
         // Spieler-Tiefe anpassen, damit er über der Tilemap liegt
         this.setDepth(10);
@@ -35,7 +46,7 @@ export class Player extends Actor {
 
     update(): void {
         if (this.dead) return;
-        this.scene.keyboardController.updateKeyboardMovement(this);
+        this.scene.keyboardController.updateKeyboardMovement();
     }
 
     public move(directionX: number, directionY: number) {
@@ -64,18 +75,19 @@ export class Player extends Actor {
             }
 
             if (
-                !this.anims.isPlaying ||
-                this.anims.currentAnim!.key !== animationKey
+                !this.sprite.anims.isPlaying ||
+                this.sprite.anims.currentAnim!.key !== animationKey
             ) {
-                this.anims.play("player-" + animationKey, true);
+                this.sprite.anims.play("player-" + animationKey, true);
             }
         } else {
-            this.anims?.stop();
+            this.sprite.anims?.stop();
         }
     }
 
     public die() {
         this.dead = true;
+        this.getSpriteBody().enable = false;
         console.log("Spieler ist tot");
 
         // Sound abspielen
@@ -85,7 +97,7 @@ export class Player extends Actor {
         this.getBody().enable = false;
 
         // Tod-Animation abspielen
-        this.anims.play("player-dead");
+        this.sprite.anims.play("player-dead");
 
         this.scene.time.delayedCall(2000, () => {
             this.scene.scene.stop("Game");
