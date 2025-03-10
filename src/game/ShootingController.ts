@@ -92,8 +92,8 @@ export class ShootingController {
             "sprites",
             "ammo-0"
         );
-
-        (this.scene as Game).soundController.playSound("bullet");
+        // Temporarily disabled:
+        //(this.scene as Game).soundController.playSound("bullet");
 
         if (bullet) {
             bullet.setActive(true);

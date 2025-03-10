@@ -1,6 +1,7 @@
 import { createNoise2D } from "simplex-noise";
 import { Player } from "./Player";
 import { createObject, treeTemplate } from "./Templates";
+import { Game } from "./scenes/Game";
 
 export class GameMap {
     noise: (x: number, y: number) => number;
@@ -11,6 +12,7 @@ export class GameMap {
     mapData: number[][] = [];
     activeChunks: Map<string, Phaser.Tilemaps.TilemapLayer[]> = new Map();
     loadedChunks: Set<string> = new Set();
+    activeColliders: Map<string, Phaser.Physics.Arcade.Collider> = new Map();
 
     constructor(private scene: Phaser.Scene) {
         // Erstelle zuerst einen Container für die Karte
@@ -65,6 +67,8 @@ export class GameMap {
 
             if (distance > 3) {
                 // Chunks, die zu weit weg sind, entfernen
+                this.activeColliders.get(key).destroy();
+                this.loadedChunks.delete(key);
                 for (const layer of layers) {
                     layer.destroy();
                 }
@@ -111,9 +115,8 @@ export class GameMap {
             this.chunkSize
         );
 
-        // Erstelle Layer für den Chunk
         const blockLayer = this.map.createBlankLayer(
-            `chunk_${chunkX}_${chunkY}_2`,
+            `chunk_${chunkX}_${chunkY}_block`,
             "tiles",
             chunkX * this.chunkSize * 8,
             chunkY * this.chunkSize * 8,
@@ -121,9 +124,8 @@ export class GameMap {
             this.chunkSize
         );
 
-        // Erstelle Layer für den Chunk
         const overlayLayer = this.map.createBlankLayer(
-            `chunk_${chunkX}_${chunkY}_3}`,
+            `chunk_${chunkX}_${chunkY}_overlay}`,
             "tiles",
             chunkX * this.chunkSize * 8,
             chunkY * this.chunkSize * 8,
@@ -158,10 +160,16 @@ export class GameMap {
         blockLayer!.setDepth(9);
         overlayLayer!.setDepth(100);
 
+        //todo: enable collision
+        blockLayer?.setCollisionBetween(0, 225);
+
         blockLayer!.putTileAt(18, 1, 0);
         overlayLayer!.putTileAt(15, 0, 0);
 
         createObject(backgroundLayer!, blockLayer!, overlayLayer!, 10, 10, treeTemplate);
+        const collider = this.scene.physics.add.collider((this.scene as Game).player,blockLayer!);
+
+        this.activeColliders.set(`${chunkX},${chunkY}`, collider);
 
         // Speichere den Layer
         this.activeChunks.set(`${chunkX},${chunkY}`, [

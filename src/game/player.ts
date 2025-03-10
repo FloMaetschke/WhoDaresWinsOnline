@@ -19,6 +19,7 @@ export class Player extends Actor {
 
         // Spieler-Tiefe anpassen, damit er über der Tilemap liegt
         this.setDepth(10);
+        
     }
 
     public shoot() {

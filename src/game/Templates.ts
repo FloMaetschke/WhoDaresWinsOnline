@@ -64,7 +64,8 @@ export function createObject(
                 );
             }
             if (obj.blockLayer[index] > 0) {
-                block.putTileAt(obj.blockLayer[index], posX + x, posY + y);
+                const tile = block.putTileAt(obj.blockLayer[index], posX + x, posY + y);
+               // tile.physics.body!.enable = true;
             }
             if (obj.overlayLayer[index] > 0) {
                 overlay.putTileAt(obj.overlayLayer[index], posX + x, posY + y);
