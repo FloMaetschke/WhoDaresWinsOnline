@@ -102,7 +102,7 @@ export class GameMap {
         const tileScale = 0.02; // Skalierungsfaktor für Perlin Noise (höher = größere Muster)
 
         // Erstelle Layer für den Chunk
-        const layer = this.map.createBlankLayer(
+        const backgroundLayer = this.map.createBlankLayer(
             `chunk_${chunkX}_${chunkY}`,
             "tiles",
             chunkX * this.chunkSize * 8,
@@ -112,7 +112,7 @@ export class GameMap {
         );
 
         // Erstelle Layer für den Chunk
-        const layer2 = this.map.createBlankLayer(
+        const blockLayer = this.map.createBlankLayer(
             `chunk_${chunkX}_${chunkY}_2`,
             "tiles",
             chunkX * this.chunkSize * 8,
@@ -122,7 +122,7 @@ export class GameMap {
         );
 
         // Erstelle Layer für den Chunk
-        const layer3 = this.map.createBlankLayer(
+        const overlayLayer = this.map.createBlankLayer(
             `chunk_${chunkX}_${chunkY}_3}`,
             "tiles",
             chunkX * this.chunkSize * 8,
@@ -149,25 +149,25 @@ export class GameMap {
                 const tileIndex = this.getTileFromNoise(noiseValue, tiles);
 
                 // Setze den Tile
-                layer!.putTileAt(tileIndex, x, y);
+                backgroundLayer!.putTileAt(tileIndex, x, y);
             }
         }
 
         // Setze explizit die Tiefe des Layers niedriger als die des Spielers
-        layer!.setDepth(0);
-        layer2!.setDepth(9);
-        layer3!.setDepth(100);
+        backgroundLayer!.setDepth(0);
+        blockLayer!.setDepth(9);
+        overlayLayer!.setDepth(100);
 
-        layer2!.putTileAt(18, 1, 0);
-        layer3!.putTileAt(15, 0, 0);
+        blockLayer!.putTileAt(18, 1, 0);
+        overlayLayer!.putTileAt(15, 0, 0);
 
-        createObject(layer!, layer2!, layer3!, 10, 10, treeTemplate);
+        createObject(backgroundLayer!, blockLayer!, overlayLayer!, 10, 10, treeTemplate);
 
         // Speichere den Layer
         this.activeChunks.set(`${chunkX},${chunkY}`, [
-            layer!,
-            layer2!,
-            layer3!,
+            backgroundLayer!,
+            blockLayer!,
+            overlayLayer!,
         ]);
         this.loadedChunks.add(`${chunkX},${chunkY}`);
     }
