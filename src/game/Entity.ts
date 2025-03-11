@@ -23,7 +23,20 @@ export class Entity extends Phaser.GameObjects.Container {
             (this.scene as Game).player,
             this.blockLayer!
         );
+
+        this.collider = this.scene.physics.add.collider(
+            (this.scene as Game).player,
+            this.blockLayer!
+        );
         this.setDepth(this.y + this.map.height * this.map.tileHeight - 2* this.map.tileHeight );
+    }
+
+    entityWidth() { 
+        return this.map.width;
+    }
+
+    entityHeight() { 
+        return this.map.height;
     }
 
     destroy() {

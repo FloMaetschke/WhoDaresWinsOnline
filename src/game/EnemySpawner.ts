@@ -18,13 +18,13 @@ export class EnemySpawner {
         this.player = player;
         this.enemies = enemies;
 
-        // Gegner spawnen
-        // this.scene.time.addEvent({
-        //     delay: ENEMY_SPAWN_INTERVAL,
-        //     callback: this.spawnEnemy,
-        //     callbackScope: this,
-        //     loop: true,
-        // });
+        //Gegner spawnen
+        this.scene.time.addEvent({
+            delay: ENEMY_SPAWN_INTERVAL,
+            callback: this.spawnEnemy,
+            callbackScope: this,
+            loop: true,
+        });
     }
 
     public spawnEnemy() {

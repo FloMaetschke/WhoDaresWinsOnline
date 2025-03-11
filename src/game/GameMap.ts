@@ -1,6 +1,7 @@
 import { createNoise2D } from "simplex-noise";
 import { Entity } from "./Entity";
 import { Player } from "./Player";
+import { isAreaOccupied } from "./MapHelper";
 
 export class GameMap {
     noise: (x: number, y: number) => number;
@@ -137,26 +138,43 @@ export class GameMap {
                 // Wähle einen Tile-Index basierend auf dem Noise-Wert
                 const tileIndex = this.getTileFromNoise(noiseValue, tiles);
                 //console.log("noiseValue: ", noiseValue);
+                
+                // Platziere Tree-Entities
                 if (noiseValue > 0.95) {
-                    const entity = new Entity(
-                        this.scene,
-                        worldX * 8,
-                        worldY * 8,
-                        "tree"
-                    );
-                    entities.push(entity);
-                    this.allEntities.add(entity);
+                    const entityX = worldX * 8;
+                    const entityY = worldY * 8;
+                    const entityType = "tree";
+                    
+                    // Prüfe, ob der Bereich bereits von einem Entity belegt ist
+                    if (!isAreaOccupied(entityX, entityY, entityType, this.allEntities)) {
+                        const entity = new Entity(
+                            this.scene,
+                            entityX,
+                            entityY,
+                            entityType
+                        );
+                        entities.push(entity);
+                        this.allEntities.add(entity);
+                    }
                 }
 
-                if (noiseValue > 0.7 && noiseValue < 0.702) {
-                    const entity = new Entity(
-                        this.scene,
-                        worldX * 8,
-                        worldY * 8,
-                        "rock"
-                    );
-                    entities.push(entity);
-                    this.allEntities.add(entity);
+                // Platziere Rock-Entities
+                if (noiseValue > 0.3 && noiseValue < 0.302) {
+                    const entityX = worldX * 8;
+                    const entityY = worldY * 8;
+                    const entityType = "rock";
+                    
+                    // Prüfe, ob der Bereich bereits von einem Entity belegt ist
+                    if (!isAreaOccupied(entityX, entityY, entityType, this.allEntities)) {
+                        const entity = new Entity(
+                            this.scene,
+                            entityX,
+                            entityY,
+                            entityType
+                        );
+                        entities.push(entity);
+                        this.allEntities.add(entity);
+                    }
                 }
 
                 // Setze den Tile
@@ -170,7 +188,10 @@ export class GameMap {
         // Speichere den Layer
         this.activeChunks.set(`${chunkX},${chunkY}`, layer);
         this.loadedChunks.add(`${chunkX},${chunkY}`);
+
     }
+    
+
 
     // Erzeugt einen Perlin-Noise-Wert für die gegebenen Koordinaten
     private generateNoiseValue(x: number, y: number, scale: number): number {
