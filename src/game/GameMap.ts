@@ -139,7 +139,7 @@ export class GameMap {
                     );
                 }
 
-                if (noiseValue > 0.70 && noiseValue < 0.703) {
+                if (noiseValue > 0.70 && noiseValue < 0.702) {
                     entities.push(
                         new Entity(this.scene, worldX * 8, worldY * 8, "rock")
                     );
