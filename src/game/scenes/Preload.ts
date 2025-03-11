@@ -34,7 +34,6 @@ export class Preload extends Scene {
         // Ressourcen laden
         this.load.setPath("assets");
         this.load.atlas("sprites", "sprites.png", "sprites.json");
-        this.load.image("background", "bg.png");
         this.load.audio("bullet", "audio/shot.wav");
         this.load.audio("enemy_die", "audio/enemy_die.wav");
         this.load.audio("player_die", "audio/player_die.wav");

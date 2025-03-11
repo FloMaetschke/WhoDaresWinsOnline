@@ -12,6 +12,7 @@ export class GameMap {
     activeChunks: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
     activeEntities: Map<string, Entity[]> = new Map();
     loadedChunks: Set<string> = new Set();
+    allEntities = new Set<Entity>();
 
     constructor(private scene: Phaser.Scene) {
         // Erstelle zuerst einen Container für die Karte
@@ -71,8 +72,11 @@ export class GameMap {
                 this.activeChunks.delete(key);
                 const entities = this.activeEntities.get(key);
                 entities?.forEach((entity) => {
+                    this.allEntities.delete(entity);
                     entity.destroy();
-                }); 
+                });
+                
+                this.activeEntities.delete(key);
                 // Behalte die Chunk-ID, damit wir wissen, dass wir diesen Chunk schon generiert haben
             }
         }
@@ -134,15 +138,25 @@ export class GameMap {
                 const tileIndex = this.getTileFromNoise(noiseValue, tiles);
                 //console.log("noiseValue: ", noiseValue);
                 if (noiseValue > 0.95) {
-                    entities.push(
-                        new Entity(this.scene, worldX * 8, worldY * 8, "tree")
+                    const entity = new Entity(
+                        this.scene,
+                        worldX * 8,
+                        worldY * 8,
+                        "tree"
                     );
+                    entities.push(entity);
+                    this.allEntities.add(entity);
                 }
 
-                if (noiseValue > 0.70 && noiseValue < 0.702) {
-                    entities.push(
-                        new Entity(this.scene, worldX * 8, worldY * 8, "rock")
+                if (noiseValue > 0.7 && noiseValue < 0.702) {
+                    const entity = new Entity(
+                        this.scene,
+                        worldX * 8,
+                        worldY * 8,
+                        "rock"
                     );
+                    entities.push(entity);
+                    this.allEntities.add(entity);
                 }
 
                 // Setze den Tile
