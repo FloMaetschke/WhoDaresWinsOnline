@@ -1,0 +1,75 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "public/assets/templates/rock.tmj",
+    "expandedProjectPaths": [
+        ".",
+        "public/assets/templates",
+        "public/assets",
+        "public"
+    ],
+    "fileStates": {
+        "public/assets/templates/rock.tmj": {
+            "scale": 31.5875,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 11.998417095370005,
+                "y": 7.993668381480016
+            }
+        },
+        "public/assets/templates/rock.tmj#tileset": {
+            "scaleInDock": 1
+        },
+        "public/assets/templates/tree.tmj": {
+            "scale": 23.86875,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 11.982194291699397,
+                "y": 20.00523697302959
+            }
+        },
+        "public/assets/templates/tree.tmj#tileset": {
+            "scaleInDock": 5.5
+        },
+        "public/assets/tree.tmj": {
+            "scale": 23.86875,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 11.982194291699397,
+                "y": 20.00523697302959
+            }
+        },
+        "sprites/Who Dares Wins II - CPC - Tileset.tsx": {
+            "scaleInDock": 1
+        },
+        "tileset.tsx": {
+            "scaleInDock": 4,
+            "scaleInEditor": 8
+        }
+    },
+    "last.imagePath": "D:/Who Dares Wins Online/public/assets",
+    "map.fixedSize": true,
+    "map.height": 2,
+    "map.lastUsedFormat": "json",
+    "map.tileHeight": 8,
+    "map.tileWidth": 8,
+    "map.width": 3,
+    "openFiles": [
+        "public/assets/templates/tree.tmj",
+        "public/assets/templates/rock.tmj"
+    ],
+    "project": "Templates.tiled-project",
+    "recentFiles": [
+        "public/assets/templates/tree.tmj",
+        "public/assets/templates/rock.tmj",
+        "tileset.tsx",
+        "public/assets/tree.tmj"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 8,
+        "width": 8
+    }
+}

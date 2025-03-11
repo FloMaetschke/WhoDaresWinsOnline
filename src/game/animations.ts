@@ -33,7 +33,7 @@ export function initAnimations(scene: Scene): void {
                 prefix: "player-left-",
                 end: 2,
             }),
-            frameRate: 10,
+            frameRate: 20,
             repeat: -1,
         });
     }
@@ -44,7 +44,7 @@ export function initAnimations(scene: Scene): void {
                 prefix: "player-right-",
                 end: 2,
             }),
-            frameRate: 10,
+            frameRate: 20,
             repeat: -1,
         });
     }

@@ -48,7 +48,7 @@ export class Player extends Actor {
         if (this.dead) return;
         this.scene.keyboardController.updateKeyboardMovement();
         this.setDepth(this.y);
-        console.log(this.x,this.y, 'depth:', this.depth);
+        //console.log(this.x,this.y, 'depth:', this.depth);
     }
 
     public move(directionX: number, directionY: number) {

@@ -1,16 +1,15 @@
 import { Scene } from "phaser";
-import { EventBus } from "../EventBus";
-import { Player } from "../Player";
-import { Enemy } from "../Enemy";
-import { GameMap } from "../GameMap";
-import { EnemySpawner } from "../EnemySpawner";
-import { ShootingController } from "../ShootingController";
 import { DebugController } from "../DebugController";
-import { ScreenSetup } from "../ScreenSetup";
+import { Enemy } from "../Enemy";
+import { EnemySpawner } from "../EnemySpawner";
+import { EventBus } from "../EventBus";
+import { GameMap } from "../GameMap";
 import { KeyboardController } from "../KeboardController";
-import { TouchController } from "../TouchController";
+import { Player } from "../Player";
+import { ScreenSetup } from "../ScreenSetup";
+import { ShootingController } from "../ShootingController";
 import { SoundController } from "../SoundController";
-import { Entity } from "../Entity";
+import { TouchController } from "../TouchController";
 
 export class Game extends Scene {
     player: Player;
@@ -73,7 +72,6 @@ export class Game extends Scene {
 
         // Rest des Codes wie zuvor
         EventBus.emit("current-scene-ready", this);
-        this.baum = new Entity(this, 5000, 5000);
     }
 
     update(time: number, delta: number) {

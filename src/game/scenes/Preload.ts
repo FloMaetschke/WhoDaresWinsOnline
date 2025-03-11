@@ -41,6 +41,9 @@ export class Preload extends Scene {
         this.load.audio("music", "audio/music.mp3");
         this.load.image("tiles", "tileset.png");
         this.load.image("mute", "icons/mute.png");
+
+        this.load.tilemapTiledJSON('tree', 'templates/tree.tmj');
+        this.load.tilemapTiledJSON('rock', 'templates/rock.tmj');
     }
 
     create() {

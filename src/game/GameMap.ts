@@ -1,18 +1,17 @@
 import { createNoise2D } from "simplex-noise";
+import { Entity } from "./Entity";
 import { Player } from "./Player";
-import { createObject, treeTemplate } from "./Templates";
-import { Game } from "./scenes/Game";
 
 export class GameMap {
     noise: (x: number, y: number) => number;
-    chunkSize = 64; // Größe eines Chunks in Tiles
+    chunkSize = 16; // Größe eines Chunks in Tiles
     map: Phaser.Tilemaps.Tilemap;
     worldWidth = 10000;
     worldHeight = 10000;
     mapData: number[][] = [];
     activeChunks: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map();
+    activeEntities: Map<string, Entity[]> = new Map();
     loadedChunks: Set<string> = new Set();
-    activeColliders: Map<string, Phaser.Physics.Arcade.Collider> = new Map();
 
     constructor(private scene: Phaser.Scene) {
         // Erstelle zuerst einen Container für die Karte
@@ -29,7 +28,7 @@ export class GameMap {
         );
 
         // Simplex-Noise initialisieren - Angepasst für neue API
-        this.noise = createNoise2D(() => 0.55337); //Math.random);
+        this.noise = createNoise2D();
 
         // Definiere Tiles-Array für die Map
         const tiles = [4, 5, 6, 7, 8, 9, 13, 14, 64];
@@ -70,6 +69,10 @@ export class GameMap {
                 this.loadedChunks.delete(key);
                 layer.destroy();
                 this.activeChunks.delete(key);
+                const entities = this.activeEntities.get(key);
+                entities?.forEach((entity) => {
+                    entity.destroy();
+                }); 
                 // Behalte die Chunk-ID, damit wir wissen, dass wir diesen Chunk schon generiert haben
             }
         }
@@ -112,6 +115,7 @@ export class GameMap {
             this.chunkSize
         )!;
 
+        const entities: Entity[] = [];
         // Fülle den Layer mit Tiles basierend auf Perlin Noise
         for (let y = 0; y < this.chunkSize; y++) {
             for (let x = 0; x < this.chunkSize; x++) {
@@ -128,6 +132,18 @@ export class GameMap {
 
                 // Wähle einen Tile-Index basierend auf dem Noise-Wert
                 const tileIndex = this.getTileFromNoise(noiseValue, tiles);
+                //console.log("noiseValue: ", noiseValue);
+                if (noiseValue > 0.95) {
+                    entities.push(
+                        new Entity(this.scene, worldX * 8, worldY * 8, "tree")
+                    );
+                }
+
+                if (noiseValue > 0.70 && noiseValue < 0.703) {
+                    entities.push(
+                        new Entity(this.scene, worldX * 8, worldY * 8, "rock")
+                    );
+                }
 
                 // Setze den Tile
                 layer!.putTileAt(tileIndex, x, y);
@@ -136,7 +152,7 @@ export class GameMap {
 
         // Setze explizit die Tiefe des Layers niedriger als die des Spielers
         layer.setDepth(0);
-
+        this.activeEntities.set(`${chunkX},${chunkY}`, entities);
         // Speichere den Layer
         this.activeChunks.set(`${chunkX},${chunkY}`, layer);
         this.loadedChunks.add(`${chunkX},${chunkY}`);
