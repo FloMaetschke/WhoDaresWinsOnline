@@ -76,7 +76,7 @@ export class GameMap {
                     this.allEntities.delete(entity);
                     entity.destroy();
                 });
-                
+
                 this.activeEntities.delete(key);
                 // Behalte die Chunk-ID, damit wir wissen, dass wir diesen Chunk schon generiert haben
             }
@@ -107,8 +107,7 @@ export class GameMap {
 
     // Erstellt einen einzelnen Tilemap-Chunk an der angegebenen Position
     private createChunk(chunkX: number, chunkY: number) {
-        const tiles = [4, 5, 6, 7, 8, 9, 13, 14, 64]; // Deine vordefinierten Tile-Indizes
-        const tileScale = 0.02; // Skalierungsfaktor für Perlin Noise (höher = größere Muster)
+        const tileScale = 0.02; //
 
         // Erstelle Layer für den Chunk
         const layer = this.map.createBlankLayer(
@@ -129,51 +128,80 @@ export class GameMap {
                 const worldY = chunkY * this.chunkSize + y;
 
                 // Generiere Perlin Noise-Wert zwischen 0 und 1
-                const noiseValue = this.generateNoiseValue(
+                const noiseValue = this.generateNoiseValue(worldX, worldY);
+
+                // Generiere Perlin Noise-Wert zwischen 0 und 1
+                const patternNoiseValue = this.generateNoiseValue(
                     worldX,
                     worldY,
                     tileScale
                 );
 
-                // Wähle einen Tile-Index basierend auf dem Noise-Wert
-                const tileIndex = this.getTileFromNoise(noiseValue, tiles);
+                // DEBUG NOISE
+                //const bgRect = this.scene.add.rectangle(worldX*8,worldY*8,8,8,0xFFFFFF);
+                // bgRect.setDepth(100000-1);
+                // const rect = this.scene.add.rectangle(worldX*8,worldY*8,8,8,0x000000,noiseValue < 0.2 ? 0:0.5);
+                // rect.setDepth(100000);
+
+                // // Wähle einen Tile-Index basierend auf dem Noise-Wert
+                const tileIndex = this.getTileFromNoise(
+                    noiseValue,
+                    patternNoiseValue
+                );
                 //console.log("noiseValue: ", noiseValue);
-                
-                // Platziere Tree-Entities
-                if (noiseValue > 0.95) {
-                    const entityX = worldX * 8;
-                    const entityY = worldY * 8;
-                    const entityType = "tree";
-                    
-                    // Prüfe, ob der Bereich bereits von einem Entity belegt ist
-                    if (!isAreaOccupied(entityX, entityY, entityType, this.allEntities)) {
-                        const entity = new Entity(
-                            this.scene,
-                            entityX,
-                            entityY,
-                            entityType
-                        );
-                        entities.push(entity);
-                        this.allEntities.add(entity);
+
+                if (this.getFloorType(patternNoiseValue) !== "water") {
+                    // Platziere Tree-Entities
+                    if (noiseValue > 0.95) {
+                        const entityX = worldX * 8;
+                        const entityY = worldY * 8;
+                        const entityType = "tree";
+
+                        // Prüfe, ob der Bereich bereits von einem Entity belegt ist
+                        if (
+                            !isAreaOccupied(
+                                entityX,
+                                entityY,
+                                entityType,
+                                this.allEntities
+                            )
+                        ) {
+                            const entity = new Entity(
+                                this.scene,
+                                entityX,
+                                entityY,
+                                entityType
+                            );
+                            entities.push(entity);
+                            this.allEntities.add(entity);
+                        }
                     }
                 }
+                if (this.getFloorType(patternNoiseValue) === "ground2") {
+                    // Platziere Rock-Entities
+                    if (noiseValue > 0.3 && noiseValue < 0.302) {
+                        const entityX = worldX * 8;
+                        const entityY = worldY * 8;
+                        const entityType = "rock";
 
-                // Platziere Rock-Entities
-                if (noiseValue > 0.3 && noiseValue < 0.302) {
-                    const entityX = worldX * 8;
-                    const entityY = worldY * 8;
-                    const entityType = "rock";
-                    
-                    // Prüfe, ob der Bereich bereits von einem Entity belegt ist
-                    if (!isAreaOccupied(entityX, entityY, entityType, this.allEntities)) {
-                        const entity = new Entity(
-                            this.scene,
-                            entityX,
-                            entityY,
-                            entityType
-                        );
-                        entities.push(entity);
-                        this.allEntities.add(entity);
+                        // Prüfe, ob der Bereich bereits von einem Entity belegt ist
+                        if (
+                            !isAreaOccupied(
+                                entityX,
+                                entityY,
+                                entityType,
+                                this.allEntities
+                            )
+                        ) {
+                            const entity = new Entity(
+                                this.scene,
+                                entityX,
+                                entityY,
+                                entityType
+                            );
+                            entities.push(entity);
+                            this.allEntities.add(entity);
+                        }
                     }
                 }
 
@@ -188,26 +216,47 @@ export class GameMap {
         // Speichere den Layer
         this.activeChunks.set(`${chunkX},${chunkY}`, layer);
         this.loadedChunks.add(`${chunkX},${chunkY}`);
-
     }
-    
-
 
     // Erzeugt einen Perlin-Noise-Wert für die gegebenen Koordinaten
-    private generateNoiseValue(x: number, y: number, scale: number): number {
+    private generateNoiseValue(x: number, y: number, scale = 1): number {
         // Angepasst an die neue API
-        //return (this.noise(x * scale, y * scale) + 1) / 2;
-        return (this.noise(x, y) + 1) / 2;
+        return (this.noise(x * scale, y * scale) + 1) / 2;
+        //return (this.noise(x, y) + 1) / 2;
+    }
+
+    private getFloorType(noiseValue: number): "water" | "ground1" | "ground2" {
+        if (noiseValue < 0.2) {
+            return "water";
+        } else if (noiseValue >= 0.2 && noiseValue < 0.6) {
+            return "ground1";
+        } else {
+            return "ground2";
+        }
     }
 
     // Wählt einen Tile basierend auf dem Noise-Wert aus
     private getTileFromNoise(
         noiseValue: number,
-        tileOptions: number[]
+        patternNoiseValue: number
     ): number {
+        const boden = [4, 5, 6, 7, 8, 9]; // Deine vordefinierten Tile-Indizes
+        const boden2 = [8, 9, 13, 14, 64]; // Deine vordefinierten Tile-Indizes
+        const wasser = [93, 94, 95, 96]; // Deine vordefinierten Tile-Indizes
+
+        if (patternNoiseValue < 0.2) {
+            const index = Math.floor(noiseValue * wasser.length);
+            return wasser[index];
+        }
+
+        if (patternNoiseValue >= 0.2 && patternNoiseValue < 0.6) {
+            const index = Math.floor(noiseValue * boden2.length);
+            return boden2[index];
+        }
+
         // Skaliere den Wert auf den Bereich des Arrays
-        const index = Math.floor(noiseValue * tileOptions.length);
-        return tileOptions[index];
+        const index = Math.floor(noiseValue * boden.length);
+        return boden[index];
     }
 
     destroy() {
