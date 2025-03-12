@@ -24,10 +24,6 @@ export class Entity extends Phaser.GameObjects.Container {
             this.blockLayer!
         );
 
-        this.collider = this.scene.physics.add.collider(
-            (this.scene as Game).player,
-            this.blockLayer!
-        );
         this.setDepth(this.y + this.map.height * this.map.tileHeight - 2* this.map.tileHeight );
     }
 
@@ -41,9 +37,7 @@ export class Entity extends Phaser.GameObjects.Container {
 
     destroy() {
         this.collider?.destroy();
-        this.blockLayer?.destroy();
-        this.overlayLayer?.destroy();
-        this.map.destroy();
+        this.removeAll(true);
         super.destroy();
     }
 }

@@ -32,6 +32,7 @@ export class Enemy extends Actor {
 
         // Schuss-Timer starten
         this.setupShootTimer();
+        console.log("Enemy created");
     }
 
     // Neue Methode für Schuss-Timer
@@ -152,7 +153,6 @@ export class Enemy extends Actor {
     }
 
     update(time: number, delta: number): void {
-        console.log("Enemy update");
         super.update(time, delta);
         if (this.dead) {
             this.alpha = 0.5 + Math.abs(Math.sin(time / 100)) * 0.2;

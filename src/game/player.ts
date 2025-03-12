@@ -9,11 +9,6 @@ export class Player extends Actor {
 
     constructor(public scene: Game, x: number, y: number) {
         super(scene, x, y, 'player-down-right-0');
-
-
-
-        
-
         this.getSpriteBody().setSize(13, 20);
         this.getSpriteBody().setOffset(1, 0);
         
