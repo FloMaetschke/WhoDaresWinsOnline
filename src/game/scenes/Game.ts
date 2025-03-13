@@ -5,7 +5,7 @@ import { EnemySpawner } from "../EnemySpawner";
 import { EventBus } from "../EventBus";
 import { GameMap } from "../GameMap";
 import { KeyboardController } from "../KeboardController";
-import { Player } from "../Player2";
+import { Player } from "../Player";
 import { ScreenSetup } from "../ScreenSetup";
 import { ShootingController } from "../ShootingController";
 import { SoundController } from "../SoundController";

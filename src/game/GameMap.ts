@@ -1,6 +1,6 @@
 import { createNoise2D } from "simplex-noise";
 import { Entity } from "./Entity";
-import { Player } from "./Player2";
+import { Player } from "./Player";
 import { isAreaOccupied } from "./MapHelper";
 import {
     FloorType,

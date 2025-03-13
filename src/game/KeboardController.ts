@@ -1,4 +1,4 @@
-import { Player } from "./Player2";
+import { Player } from "./Player";
 import { Game } from "./scenes/Game";
 
 export class KeyboardController {
