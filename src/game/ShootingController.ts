@@ -1,6 +1,6 @@
 import { Scene } from "phaser";
 import { Player } from "./Player";
-import { Enemy } from "./Enemy";
+import { Enemy } from "./Enemy2";
 
 export class ShootingController {
     private scene: Scene;

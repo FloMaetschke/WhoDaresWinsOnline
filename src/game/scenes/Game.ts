@@ -1,6 +1,6 @@
 import { Scene } from "phaser";
 import { DebugController } from "../DebugController";
-import { Enemy } from "../Enemy";
+import { Enemy } from "../Enemy2";
 import { EnemySpawner } from "../EnemySpawner";
 import { EventBus } from "../EventBus";
 import { GameMap } from "../GameMap";
