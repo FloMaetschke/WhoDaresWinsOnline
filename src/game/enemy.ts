@@ -1,5 +1,5 @@
 import { Actor } from "./actor";
-import { Player } from "./Player";
+import { Player } from "./Player2";
 import { Game } from "./scenes/Game"; // Importiere die Game-Szene
 
 export class Enemy extends Actor {

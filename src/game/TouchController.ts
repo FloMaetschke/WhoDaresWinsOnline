@@ -1,5 +1,5 @@
 import { Game } from "./scenes/Game";
-import { Player } from "./Player";
+import { Player } from "./Player2";
 
 export class TouchController {
     private touchControls: {

@@ -1,5 +1,5 @@
 import { Scene } from "phaser";
-import { Player } from "./Player";
+import { Player } from "./Player2";
 import { Enemy } from "./Enemy";
 
 const ENEMY_SPAWN_INTERVAL = 2000;
