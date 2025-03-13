@@ -3,6 +3,7 @@ import { Player } from "./Player";
 import { Game } from "./scenes/Game"; // Importiere die Game-Szene
 
 export class Enemy extends Actor {
+
     private target: Player;
     private AGRESSOR_RADIUS = 500;
     public currentDirectionX = 0;
@@ -33,6 +34,7 @@ export class Enemy extends Actor {
         // Schuss-Timer starten
         this.setupShootTimer();
         console.log("Enemy created");
+        this.scene.gameMap.addEnemyWaterCollision(this);
     }
 
     // Neue Methode für Schuss-Timer
@@ -170,6 +172,10 @@ export class Enemy extends Actor {
         } else {
             this.handleWandering();
         }
+    }
+
+    onWaterCollision(): void {
+        console.log('Enemy Collision with water!');
     }
 
     public setTarget(target: Player): void {

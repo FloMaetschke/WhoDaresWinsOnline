@@ -11,6 +11,7 @@ import {
     getWaterBorderTile,
 } from "./TilePlacement";
 import { Game } from "./scenes/Game";
+import { Enemy } from "./Enemy";
 const tileScale = 0.02;
 
 export class GameMap {
@@ -104,19 +105,7 @@ export class GameMap {
         }
     }
 
-    private destroyChunk(key: string, layer: Phaser.Tilemaps.TilemapLayer) {
-        this.loadedChunks.delete(key);
-        layer.getData("player_collider")?.destroy();
-        layer.destroy();
-        this.activeChunks.delete(key);
-        const entities = this.activeEntities.get(key);
-        entities?.forEach((entity) => {
-            this.allEntities.delete(entity);
-            entity.destroy();
-        });
 
-        this.activeEntities.delete(key);
-    }
 
     // Erstellt einen einzelnen Tilemap-Chunk an der angegebenen Position
     private createChunk(chunkX: number, chunkY: number) {
@@ -133,12 +122,18 @@ export class GameMap {
         layer.setCollisionBetween(91, 95);
         layer.setCollisionBetween(110, 111);
         
+        // Kollision für Spieler beibehalten
         const waterPlayerCollider = this.scene.physics.add.collider(
             (this.scene as Game).player,
             layer,
             () => (this.scene as Game).player.die(true)
         );
-        layer.setData("player_collider", waterPlayerCollider);
+        const colliders = layer.getData("colliders") || [];
+        colliders.push(waterPlayerCollider);
+        layer.setData("colliders", colliders);
+        
+        // Die Wasserkollision für spätere Verwendung durch Feinde speichern
+        layer.setData("water_layer", layer);
 
         const entities: Entity[] = [];
 
@@ -270,6 +265,19 @@ export class GameMap {
         this.loadedChunks.add(`${chunkX},${chunkY}`);
     }
 
+    // Neue Methode: Lasse Feinde mit Wasserbereichen kollidieren
+    public addEnemyWaterCollision(enemy: Enemy) {
+        this.activeChunks.forEach((layer) => {
+            const waterLayer = layer.getData("water_layer");
+            if (waterLayer) {
+                const collider = this.scene.physics.add.collider(enemy, waterLayer, () => enemy.onWaterCollision());
+                const colliders: Phaser.Physics.Arcade.Collider[] = waterLayer.getData("colliders") || [];
+                colliders.push(collider);
+                layer.setData("colliders", colliders);
+            }
+        });
+    }
+
     // Erzeugt einen Perlin-Noise-Wert für die gegebenen Koordinaten
     private generateNoiseValue(x: number, y: number, scale = 1): number {
         // Angepasst an die neue API
@@ -313,6 +321,23 @@ export class GameMap {
                 }
             }
         }
+    }
+
+    private destroyChunk(key: string, layer: Phaser.Tilemaps.TilemapLayer) {
+        this.loadedChunks.delete(key);
+        const colliders =layer.getData("colliders");
+        colliders?.forEach((collider: Phaser.Physics.Arcade.Collider) => {
+            collider.destroy();
+        });
+        layer.destroy();
+        this.activeChunks.delete(key);
+        const entities = this.activeEntities.get(key);
+        entities?.forEach((entity) => {
+            this.allEntities.delete(entity);
+            entity.destroy();
+        });
+
+        this.activeEntities.delete(key);
     }
 
     destroy() {

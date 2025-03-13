@@ -19,12 +19,12 @@ export class EnemySpawner {
         this.enemies = enemies;
 
         //Gegner spawnen
-        // this.scene.time.addEvent({
-        //     delay: ENEMY_SPAWN_INTERVAL,
-        //     callback: this.spawnEnemy,
-        //     callbackScope: this,
-        //     loop: true,
-        // });
+        this.scene.time.addEvent({
+            delay: ENEMY_SPAWN_INTERVAL,
+            callback: this.spawnEnemy,
+            callbackScope: this,
+            loop: true,
+        });
     }
 
     public spawnEnemy() {

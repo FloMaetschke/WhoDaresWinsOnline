@@ -93,7 +93,7 @@ export class ShootingController {
             "ammo-0"
         );
         // Temporarily disabled:
-        //(this.scene as Game).soundController.playSound("bullet");
+        (this.scene as Game).soundController.playSound("bullet");
 
         if (bullet) {
             bullet.setActive(true);
