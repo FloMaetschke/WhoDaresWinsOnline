@@ -3,6 +3,8 @@ import { Entity } from "./Entity";
 import { Player } from "./Player";
 import { isAreaOccupied } from "./MapHelper";
 import { FloorType, getFloorType, getTileFromNoise } from "./TilePlacement";
+const tileScale = 0.02; 
+
 
 export class GameMap {
     noise: (x: number, y: number) => number;
@@ -108,7 +110,7 @@ export class GameMap {
 
     // Erstellt einen einzelnen Tilemap-Chunk an der angegebenen Position
     private createChunk(chunkX: number, chunkY: number) {
-        const tileScale = 0.02; //
+   
 
         // Erstelle Layer für den Chunk
         const layer = this.map.createBlankLayer(
@@ -179,12 +181,15 @@ export class GameMap {
                 const entityX = worldX * 8;
                 const entityY = worldY * 8;
                 const entityType = "tree";
+                
+                // Übergebe die generateNoiseValue-Funktion als Parameter, um die Wasserprüfung zu ermöglichen
                 if (
                     !isAreaOccupied(
                         entityX,
                         entityY,
                         entityType,
-                        this.allEntities
+                        this.allEntities,
+                        (x, y) => this.generateNoiseValue(x, y, tileScale)
                     )
                 ) {
                     const entity = new Entity(

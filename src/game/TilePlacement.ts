@@ -3,7 +3,7 @@
 
 const ground = [4, 5, 6, 7, 8, 9]; // Deine vordefinierten Tile-Indizes
 const ground2 = [8, 9, 13, 14, 64]; // Deine vordefinierten Tile-Indizes
-const water = [93, 94, 95, 96]; // Deine vordefinierten Tile-Indizes
+const water = [91,92,93, 94, 95,110,110,110,110,110,110,111]; // Deine vordefinierten Tile-Indizes
 export type FloorType = "water" | "ground1" | "ground2";
 
 // Wählt einen Tile basierend auf dem Noise-Wert aus
