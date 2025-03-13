@@ -2,6 +2,7 @@ import { createNoise2D } from "simplex-noise";
 import { Entity } from "./Entity";
 import { Player } from "./Player";
 import { isAreaOccupied } from "./MapHelper";
+import { getFloorType, getTileFromNoise } from "./TilePlacement";
 
 export class GameMap {
     noise: (x: number, y: number) => number;
@@ -142,15 +143,13 @@ export class GameMap {
                 // bgRect.setDepth(100000-1);
                 // const rect = this.scene.add.rectangle(worldX*8,worldY*8,8,8,0x000000,noiseValue < 0.2 ? 0:0.5);
                 // rect.setDepth(100000);
-
+                const floorType = getFloorType(patternNoiseValue);
                 // // Wähle einen Tile-Index basierend auf dem Noise-Wert
-                const tileIndex = this.getTileFromNoise(
-                    noiseValue,
-                    patternNoiseValue
-                );
+                const tileIndex = getTileFromNoise(noiseValue, floorType);
+
                 //console.log("noiseValue: ", noiseValue);
 
-                if (this.getFloorType(patternNoiseValue) !== "water") {
+                if (floorType !== "water") {
                     // Platziere Tree-Entities
                     if (noiseValue > 0.95) {
                         const entityX = worldX * 8;
@@ -177,7 +176,7 @@ export class GameMap {
                         }
                     }
                 }
-                if (this.getFloorType(patternNoiseValue) === "ground2") {
+                if (floorType === "ground2") {
                     // Platziere Rock-Entities
                     if (noiseValue > 0.3 && noiseValue < 0.302) {
                         const entityX = worldX * 8;
