@@ -175,7 +175,13 @@ export class Enemy extends Actor {
     }
 
     onWaterCollision(): void {
-        console.log('Enemy Collision with water!');
+        // Ändere die Wanderrichtung
+        const newDirection = {
+            x: -this.wanderDirection.x,
+            y: -this.wanderDirection.y
+        };
+        this.wanderDirection = newDirection;
+        this.startWandering();
     }
 
     public setTarget(target: Player): void {
