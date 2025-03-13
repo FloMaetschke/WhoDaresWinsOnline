@@ -11,7 +11,7 @@ import {
     getWaterBorderTile,
 } from "./TilePlacement";
 import { Game } from "./scenes/Game";
-import { Enemy } from "./Enemy2";
+import { Enemy } from "./Enemy";
 const tileScale = 0.02;
 
 export class GameMap {
