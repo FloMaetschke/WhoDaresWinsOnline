@@ -84,7 +84,7 @@ export class ShootingController {
     ) {
         const bulletGroup =
             target === "enemy" ? this.bullets : this.enemyBullets;
-        const speed = 150;
+        const speed = (target === 'enemy' ? 200 : 150);
 
         const bullet = bulletGroup.get(
             shooter.x + shooter.sprite.x,

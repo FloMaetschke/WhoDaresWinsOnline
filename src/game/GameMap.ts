@@ -137,15 +137,7 @@ export class GameMap {
 
         const entities: Entity[] = [];
 
-        // Speichern der Bodeninformationen für die spätere Randberechnung
-        const floorTypes: FloorType[][] = Array(this.chunkSize)
-            .fill(null)
-            .map(() => Array(this.chunkSize).fill("ground1"));
-        const tileNoiseValues: number[][] = Array(this.chunkSize)
-            .fill(null)
-            .map(() => Array(this.chunkSize).fill(0));
-
-        // Erster Durchlauf: Platziere Grundtiles und speichere ihre Typen
+        // Generiere und platziere Tiles in einem einzigen Durchlauf
         for (let y = 0; y < this.chunkSize; y++) {
             for (let x = 0; x < this.chunkSize; x++) {
                 // Berechne globale Position für konsistenten Noise
@@ -154,9 +146,8 @@ export class GameMap {
 
                 // Generiere Perlin Noise-Wert zwischen 0 und 1
                 const noiseValue = this.generateNoiseValue(worldX, worldY);
-                tileNoiseValues[y][x] = noiseValue;
-
-                // Generiere Perlin Noise-Wert zwischen 0 und 1
+                
+                // Generiere Perlin Noise-Wert zwischen 0 und 1 für Bodentyp
                 const patternNoiseValue = this.generateNoiseValue(
                     worldX,
                     worldY,
@@ -164,96 +155,41 @@ export class GameMap {
                 );
 
                 const floorType = getFloorType(patternNoiseValue);
-                floorTypes[y][x] = floorType;
+                
+                // Wenn es Wasser ist, prüfe die Übergänge
+                if (floorType === "water") {
+                    // Prüfe Nachbarn für Wasserübergänge
+                    const isWater = this.checkNeighborWaterTiles(worldX, worldY, chunkX, chunkY);
+                    
+                    // Bestimme den Randtyp
+                    const borderDirection = determineWaterBorderType(isWater);
 
-                // Wähle einen Tile-Index basierend auf dem Noise-Wert
-                const tileIndex = getTileFromNoise(noiseValue, floorType);
-
-                // Setze den Tile
-                layer!.putTileAt(tileIndex, x, y);
-            }
-        }
-
-        // Zweiter Durchlauf: Platziere Randtiles zwischen Wasser und Land
-        for (let y = 0; y < this.chunkSize; y++) {
-            for (let x = 0; x < this.chunkSize; x++) {
-                // Überspringe, wenn das Tile kein Wasser ist
-                if (floorTypes[y][x] !== "water") continue;
-
-                // Prüfe alle Nachbarn und sammle Informationen, ob sie Wasser sind
-                // [center, top, right, bottom, left, topRight, bottomRight, bottomLeft, topLeft]
-                const isWater: boolean[] = [
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                ];
-
-                // Direkter Mittelpunkt
-                isWater[0] = floorTypes[y][x] === "water";
-
-                // Direkte Nachbarn
-                if (y > 0) isWater[1] = floorTypes[y - 1][x] === "water"; // Oben
-                if (x < this.chunkSize - 1)
-                    isWater[2] = floorTypes[y][x + 1] === "water"; // Rechts
-                if (y < this.chunkSize - 1)
-                    isWater[3] = floorTypes[y + 1][x] === "water"; // Unten
-                if (x > 0) isWater[4] = floorTypes[y][x - 1] === "water"; // Links
-
-                // Diagonale Nachbarn
-                if (y > 0 && x < this.chunkSize - 1)
-                    isWater[5] = floorTypes[y - 1][x + 1] === "water"; // Oben-Rechts
-                if (y < this.chunkSize - 1 && x < this.chunkSize - 1)
-                    isWater[6] = floorTypes[y + 1][x + 1] === "water"; // Unten-Rechts
-                if (y < this.chunkSize - 1 && x > 0)
-                    isWater[7] = floorTypes[y + 1][x - 1] === "water"; // Unten-Links
-                if (y > 0 && x > 0)
-                    isWater[8] = floorTypes[y - 1][x - 1] === "water"; // Oben-Links
-
-                // Bestimme den Randtyp
-                const borderDirection = determineWaterBorderType(isWater);
-
-                // Wenn ein Randtile benötigt wird, ersetze das aktuelle Tile
-                if (borderDirection !== TileBorderDirections.None) {
-                    const noiseValue = tileNoiseValues[y][x];
-                    const borderTileIndex = getWaterBorderTile(
-                        borderDirection,
-                        noiseValue
-                    );
-                    layer!.putTileAt(borderTileIndex, x, y);
+                    // Wenn ein Randtile benötigt wird, setze das entsprechende Tile
+                    if (borderDirection !== TileBorderDirections.None) {
+                        const borderTileIndex = getWaterBorderTile(borderDirection, noiseValue);
+                        layer.putTileAt(borderTileIndex, x, y);
+                    } else {
+                        // Normales Wassertile
+                        const tileIndex = getTileFromNoise(noiseValue, floorType);
+                        layer.putTileAt(tileIndex, x, y);
+                    }
+                } else {
+                    // Normaler Boden (nicht Wasser)
+                    const tileIndex = getTileFromNoise(noiseValue, floorType);
+                    layer.putTileAt(tileIndex, x, y);
                 }
-            }
-        }
 
-        // Platziere Entities
-        for (let y = 0; y < this.chunkSize; y++) {
-            for (let x = 0; x < this.chunkSize; x++) {
-                const worldX = chunkX * this.chunkSize + x;
-                const worldY = chunkY * this.chunkSize + y;
-                const noiseValue = tileNoiseValues[y][x];
-                const floorType = floorTypes[y][x];
-
-                this.placeEntity(
-                    "tree",
-                    worldX,
-                    worldY,
-                    floorType,
-                    noiseValue,
-                    entities
-                );
-                this.placeEntity(
-                    "rock",
-                    worldX,
-                    worldY,
-                    floorType,
-                    noiseValue,
-                    entities
-                );
+                // Entities platzieren, wenn es sich nicht um Wasser handelt
+                if (floorType !== "water" && noiseValue > 0.95) {
+                    this.placeEntity(
+                        "tree",
+                        worldX,
+                        worldY,
+                        floorType,
+                        noiseValue,
+                        entities
+                    );
+                }
             }
         }
 
@@ -263,6 +199,51 @@ export class GameMap {
         // Speichere den Layer
         this.activeChunks.set(`${chunkX},${chunkY}`, layer);
         this.loadedChunks.add(`${chunkX},${chunkY}`);
+    }
+
+    // Neue Methode zum Prüfen von Nachbartiles für Wasserübergänge
+    private checkNeighborWaterTiles(worldX: number, worldY: number, chunkX: number, chunkY: number): boolean[] {
+        // [center, top, right, bottom, left, topRight, bottomRight, bottomLeft, topLeft]
+        const isWater: boolean[] = [true, true, true, true, true, true, true, true, true];
+        
+        // Prüfe für jeden Nachbarn, ob es Wasser ist (mittels getFloorType und generateNoiseValue)
+        // Zentrum (aktuelles Tile)
+        const centerNoise = this.generateNoiseValue(worldX, worldY, tileScale);
+        isWater[0] = getFloorType(centerNoise) === "water";
+        
+        // Oben
+        const topNoise = this.generateNoiseValue(worldX, worldY - 1, tileScale);
+        isWater[1] = getFloorType(topNoise) === "water";
+        
+        // Rechts
+        const rightNoise = this.generateNoiseValue(worldX + 1, worldY, tileScale);
+        isWater[2] = getFloorType(rightNoise) === "water";
+        
+        // Unten
+        const bottomNoise = this.generateNoiseValue(worldX, worldY + 1, tileScale);
+        isWater[3] = getFloorType(bottomNoise) === "water";
+        
+        // Links
+        const leftNoise = this.generateNoiseValue(worldX - 1, worldY, tileScale);
+        isWater[4] = getFloorType(leftNoise) === "water";
+        
+        // Oben-Rechts
+        const topRightNoise = this.generateNoiseValue(worldX + 1, worldY - 1, tileScale);
+        isWater[5] = getFloorType(topRightNoise) === "water";
+        
+        // Unten-Rechts
+        const bottomRightNoise = this.generateNoiseValue(worldX + 1, worldY + 1, tileScale);
+        isWater[6] = getFloorType(bottomRightNoise) === "water";
+        
+        // Unten-Links
+        const bottomLeftNoise = this.generateNoiseValue(worldX - 1, worldY + 1, tileScale);
+        isWater[7] = getFloorType(bottomLeftNoise) === "water";
+        
+        // Oben-Links
+        const topLeftNoise = this.generateNoiseValue(worldX - 1, worldY - 1, tileScale);
+        isWater[8] = getFloorType(topLeftNoise) === "water";
+        
+        return isWater;
     }
 
     // Neue Methode: Lasse Feinde mit Wasserbereichen kollidieren
@@ -295,30 +276,28 @@ export class GameMap {
     ) {
         if (floorType !== "water") {
             // Platziere Tree-Entities
-            if (noiseValue > 0.95) {
-                const entityX = worldX * 8;
-                const entityY = worldY * 8;
-                const entityType = "tree";
+            const entityX = worldX * 8;
+            const entityY = worldY * 8;
+            const entityType = "tree";
 
-                // Übergebe die generateNoiseValue-Funktion als Parameter, um die Wasserprüfung zu ermöglichen
-                if (
-                    !isAreaOccupied(
-                        entityX,
-                        entityY,
-                        entityType,
-                        this.allEntities,
-                        (x, y) => this.generateNoiseValue(x, y, tileScale)
-                    )
-                ) {
-                    const entity = new Entity(
-                        this.scene,
-                        entityX,
-                        entityY,
-                        entityType
-                    );
-                    entities.push(entity);
-                    this.allEntities.add(entity);
-                }
+            // Übergebe die generateNoiseValue-Funktion als Parameter, um die Wasserprüfung zu ermöglichen
+            if (
+                !isAreaOccupied(
+                    entityX,
+                    entityY,
+                    entityType,
+                    this.allEntities,
+                    (x, y) => this.generateNoiseValue(x, y, tileScale)
+                )
+            ) {
+                const entity = new Entity(
+                    this.scene,
+                    entityX,
+                    entityY,
+                    entityType
+                );
+                entities.push(entity);
+                this.allEntities.add(entity);
             }
         }
     }
