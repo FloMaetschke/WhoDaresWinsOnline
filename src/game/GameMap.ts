@@ -3,8 +3,8 @@ import { Entity } from "./Entity";
 import { Player } from "./Player";
 import { isAreaOccupied } from "./MapHelper";
 import { FloorType, getFloorType, getTileFromNoise } from "./TilePlacement";
-const tileScale = 0.02; 
-
+import { Game } from "./scenes/Game";
+const tileScale = 0.02;
 
 export class GameMap {
     noise: (x: number, y: number) => number;
@@ -70,18 +70,7 @@ export class GameMap {
             );
 
             if (distance > 3) {
-                // Chunks, die zu weit weg sind, entfernen
-                this.loadedChunks.delete(key);
-                layer.destroy();
-                this.activeChunks.delete(key);
-                const entities = this.activeEntities.get(key);
-                entities?.forEach((entity) => {
-                    this.allEntities.delete(entity);
-                    entity.destroy();
-                });
-
-                this.activeEntities.delete(key);
-                // Behalte die Chunk-ID, damit wir wissen, dass wir diesen Chunk schon generiert haben
+                this.destroyChunk(key, layer);
             }
         }
 
@@ -108,10 +97,22 @@ export class GameMap {
         }
     }
 
+    private destroyChunk(key: string, layer: Phaser.Tilemaps.TilemapLayer) {
+        this.loadedChunks.delete(key);
+        layer.getData("player_collider")?.destroy();
+        layer.destroy();
+        this.activeChunks.delete(key);
+        const entities = this.activeEntities.get(key);
+        entities?.forEach((entity) => {
+            this.allEntities.delete(entity);
+            entity.destroy();
+        });
+
+        this.activeEntities.delete(key);
+    }
+
     // Erstellt einen einzelnen Tilemap-Chunk an der angegebenen Position
     private createChunk(chunkX: number, chunkY: number) {
-   
-
         // Erstelle Layer für den Chunk
         const layer = this.map.createBlankLayer(
             `chunk_${chunkX}_${chunkY}`,
@@ -121,6 +122,14 @@ export class GameMap {
             this.chunkSize,
             this.chunkSize
         )!;
+
+        layer.setCollisionBetween(91, 95);
+        layer.setCollisionBetween(110, 111);
+
+        layer.setData(
+            "player_collider",
+            this.scene.physics.add.collider((this.scene as Game).player, layer)
+        );
 
         const entities: Entity[] = [];
         // Fülle den Layer mit Tiles basierend auf Perlin Noise
@@ -148,13 +157,26 @@ export class GameMap {
                 const floorType = getFloorType(patternNoiseValue);
                 // // Wähle einen Tile-Index basierend auf dem Noise-Wert
                 const tileIndex = getTileFromNoise(noiseValue, floorType);
-                
+
                 // Setze den Tile
                 layer!.putTileAt(tileIndex, x, y);
-                
-                this.placeEntity("tree", worldX, worldY, floorType, noiseValue, entities);
-                this.placeEntity("rock", worldX, worldY, floorType, noiseValue, entities);
-                
+
+                this.placeEntity(
+                    "tree",
+                    worldX,
+                    worldY,
+                    floorType,
+                    noiseValue,
+                    entities
+                );
+                this.placeEntity(
+                    "rock",
+                    worldX,
+                    worldY,
+                    floorType,
+                    noiseValue,
+                    entities
+                );
             }
         }
 
@@ -173,15 +195,21 @@ export class GameMap {
         //return (this.noise(x, y) + 1) / 2;
     }
 
-
-    private placeEntity(entityType: string, worldX: number, worldY:number, floorType: FloorType, noiseValue: number, entities: Entity[]) {
+    private placeEntity(
+        entityType: string,
+        worldX: number,
+        worldY: number,
+        floorType: FloorType,
+        noiseValue: number,
+        entities: Entity[]
+    ) {
         if (floorType !== "water") {
             // Platziere Tree-Entities
             if (noiseValue > 0.95) {
                 const entityX = worldX * 8;
                 const entityY = worldY * 8;
                 const entityType = "tree";
-                
+
                 // Übergebe die generateNoiseValue-Funktion als Parameter, um die Wasserprüfung zu ermöglichen
                 if (
                     !isAreaOccupied(
