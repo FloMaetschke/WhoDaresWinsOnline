@@ -95,7 +95,9 @@ export class Player extends Actor {
 
         // Tod-Animation abspielen
         if (inWater) {
-            
+            // Bewege den Spieler 8 Pixel in die aktuelle Richtung
+            this.x += this.currentDirectionX * 8;
+            this.y += this.currentDirectionY * 8;
             this.sprite.anims.play("player-drunk");
         } else {
             this.sprite.anims.play("player-dead");
