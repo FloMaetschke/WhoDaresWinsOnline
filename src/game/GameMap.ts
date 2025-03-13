@@ -2,7 +2,7 @@ import { createNoise2D } from "simplex-noise";
 import { Entity } from "./Entity";
 import { Player } from "./Player";
 import { isAreaOccupied } from "./MapHelper";
-import { getFloorType, getTileFromNoise } from "./TilePlacement";
+import { FloorType, getFloorType, getTileFromNoise } from "./TilePlacement";
 
 export class GameMap {
     noise: (x: number, y: number) => number;
@@ -146,66 +146,13 @@ export class GameMap {
                 const floorType = getFloorType(patternNoiseValue);
                 // // Wähle einen Tile-Index basierend auf dem Noise-Wert
                 const tileIndex = getTileFromNoise(noiseValue, floorType);
-
-                //console.log("noiseValue: ", noiseValue);
-
-                if (floorType !== "water") {
-                    // Platziere Tree-Entities
-                    if (noiseValue > 0.95) {
-                        const entityX = worldX * 8;
-                        const entityY = worldY * 8;
-                        const entityType = "tree";
-
-                        // Prüfe, ob der Bereich bereits von einem Entity belegt ist
-                        if (
-                            !isAreaOccupied(
-                                entityX,
-                                entityY,
-                                entityType,
-                                this.allEntities
-                            )
-                        ) {
-                            const entity = new Entity(
-                                this.scene,
-                                entityX,
-                                entityY,
-                                entityType
-                            );
-                            entities.push(entity);
-                            this.allEntities.add(entity);
-                        }
-                    }
-                }
-                if (floorType === "ground2") {
-                    // Platziere Rock-Entities
-                    if (noiseValue > 0.3 && noiseValue < 0.302) {
-                        const entityX = worldX * 8;
-                        const entityY = worldY * 8;
-                        const entityType = "rock";
-
-                        // Prüfe, ob der Bereich bereits von einem Entity belegt ist
-                        if (
-                            !isAreaOccupied(
-                                entityX,
-                                entityY,
-                                entityType,
-                                this.allEntities
-                            )
-                        ) {
-                            const entity = new Entity(
-                                this.scene,
-                                entityX,
-                                entityY,
-                                entityType
-                            );
-                            entities.push(entity);
-                            this.allEntities.add(entity);
-                        }
-                    }
-                }
-
+                
                 // Setze den Tile
                 layer!.putTileAt(tileIndex, x, y);
+                
+                this.placeEntity("tree", worldX, worldY, floorType, noiseValue, entities);
+                this.placeEntity("rock", worldX, worldY, floorType, noiseValue, entities);
+                
             }
         }
 
@@ -224,38 +171,33 @@ export class GameMap {
         //return (this.noise(x, y) + 1) / 2;
     }
 
-    private getFloorType(noiseValue: number): "water" | "ground1" | "ground2" {
-        if (noiseValue < 0.2) {
-            return "water";
-        } else if (noiseValue >= 0.2 && noiseValue < 0.6) {
-            return "ground1";
-        } else {
-            return "ground2";
+
+    private placeEntity(entityType: string, worldX: number, worldY:number, floorType: FloorType, noiseValue: number, entities: Entity[]) {
+        if (floorType !== "water") {
+            // Platziere Tree-Entities
+            if (noiseValue > 0.95) {
+                const entityX = worldX * 8;
+                const entityY = worldY * 8;
+                const entityType = "tree";
+                if (
+                    !isAreaOccupied(
+                        entityX,
+                        entityY,
+                        entityType,
+                        this.allEntities
+                    )
+                ) {
+                    const entity = new Entity(
+                        this.scene,
+                        entityX,
+                        entityY,
+                        entityType
+                    );
+                    entities.push(entity);
+                    this.allEntities.add(entity);
+                }
+            }
         }
-    }
-
-    // Wählt einen Tile basierend auf dem Noise-Wert aus
-    private getTileFromNoise(
-        noiseValue: number,
-        patternNoiseValue: number
-    ): number {
-        const boden = [4, 5, 6, 7, 8, 9]; // Deine vordefinierten Tile-Indizes
-        const boden2 = [8, 9, 13, 14, 64]; // Deine vordefinierten Tile-Indizes
-        const wasser = [93, 94, 95, 96]; // Deine vordefinierten Tile-Indizes
-
-        if (patternNoiseValue < 0.2) {
-            const index = Math.floor(noiseValue * wasser.length);
-            return wasser[index];
-        }
-
-        if (patternNoiseValue >= 0.2 && patternNoiseValue < 0.6) {
-            const index = Math.floor(noiseValue * boden2.length);
-            return boden2[index];
-        }
-
-        // Skaliere den Wert auf den Bereich des Arrays
-        const index = Math.floor(noiseValue * boden.length);
-        return boden[index];
     }
 
     destroy() {
