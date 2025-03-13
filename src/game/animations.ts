@@ -104,6 +104,18 @@ export function initAnimations(scene: Scene): void {
         });
     }
 
+    if (!animationManager.exists('player-drunk')) {
+        animationManager.create({
+            key: "player-drunk",
+            frames: scene.anims.generateFrameNames("sprites", {
+                prefix: "player-drunk-",
+                end: 0,
+            }),
+            frameRate: 10,
+            repeat: -1,
+        });
+    }
+
     // Enemy Animationen
     if (!animationManager.exists('enemy-up')) {
         animationManager.create({

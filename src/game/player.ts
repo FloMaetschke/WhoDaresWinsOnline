@@ -82,7 +82,7 @@ export class Player extends Actor {
         }
     }
 
-    public die() {
+    public die(inWater = false) {
         this.dead = true;
         this.getSpriteBody().enable = false;
         console.log("Spieler ist tot");
@@ -94,7 +94,12 @@ export class Player extends Actor {
         this.getBody().enable = false;
 
         // Tod-Animation abspielen
-        this.sprite.anims.play("player-dead");
+        if (inWater) {
+            
+            this.sprite.anims.play("player-drunk");
+        } else {
+            this.sprite.anims.play("player-dead");
+        }
 
         this.scene.time.delayedCall(2000, () => {
             this.scene.scene.stop("Game");
