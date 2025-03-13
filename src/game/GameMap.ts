@@ -2,7 +2,7 @@ import { createNoise2D } from "simplex-noise";
 import { Entity } from "./Entity";
 import { Player } from "./Player";
 import { isAreaOccupied } from "./MapHelper";
-import { FloorType, getFloorType, getTileFromNoise } from "./TilePlacement";
+import { FloorType, getFloorType, getTileFromNoise, TileBorderDirections, determineWaterBorderType, getWaterBorderTile } from "./TilePlacement";
 import { Game } from "./scenes/Game";
 const tileScale = 0.02;
 
@@ -132,7 +132,12 @@ export class GameMap {
         );
 
         const entities: Entity[] = [];
-        // Fülle den Layer mit Tiles basierend auf Perlin Noise
+        
+        // Speichern der Bodeninformationen für die spätere Randberechnung
+        const floorTypes: FloorType[][] = Array(this.chunkSize).fill(null).map(() => Array(this.chunkSize).fill("ground1"));
+        const tileNoiseValues: number[][] = Array(this.chunkSize).fill(null).map(() => Array(this.chunkSize).fill(0));
+        
+        // Erster Durchlauf: Platziere Grundtiles und speichere ihre Typen
         for (let y = 0; y < this.chunkSize; y++) {
             for (let x = 0; x < this.chunkSize; x++) {
                 // Berechne globale Position für konsistenten Noise
@@ -141,6 +146,7 @@ export class GameMap {
 
                 // Generiere Perlin Noise-Wert zwischen 0 und 1
                 const noiseValue = this.generateNoiseValue(worldX, worldY);
+                tileNoiseValues[y][x] = noiseValue;
 
                 // Generiere Perlin Noise-Wert zwischen 0 und 1
                 const patternNoiseValue = this.generateNoiseValue(
@@ -149,18 +155,62 @@ export class GameMap {
                     tileScale
                 );
 
-                // DEBUG NOISE
-                //const bgRect = this.scene.add.rectangle(worldX*8,worldY*8,8,8,0xFFFFFF);
-                // bgRect.setDepth(100000-1);
-                // const rect = this.scene.add.rectangle(worldX*8,worldY*8,8,8,0x000000,noiseValue < 0.2 ? 0:0.5);
-                // rect.setDepth(100000);
                 const floorType = getFloorType(patternNoiseValue);
-                // // Wähle einen Tile-Index basierend auf dem Noise-Wert
+                floorTypes[y][x] = floorType;
+                
+                // Wähle einen Tile-Index basierend auf dem Noise-Wert
                 const tileIndex = getTileFromNoise(noiseValue, floorType);
 
                 // Setze den Tile
                 layer!.putTileAt(tileIndex, x, y);
-
+            }
+        }
+        
+        // Zweiter Durchlauf: Platziere Randtiles zwischen Wasser und Land
+        for (let y = 0; y < this.chunkSize; y++) {
+            for (let x = 0; x < this.chunkSize; x++) {
+                // Überspringe, wenn das Tile kein Wasser ist
+                if (floorTypes[y][x] !== "water") continue;
+                
+                // Prüfe alle Nachbarn und sammle Informationen, ob sie Wasser sind
+                // [center, top, right, bottom, left, topRight, bottomRight, bottomLeft, topLeft]
+                const isWater: boolean[] = [true, true, true, true, true, true, true, true, true];
+                
+                // Direkter Mittelpunkt
+                isWater[0] = floorTypes[y][x] === "water";
+                
+                // Direkte Nachbarn
+                if (y > 0) isWater[1] = floorTypes[y-1][x] === "water";  // Oben
+                if (x < this.chunkSize - 1) isWater[2] = floorTypes[y][x+1] === "water";  // Rechts
+                if (y < this.chunkSize - 1) isWater[3] = floorTypes[y+1][x] === "water";  // Unten
+                if (x > 0) isWater[4] = floorTypes[y][x-1] === "water";  // Links
+                
+                // Diagonale Nachbarn
+                if (y > 0 && x < this.chunkSize - 1) isWater[5] = floorTypes[y-1][x+1] === "water";  // Oben-Rechts
+                if (y < this.chunkSize - 1 && x < this.chunkSize - 1) isWater[6] = floorTypes[y+1][x+1] === "water";  // Unten-Rechts
+                if (y < this.chunkSize - 1 && x > 0) isWater[7] = floorTypes[y+1][x-1] === "water";  // Unten-Links
+                if (y > 0 && x > 0) isWater[8] = floorTypes[y-1][x-1] === "water";  // Oben-Links
+                
+                // Bestimme den Randtyp
+                const borderDirection = determineWaterBorderType(isWater);
+                
+                // Wenn ein Randtile benötigt wird, ersetze das aktuelle Tile
+                if (borderDirection !== TileBorderDirections.None) {
+                    const noiseValue = tileNoiseValues[y][x];
+                    const borderTileIndex = getWaterBorderTile(borderDirection, noiseValue);
+                    layer!.putTileAt(borderTileIndex, x, y);
+                }
+            }
+        }
+        
+        // Platziere Entities
+        for (let y = 0; y < this.chunkSize; y++) {
+            for (let x = 0; x < this.chunkSize; x++) {
+                const worldX = chunkX * this.chunkSize + x;
+                const worldY = chunkY * this.chunkSize + y;
+                const noiseValue = tileNoiseValues[y][x];
+                const floorType = floorTypes[y][x];
+                
                 this.placeEntity(
                     "tree",
                     worldX,

@@ -20,14 +20,14 @@
             }
         },
         "public/assets/templates/rock.tmj#tileset": {
-            "scaleInDock": 1
+            "scaleInDock": 5.5
         },
         "public/assets/templates/tree.tmj": {
             "scale": 23.86875,
             "selectedLayer": 1,
             "viewCenter": {
                 "x": 11.982194291699397,
-                "y": 20.00523697302959
+                "y": 19.96334118879288
             }
         },
         "public/assets/templates/tree.tmj#tileset": {
@@ -50,7 +50,7 @@
         }
     },
     "last.imagePath": "D:/Who Dares Wins Online/public/assets",
-    "map.fixedSize": true,
+    "map.fixedSize": false,
     "map.height": 2,
     "map.lastUsedFormat": "json",
     "map.tileHeight": 8,
