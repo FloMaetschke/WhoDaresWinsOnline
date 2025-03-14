@@ -48,9 +48,6 @@ export class GameMap {
         // Simplex-Noise initialisieren - Angepasst für neue API
         this.noise = createNoise2D();
 
-        // Definiere Tiles-Array für die Map
-        const tiles = [4, 5, 6, 7, 8, 9, 13, 14, 64];
-
         // Leere Basistilemap erstellen
         this.map = this.scene.make.tilemap({
             tileWidth: 8,
@@ -58,8 +55,7 @@ export class GameMap {
             width: this.chunkSize,
             height: this.chunkSize,
         });
-
-        const tileset = this.map.addTilesetImage("tiles");
+        this.map.addTilesetImage("tiles");
 
         // Tooltip erstellen
         this.tooltip = new InfoTooltip('game-map-tooltip');
