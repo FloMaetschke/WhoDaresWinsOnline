@@ -216,6 +216,42 @@ export function initAnimations(scene: Scene): void {
             repeat: -1,
         });
     }
+
+    if (!animationManager.exists('enemy-ducked-aim-down')) {
+        animationManager.create({
+            key: "enemy-ducked-aim-down",
+            frames: scene.anims.generateFrameNames("sprites", {
+                prefix: "enemy-ducked-aim-down-",
+                end: 0,
+            }),
+            frameRate: 10,
+            repeat: -1,
+        });
+    }
+
+    if (!animationManager.exists('enemy-ducked-aim-down-left')) {
+        animationManager.create({
+            key: "enemy-ducked-aim-down-left",
+            frames: scene.anims.generateFrameNames("sprites", {
+                prefix: "enemy-ducked-aim-down-left-",
+                end: 0,
+            }),
+            frameRate: 10,
+            repeat: -1,
+        });
+    }
+
+    if (!animationManager.exists('enemy-ducked-aim-down-right')) {
+        animationManager.create({
+            key: "enemy-ducked-aim-down-right",
+            frames: scene.anims.generateFrameNames("sprites", {
+                prefix: "enemy-ducked-aim-down-right-",
+                end: 0,
+            }),
+            frameRate: 10,
+            repeat: -1,
+        });
+    }
 }
 
 export function clearAnimations(scene: Phaser.Scene) {
