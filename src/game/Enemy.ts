@@ -4,13 +4,13 @@ import { Game } from "./scenes/Game"; // Importiere die Game-Szene
 
 // Definiere die möglichen Zustände des Gegners
 enum EnemyState {
-    SEARCH_PLAYER,
-    WANDER_AROUND,
-    DYING
+    SEARCH_PLAYER = "SEARCH_PLAYER",
+    WANDER_AROUND = "WANDER_AROUND",
+    DYING = "DYING",
+    SNIPER = "SNIPER",
 }
 
 export class Enemy extends Actor {
-
     private target: Player;
     private AGRESSOR_RADIUS = 500;
     public currentDirectionX = 0;
@@ -20,17 +20,18 @@ export class Enemy extends Actor {
     private wanderEvent: Phaser.Time.TimerEvent | null = null;
     private shootTimer: Phaser.Time.TimerEvent | null = null;
     private speed = 50;
-    
+
     // Statusvariablen der Zustandsmaschine
     private currentState: EnemyState = EnemyState.WANDER_AROUND;
     private stateTimers: Map<EnemyState, number> = new Map();
-    
+
     // Bewegungsmuster für den SEARCH_PLAYER-Zustand
     private movementPattern = {
         direction: { x: 0, y: 0 },
         duration: 0,
         timer: 0,
     };
+    hideOut: import("d:/Who Dares Wins Online/src/game/Entity").Entity;
 
     constructor(public scene: Game, x: number, y: number, target: Player) {
         super(scene, x, y, "enemy-down-right-0");
@@ -61,18 +62,21 @@ export class Enemy extends Actor {
             // Wenn nicht, Verarbeitung abbrechen
             return;
         }
-        
-        // Gelegenheitlich schießen, wenn nicht in "Idle"-Zustand
-        const shootDelay = Phaser.Math.Between(500, 1000); // Zufällige Zeit zwischen 0.5 und 1 Sekunden
+        let shootDelay = Phaser.Math.Between(500, 1000);
+        if(this.currentState === EnemyState.SNIPER) {
+            shootDelay = Phaser.Math.Between(1000, 3000);
+        }
+
+         // Zufällige Zeit zwischen 0.5 und 1 Sekunden
 
         this.shootTimer = this.scene.time.addEvent({
             delay: shootDelay,
-            callback: this.tryToShoot,  // Methoden-Referenz statt anonymer Funktion
-            callbackScope: this,        // Wichtig: Setzt den Kontext für die Callback-Methode
+            callback: this.tryToShoot, // Methoden-Referenz statt anonymer Funktion
+            callbackScope: this, // Wichtig: Setzt den Kontext für die Callback-Methode
         });
     }
 
-    // Methode zum Überprüfen der Entfernung zum Spieler 
+    // Methode zum Überprüfen der Entfernung zum Spieler
     private distanceToPlayer(): number {
         return Phaser.Math.Distance.BetweenPoints(
             { x: this.x, y: this.y },
@@ -83,10 +87,18 @@ export class Enemy extends Actor {
     // Versuche zu schießen (mit etwas Wahrscheinlichkeit)
     private tryToShoot(): void {
         // Nur schießen, wenn in Sicht und mit 80% Wahrscheinlichkeit
-        if (this.currentState !== EnemyState.DYING && Phaser.Math.Between(1, 100) <= 80) {
-            this.scene.shootingController.shoot(this, 'player', this.currentDirectionX, this.currentDirectionY);
+        if (
+            this.currentState !== EnemyState.DYING &&
+            Phaser.Math.Between(1, 100) <= 80
+        ) {
+            this.scene.shootingController.shoot(
+                this,
+                "player",
+                this.currentDirectionX,
+                this.currentDirectionY
+            );
         }
-        
+
         // Timer neu starten mit neuer zufälliger Verzögerung, wenn die Szene noch existiert
         if (this.scene && this.scene.time) {
             this.setupShootTimer();
@@ -95,30 +107,36 @@ export class Enemy extends Actor {
 
     // Zustandsmanagement-Methoden
     private enterState(newState: EnemyState): void {
+        console.log("Enemy state changed to", newState);
         const oldState = this.currentState;
         this.currentState = newState;
-        
+
         // Aufräumen des alten Zustands
         this.exitState(oldState);
-        
+
         // Setup für den neuen Zustand
         switch (newState) {
             case EnemyState.WANDER_AROUND:
                 this.startWandering();
                 break;
-                
+
             case EnemyState.SEARCH_PLAYER:
                 // Anfängliche Richtung zum Spieler berechnen
                 this.movementPattern.timer = 0; // Erzwinge neue Richtungswahl
                 break;
-                
+
+            case EnemyState.SNIPER:
+                this.movementPattern.timer = 0; // Erzwinge neue Richtungswahl
+                this.sprite.setDepth(50000000000);
+                break;
+
             case EnemyState.DYING:
                 // Kollisionen deaktivieren
                 this.getBody().enable = false;
-                
+
                 // Tod-Animation abspielen
                 this.sprite.anims.play("enemy-die");
-                
+
                 // Nach 1 Sekunde zerstören
                 this.scene.time.delayedCall(1000, () => {
                     this.destroy();
@@ -126,7 +144,7 @@ export class Enemy extends Actor {
                 break;
         }
     }
-    
+
     private exitState(state: EnemyState): void {
         switch (state) {
             case EnemyState.WANDER_AROUND:
@@ -138,15 +156,43 @@ export class Enemy extends Actor {
                 break;
         }
     }
-    
+
     private updateState(): void {
         if (this.currentState === EnemyState.DYING) {
             // Im DYING-Zustand nichts weiter tun
             return;
         }
-        
+
+        if (this.currentState === EnemyState.SNIPER) {
+            this.currentDirectionY = 1;
+            this.getBody().setVelocityX(0);
+            this.getBody().setVelocityY(0);
+
+            if (this.scene.player.x < this.x - 25) {
+                this.sprite.anims.play("enemy-ducked-aim-down-left");
+                this.currentDirectionX = -1;
+            } else if (this.scene.player.x > this.x + 25) {
+                this.sprite.anims.play("enemy-ducked-aim-down-right");
+                this.currentDirectionX = 1;
+            } else {
+                this.sprite.anims.play("enemy-ducked-aim-down");
+                this.currentDirectionX = 0;
+            }
+
+            if (this.scene.player.y < this.y + 25) {
+                // leave  hideout
+                this.enterState(EnemyState.WANDER_AROUND);
+                this.hideOut.setData("is_occupied", undefined);
+            }
+            return;
+        }
+
+        if (this.searchSniperLocaiton()) {
+            return;
+        }
+
         const distanceToPlayer = this.distanceToPlayer();
-        
+
         // Zustandswechsel basierend auf Spielerentfernung
         if (distanceToPlayer < this.AGRESSOR_RADIUS && distanceToPlayer > 150) {
             if (this.currentState !== EnemyState.SEARCH_PLAYER) {
@@ -157,6 +203,35 @@ export class Enemy extends Actor {
                 this.enterState(EnemyState.WANDER_AROUND);
             }
         }
+    }
+
+    searchSniperLocaiton() {
+        let result = false;
+        this.scene.gameMap.allEntities.forEach((entity) => {
+            if (entity.getType() === "rock") {
+                //filter
+                if (
+                    Phaser.Math.Distance.BetweenPoints(
+                        { x: this.x, y: this.y },
+                        { x: entity.x, y: entity.y }
+                    ) < 20 // Distanz zur deckung
+                ) {
+                    if (entity.getData("is_occupied") === undefined) {
+                        entity.setData("is_occupied", true);
+                        this.hideOut = entity;
+
+                        this.setPosition(entity.x + 5, entity.y - 12);
+                        entity.setDepth(0);
+                        this.getBody().setVelocityX(0);
+                        this.getBody().setVelocityY(0);
+                        this.enterState(EnemyState.SNIPER);
+                        result = true;
+                        return;
+                    }
+                }
+            }
+        });
+        return result;
     }
 
     private startWandering(): void {
@@ -238,20 +313,20 @@ export class Enemy extends Actor {
 
     update(time: number, delta: number): void {
         super.update(time, delta);
-        
+
         // Zustandsübergang prüfen
         this.updateState();
-        
+
         // Statusspezifische Updates
         switch (this.currentState) {
             case EnemyState.WANDER_AROUND:
                 this.handleWandering();
                 break;
-                
+
             case EnemyState.SEARCH_PLAYER:
                 this.followPlayerInSteps();
                 break;
-                
+
             case EnemyState.DYING:
                 this.alpha = 0.5 + Math.abs(Math.sin(time / 100)) * 0.2;
                 this.getBody().setVelocityX(0);
@@ -264,10 +339,10 @@ export class Enemy extends Actor {
         // Ändere die Wanderrichtung
         const newDirection = {
             x: -this.wanderDirection.x,
-            y: -this.wanderDirection.y
+            y: -this.wanderDirection.y,
         };
         this.wanderDirection = newDirection;
-        
+
         if (this.currentState === EnemyState.WANDER_AROUND) {
             this.startWandering();
         }
@@ -280,7 +355,7 @@ export class Enemy extends Actor {
     public die() {
         // Sound abspielen
         (this.scene as Game).soundController.playSound("enemy_die");
-        
+
         // In DYING-Zustand wechseln
         this.enterState(EnemyState.DYING);
     }
@@ -322,7 +397,10 @@ export class Enemy extends Actor {
             });
 
             // Zufällige Richtung basierend auf Gewichtung wählen
-            const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+            const totalWeight = weights.reduce(
+                (sum, weight) => sum + weight,
+                0
+            );
             let randomValue = Math.random() * totalWeight;
             let selectedIndex = 0;
 
@@ -342,8 +420,12 @@ export class Enemy extends Actor {
         }
 
         // Bewegung in der aktuellen Richtung
-        this.getBody().setVelocityX(this.movementPattern.direction.x * this.speed);
-        this.getBody().setVelocityY(this.movementPattern.direction.y * this.speed);
+        this.getBody().setVelocityX(
+            this.movementPattern.direction.x * this.speed
+        );
+        this.getBody().setVelocityY(
+            this.movementPattern.direction.y * this.speed
+        );
 
         // Animations-Richtung aktualisieren
         this.currentDirectionX = this.movementPattern.direction.x;
