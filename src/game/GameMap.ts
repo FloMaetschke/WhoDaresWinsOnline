@@ -12,6 +12,8 @@ import {
 } from "./TilePlacement";
 import { Game } from "./scenes/Game";
 import { Enemy } from "./Enemy";
+import { InfoTooltip } from "./InfoTooltip";
+import { findEntitiesAtPosition } from "./EntityHelper";
 const tileScale = 0.02;
 
 export class GameMap {
@@ -26,8 +28,8 @@ export class GameMap {
     loadedChunks: Set<string> = new Set();
     allEntities = new Set<Entity>();
     
-    // Neues tooltip Element zum Anzeigen der Tile-ID
-    private tooltip: HTMLElement | null = null;
+    // Tooltip-Instanz
+    private tooltip: InfoTooltip;
 
     constructor(private scene: Phaser.Scene) {
         // Erstelle zuerst einen Container für die Karte
@@ -60,7 +62,7 @@ export class GameMap {
         const tileset = this.map.addTilesetImage("tiles");
 
         // Tooltip erstellen
-        this.createTooltip();
+        this.tooltip = new InfoTooltip('game-map-tooltip');
         
         // Mausbewegung verfolgen
         this.scene.input.on('pointermove', this.handleMouseMove, this);
@@ -402,38 +404,10 @@ export class GameMap {
         this.map.destroy();
         
         // Tooltip entfernen
-        if (this.tooltip && document.body.contains(this.tooltip)) {
-            document.body.removeChild(this.tooltip);
-        }
+        this.tooltip.destroy();
         
         // Event-Listener entfernen
         this.scene.input.off('pointermove', this.handleMouseMove, this);
-    }
-
-    // Erstellt das Tooltip-Element
-    private createTooltip() {
-        // Prüfen, ob bereits ein Tooltip mit derselben ID existiert und diesen entfernen
-        const existingTooltip = document.getElementById('game-map-tooltip');
-        if (existingTooltip) {
-            existingTooltip.remove();
-        }
-        
-        // Tooltip erstellen wenn es noch nicht existiert
-        this.tooltip = document.createElement('div');
-        this.tooltip.id = 'game-map-tooltip';
-        this.tooltip.style.position = 'absolute';
-        this.tooltip.style.padding = '8px';
-        this.tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-        this.tooltip.style.color = 'white';
-        this.tooltip.style.borderRadius = '4px';
-        this.tooltip.style.pointerEvents = 'none';
-        this.tooltip.style.zIndex = '1000';
-        this.tooltip.style.display = 'none';
-        this.tooltip.style.fontFamily = 'Arial, sans-serif';
-        this.tooltip.style.fontSize = '12px';
-        this.tooltip.style.lineHeight = '1.4';
-        this.tooltip.style.whiteSpace = 'nowrap';
-        document.body.appendChild(this.tooltip);
     }
     
     // Behandelt Mausbewegungen und aktualisiert das Tooltip
@@ -464,85 +438,51 @@ export class GameMap {
             const tile = layer.getTileAt(localTileX, localTileY);
             
             if (tile) {
-                // Tooltip mit erweiterten Informationen aktualisieren
-                if (this.tooltip) {
-                    this.tooltip.style.display = 'block';
-                    
-                    // Verwende die tatsächlichen Mauskoordinaten im Browserfenster
-                    this.tooltip.style.left = `${pointer.event.pageX + 15}px`;
-                    this.tooltip.style.top = `${pointer.event.pageY + 15}px`;
-                    
-                    // Prüfe, ob das Tile Kollision hat
-                    const isBlocked = tile.collides;
-                    
-                    // Suche nach Entities an dieser Position
-                    const worldX = tileX * 8; // Konvertiere zurück zu Weltkoordinaten
-                    const worldY = tileY * 8;
-                    const entitiesAtPosition = this.findEntitiesAtPosition(worldX, worldY);
-                    
-                    // Bereite den Tooltip-Text vor
-                    let tooltipContent = `Ground:\nTile: ${tile.index}\nBlocked: ${isBlocked}\n`;
-                    
-                    // Füge Entity-Informationen hinzu, wenn vorhanden
-                    if (entitiesAtPosition.length > 0) {
-                        tooltipContent += `\nEntity:\n`;
-                        entitiesAtPosition.forEach(entity => {
-                            try {
-                                tooltipContent += `Name: ${entity.getType()}\n`;
-                                
-                                // Berechne die relative Position innerhalb des Entities
-                                const relativeX = pixelX - entity.x;
-                                const relativeY = pixelY - entity.y;
-                                
-                                // Hole den spezifischen Tile-Index an dieser Position
-                                const specificTileIndex = entity.getTileAt(relativeX, relativeY);
-                                
-                                // Zeige "-" für leere Tiles und den korrigierten Index für vorhandene Tiles
-                                tooltipContent += `Tile: ${specificTileIndex !== -1 ? specificTileIndex : '-'}\n`;
-                            } catch (error) {
-                                console.log("Error getting entity info:", error);
-                                tooltipContent += "Error getting entity info\n";
-                            }
-                        });
-                    }
-                    
-                    // Ersetze Zeilenumbrüche mit HTML-Zeilenumbrüchen
-                    this.tooltip.innerHTML = tooltipContent.replace(/\n/g, '<br>');
+                // Prüfe, ob das Tile Kollision hat
+                const isBlocked = tile.collides;
+                
+                // Suche nach Entities an dieser Position
+                const worldX = tileX * 8; // Konvertiere zurück zu Weltkoordinaten
+                const worldY = tileY * 8;
+                const entitiesAtPosition = findEntitiesAtPosition(worldX, worldY, this.allEntities);
+                
+                // Bereite den Tooltip-Text vor
+                let tooltipContent = `Ground:\nTile: ${tile.index}\nBlocked: ${isBlocked}\n`;
+                
+                // Füge Entity-Informationen hinzu, wenn vorhanden
+                if (entitiesAtPosition.length > 0) {
+                    tooltipContent += `\nEntity:\n`;
+                    entitiesAtPosition.forEach(entity => {
+                        try {
+                            tooltipContent += `Name: ${entity.getType()}\n`;
+                            
+                            // Berechne die relative Position innerhalb des Entities
+                            const relativeX = pixelX - entity.x;
+                            const relativeY = pixelY - entity.y;
+                            
+                            // Hole den spezifischen Tile-Index an dieser Position
+                            const specificTileIndex = entity.getTileAt(relativeX, relativeY);
+                            
+                            // Zeige "-" für leere Tiles und den korrigierten Index für vorhandene Tiles
+                            tooltipContent += `Tile: ${specificTileIndex !== -1 ? specificTileIndex : '-'}\n`;
+                        } catch (error) {
+                            console.log("Error getting entity info:", error);
+                            tooltipContent += "Error getting entity info\n";
+                        }
+                    });
                 }
+                
+                // Aktualisiere das Tooltip
+                this.tooltip.update(tooltipContent, pointer.event.pageX, pointer.event.pageY);
             } else {
                 // Kein Tile gefunden, Tooltip verstecken
-                if (this.tooltip) {
-                    this.tooltip.style.display = 'none';
-                }
+                this.tooltip.hide();
             }
         } else {
             // Kein Layer für diesen Chunk gefunden, Tooltip verstecken
-            if (this.tooltip) {
-                this.tooltip.style.display = 'none';
-            }
+            this.tooltip.hide();
         }
     }
 
-    // Sucht nach Entities an einer bestimmten Position
-    private findEntitiesAtPosition(x: number, y: number): Entity[] {
-        const foundEntities: Entity[] = [];
-        
-        // Durchsuche alle Entities
-        this.allEntities.forEach(entity => {
-            // Verbesserte Kollisionserkennung für Entities mit ihren tatsächlichen Dimensionen
-            // Die Position muss innerhalb des Entity-Bereichs liegen
-            const entityX = entity.x;
-            const entityY = entity.y;
-            const entityWidth = entity.entityWidth() * 8;  // Breite in Pixeln
-            const entityHeight = entity.entityHeight() * 8; // Höhe in Pixeln
-            
-            // Prüfe, ob die Position innerhalb des Entity-Bereichs liegt
-            if (x >= entityX && x < entityX + entityWidth && 
-                y >= entityY && y < entityY + entityHeight) {
-                foundEntities.push(entity);
-            }
-        });
-        
-        return foundEntities;
-    }
+   
 }
