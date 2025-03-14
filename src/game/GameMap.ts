@@ -25,6 +25,9 @@ export class GameMap {
     activeEntities: Map<string, Entity[]> = new Map();
     loadedChunks: Set<string> = new Set();
     allEntities = new Set<Entity>();
+    
+    // Neues tooltip Element zum Anzeigen der Tile-ID
+    private tooltip: HTMLElement | null = null;
 
     constructor(private scene: Phaser.Scene) {
         // Erstelle zuerst einen Container für die Karte
@@ -55,6 +58,12 @@ export class GameMap {
         });
 
         const tileset = this.map.addTilesetImage("tiles");
+
+        // Tooltip erstellen
+        this.createTooltip();
+        
+        // Mausbewegung verfolgen
+        this.scene.input.on('pointermove', this.handleMouseMove, this);
     }
 
     getPlayerStartPosition(): { x: number; y: number } {
@@ -391,5 +400,83 @@ export class GameMap {
         this.activeChunks.clear();
         this.loadedChunks.clear();
         this.map.destroy();
+        
+        // Tooltip entfernen
+        if (this.tooltip && document.body.contains(this.tooltip)) {
+            document.body.removeChild(this.tooltip);
+        }
+        
+        // Event-Listener entfernen
+        this.scene.input.off('pointermove', this.handleMouseMove, this);
+    }
+
+    // Erstellt das Tooltip-Element
+    private createTooltip() {
+        // Tooltip erstellen wenn es noch nicht existiert
+        if (!this.tooltip) {
+            this.tooltip = document.createElement('div');
+            this.tooltip.style.position = 'absolute';
+            this.tooltip.style.padding = '5px';
+            this.tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            this.tooltip.style.color = 'white';
+            this.tooltip.style.borderRadius = '3px';
+            this.tooltip.style.pointerEvents = 'none'; // Verhindert, dass das Tooltip Mausevents blockiert
+            this.tooltip.style.zIndex = '1000';
+            this.tooltip.style.display = 'none';
+            this.tooltip.style.fontFamily = 'Arial, sans-serif';
+            this.tooltip.style.fontSize = '12px';
+            document.body.appendChild(this.tooltip);
+        }
+    }
+    
+    // Behandelt Mausbewegungen und aktualisiert das Tooltip
+    private handleMouseMove(pointer: Phaser.Input.Pointer) {
+        // Mausposition im Weltkoordinatensystem
+        const worldPoint = this.scene.cameras.main.getWorldPoint(pointer.x, pointer.y);
+        
+        // Position im Tile-Koordinatensystem
+        const tileX = Math.floor(worldPoint.x / 8);
+        const tileY = Math.floor(worldPoint.y / 8);
+        
+        // Bestimme den Chunk
+        const chunkX = Math.floor(tileX / this.chunkSize);
+        const chunkY = Math.floor(tileY / this.chunkSize);
+        
+        // Bestimme die Position innerhalb des Chunks
+        const localTileX = tileX % this.chunkSize;
+        const localTileY = tileY % this.chunkSize;
+        
+        // Hole den Layer für diesen Chunk
+        const chunkKey = `${chunkX},${chunkY}`;
+        const layer = this.activeChunks.get(chunkKey);
+        
+        if (layer) {
+            // Hole das Tile an dieser Position
+            const tile = layer.getTileAt(localTileX, localTileY);
+            
+            if (tile) {
+                // Tooltip mit Tile-ID aktualisieren
+                if (this.tooltip) {
+                    this.tooltip.style.display = 'block';
+                    
+                    // Verwende die tatsächlichen Mauskoordinaten im Browserfenster
+                    // statt der Koordinaten innerhalb des skalierten Canvas
+                    this.tooltip.style.left = `${pointer.event.pageX + 15}px`;
+                    this.tooltip.style.top = `${pointer.event.pageY + 15}px`;
+                    
+                    this.tooltip.textContent = `Tile ID: ${tile.index}`;
+                }
+            } else {
+                // Kein Tile gefunden, Tooltip verstecken
+                if (this.tooltip) {
+                    this.tooltip.style.display = 'none';
+                }
+            }
+        } else {
+            // Kein Layer für diesen Chunk gefunden, Tooltip verstecken
+            if (this.tooltip) {
+                this.tooltip.style.display = 'none';
+            }
+        }
     }
 }
