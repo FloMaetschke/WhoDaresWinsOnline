@@ -412,23 +412,28 @@ export class GameMap {
 
     // Erstellt das Tooltip-Element
     private createTooltip() {
-        // Tooltip erstellen wenn es noch nicht existiert
-        if (!this.tooltip) {
-            this.tooltip = document.createElement('div');
-            this.tooltip.style.position = 'absolute';
-            this.tooltip.style.padding = '8px';
-            this.tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-            this.tooltip.style.color = 'white';
-            this.tooltip.style.borderRadius = '4px';
-            this.tooltip.style.pointerEvents = 'none';
-            this.tooltip.style.zIndex = '1000';
-            this.tooltip.style.display = 'none';
-            this.tooltip.style.fontFamily = 'Arial, sans-serif';
-            this.tooltip.style.fontSize = '12px';
-            this.tooltip.style.lineHeight = '1.4';
-            this.tooltip.style.whiteSpace = 'nowrap';
-            document.body.appendChild(this.tooltip);
+        // Prüfen, ob bereits ein Tooltip mit derselben ID existiert und diesen entfernen
+        const existingTooltip = document.getElementById('game-map-tooltip');
+        if (existingTooltip) {
+            existingTooltip.remove();
         }
+        
+        // Tooltip erstellen wenn es noch nicht existiert
+        this.tooltip = document.createElement('div');
+        this.tooltip.id = 'game-map-tooltip';
+        this.tooltip.style.position = 'absolute';
+        this.tooltip.style.padding = '8px';
+        this.tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        this.tooltip.style.color = 'white';
+        this.tooltip.style.borderRadius = '4px';
+        this.tooltip.style.pointerEvents = 'none';
+        this.tooltip.style.zIndex = '1000';
+        this.tooltip.style.display = 'none';
+        this.tooltip.style.fontFamily = 'Arial, sans-serif';
+        this.tooltip.style.fontSize = '12px';
+        this.tooltip.style.lineHeight = '1.4';
+        this.tooltip.style.whiteSpace = 'nowrap';
+        document.body.appendChild(this.tooltip);
     }
     
     // Behandelt Mausbewegungen und aktualisiert das Tooltip
