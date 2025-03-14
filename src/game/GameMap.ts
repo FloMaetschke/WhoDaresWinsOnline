@@ -416,15 +416,17 @@ export class GameMap {
         if (!this.tooltip) {
             this.tooltip = document.createElement('div');
             this.tooltip.style.position = 'absolute';
-            this.tooltip.style.padding = '5px';
-            this.tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            this.tooltip.style.padding = '8px';
+            this.tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
             this.tooltip.style.color = 'white';
-            this.tooltip.style.borderRadius = '3px';
-            this.tooltip.style.pointerEvents = 'none'; // Verhindert, dass das Tooltip Mausevents blockiert
+            this.tooltip.style.borderRadius = '4px';
+            this.tooltip.style.pointerEvents = 'none';
             this.tooltip.style.zIndex = '1000';
             this.tooltip.style.display = 'none';
             this.tooltip.style.fontFamily = 'Arial, sans-serif';
             this.tooltip.style.fontSize = '12px';
+            this.tooltip.style.lineHeight = '1.4';
+            this.tooltip.style.whiteSpace = 'nowrap';
             document.body.appendChild(this.tooltip);
         }
     }
@@ -437,6 +439,8 @@ export class GameMap {
         // Position im Tile-Koordinatensystem
         const tileX = Math.floor(worldPoint.x / 8);
         const tileY = Math.floor(worldPoint.y / 8);
+        const pixelX = worldPoint.x;  // Exakte Pixelposition für Entity-Tile-Erkennung
+        const pixelY = worldPoint.y;
         
         // Bestimme den Chunk
         const chunkX = Math.floor(tileX / this.chunkSize);
@@ -455,16 +459,50 @@ export class GameMap {
             const tile = layer.getTileAt(localTileX, localTileY);
             
             if (tile) {
-                // Tooltip mit Tile-ID aktualisieren
+                // Tooltip mit erweiterten Informationen aktualisieren
                 if (this.tooltip) {
                     this.tooltip.style.display = 'block';
                     
                     // Verwende die tatsächlichen Mauskoordinaten im Browserfenster
-                    // statt der Koordinaten innerhalb des skalierten Canvas
                     this.tooltip.style.left = `${pointer.event.pageX + 15}px`;
                     this.tooltip.style.top = `${pointer.event.pageY + 15}px`;
                     
-                    this.tooltip.textContent = `Tile ID: ${tile.index}`;
+                    // Prüfe, ob das Tile Kollision hat
+                    const isBlocked = tile.collides;
+                    
+                    // Suche nach Entities an dieser Position
+                    const worldX = tileX * 8; // Konvertiere zurück zu Weltkoordinaten
+                    const worldY = tileY * 8;
+                    const entitiesAtPosition = this.findEntitiesAtPosition(worldX, worldY);
+                    
+                    // Bereite den Tooltip-Text vor
+                    let tooltipContent = `Ground:\nTile: ${tile.index}\nBlocked: ${isBlocked}\n`;
+                    
+                    // Füge Entity-Informationen hinzu, wenn vorhanden
+                    if (entitiesAtPosition.length > 0) {
+                        tooltipContent += `\nEntity:\n`;
+                        entitiesAtPosition.forEach(entity => {
+                            try {
+                                tooltipContent += `Name: ${entity.getType()}\n`;
+                                
+                                // Berechne die relative Position innerhalb des Entities
+                                const relativeX = pixelX - entity.x;
+                                const relativeY = pixelY - entity.y;
+                                
+                                // Hole den spezifischen Tile-Index an dieser Position
+                                const specificTileIndex = entity.getTileAt(relativeX, relativeY);
+                                
+                                // Zeige "-" für leere Tiles und den korrigierten Index für vorhandene Tiles
+                                tooltipContent += `Tile: ${specificTileIndex !== -1 ? specificTileIndex : '-'}\n`;
+                            } catch (error) {
+                                console.log("Error getting entity info:", error);
+                                tooltipContent += "Error getting entity info\n";
+                            }
+                        });
+                    }
+                    
+                    // Ersetze Zeilenumbrüche mit HTML-Zeilenumbrüchen
+                    this.tooltip.innerHTML = tooltipContent.replace(/\n/g, '<br>');
                 }
             } else {
                 // Kein Tile gefunden, Tooltip verstecken
@@ -478,5 +516,28 @@ export class GameMap {
                 this.tooltip.style.display = 'none';
             }
         }
+    }
+
+    // Sucht nach Entities an einer bestimmten Position
+    private findEntitiesAtPosition(x: number, y: number): Entity[] {
+        const foundEntities: Entity[] = [];
+        
+        // Durchsuche alle Entities
+        this.allEntities.forEach(entity => {
+            // Verbesserte Kollisionserkennung für Entities mit ihren tatsächlichen Dimensionen
+            // Die Position muss innerhalb des Entity-Bereichs liegen
+            const entityX = entity.x;
+            const entityY = entity.y;
+            const entityWidth = entity.entityWidth() * 8;  // Breite in Pixeln
+            const entityHeight = entity.entityHeight() * 8; // Höhe in Pixeln
+            
+            // Prüfe, ob die Position innerhalb des Entity-Bereichs liegt
+            if (x >= entityX && x < entityX + entityWidth && 
+                y >= entityY && y < entityY + entityHeight) {
+                foundEntities.push(entity);
+            }
+        });
+        
+        return foundEntities;
     }
 }
