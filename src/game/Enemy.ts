@@ -2,6 +2,13 @@ import { Actor } from "./actor";
 import { Player } from "./Player";
 import { Game } from "./scenes/Game"; // Importiere die Game-Szene
 
+// Definiere die möglichen Zustände des Gegners
+enum EnemyState {
+    SEARCH_PLAYER,
+    WANDER_AROUND,
+    DYING
+}
+
 export class Enemy extends Actor {
 
     private target: Player;
@@ -9,12 +16,21 @@ export class Enemy extends Actor {
     public currentDirectionX = 0;
     public currentDirectionY = 0;
     private wanderTimer: number = 0;
-    private isWandering: boolean = false;
     private wanderDirection = { x: 0, y: 0 };
     private wanderEvent: Phaser.Time.TimerEvent | null = null;
     private shootTimer: Phaser.Time.TimerEvent | null = null;
-    private dead = false;
     private speed = 50;
+    
+    // Statusvariablen der Zustandsmaschine
+    private currentState: EnemyState = EnemyState.WANDER_AROUND;
+    private stateTimers: Map<EnemyState, number> = new Map();
+    
+    // Bewegungsmuster für den SEARCH_PLAYER-Zustand
+    private movementPattern = {
+        direction: { x: 0, y: 0 },
+        duration: 0,
+        timer: 0,
+    };
 
     constructor(public scene: Game, x: number, y: number, target: Player) {
         super(scene, x, y, "enemy-down-right-0");
@@ -23,13 +39,14 @@ export class Enemy extends Actor {
         this.getBody().setSize(13, 20);
         this.getBody().setOffset(1, 0);
 
-        // // Physik aktivieren
+        // Physik aktivieren
         this.getBody().enable = true;
 
         // Initial animation starten
         this.sprite.anims.play("enemy-down");
 
-        this.startWandering();
+        // Starte im Wander-Zustand
+        this.enterState(EnemyState.WANDER_AROUND);
 
         // Schuss-Timer starten
         this.setupShootTimer();
@@ -39,21 +56,19 @@ export class Enemy extends Actor {
 
     // Neue Methode für Schuss-Timer
     private setupShootTimer(): void {
+        // Prüfen, ob die Szene verfügbar ist
+        if (!this.scene || !this.scene.time) {
+            // Wenn nicht, Verarbeitung abbrechen
+            return;
+        }
+        
         // Gelegenheitlich schießen, wenn nicht in "Idle"-Zustand
-        const shootDelay = Phaser.Math.Between(500, 1000); // Zufällige Zeit zwischen 3 und 8 Sekunden
+        const shootDelay = Phaser.Math.Between(500, 1000); // Zufällige Zeit zwischen 0.5 und 1 Sekunden
 
         this.shootTimer = this.scene.time.addEvent({
             delay: shootDelay,
-            callback: () => {
-                // Nur schießen, wenn in Reichweite und nicht tot
-                if (!this.dead) {
-                    //&& this.distanceToPlayer() < this.AGRESSOR_RADIUS) {
-                    this.tryToShoot();
-                }
-                // Timer neu starten mit neuer zufälliger Verzögerung
-                this.setupShootTimer();
-            },
-            callbackScope: this,
+            callback: this.tryToShoot,  // Methoden-Referenz statt anonymer Funktion
+            callbackScope: this,        // Wichtig: Setzt den Kontext für die Callback-Methode
         });
     }
 
@@ -67,15 +82,84 @@ export class Enemy extends Actor {
 
     // Versuche zu schießen (mit etwas Wahrscheinlichkeit)
     private tryToShoot(): void {
-        // Nur schießen, wenn in Sicht und mit 30% Wahrscheinlichkeit
-        if (Phaser.Math.Between(1, 100) <= 80) {
-            this.scene.shootingController.shoot(this,'player',this.currentDirectionX,this.currentDirectionY);
+        // Nur schießen, wenn in Sicht und mit 80% Wahrscheinlichkeit
+        if (this.currentState !== EnemyState.DYING && Phaser.Math.Between(1, 100) <= 80) {
+            this.scene.shootingController.shoot(this, 'player', this.currentDirectionX, this.currentDirectionY);
+        }
+        
+        // Timer neu starten mit neuer zufälliger Verzögerung, wenn die Szene noch existiert
+        if (this.scene && this.scene.time) {
+            this.setupShootTimer();
+        }
+    }
+
+    // Zustandsmanagement-Methoden
+    private enterState(newState: EnemyState): void {
+        const oldState = this.currentState;
+        this.currentState = newState;
+        
+        // Aufräumen des alten Zustands
+        this.exitState(oldState);
+        
+        // Setup für den neuen Zustand
+        switch (newState) {
+            case EnemyState.WANDER_AROUND:
+                this.startWandering();
+                break;
+                
+            case EnemyState.SEARCH_PLAYER:
+                // Anfängliche Richtung zum Spieler berechnen
+                this.movementPattern.timer = 0; // Erzwinge neue Richtungswahl
+                break;
+                
+            case EnemyState.DYING:
+                // Kollisionen deaktivieren
+                this.getBody().enable = false;
+                
+                // Tod-Animation abspielen
+                this.sprite.anims.play("enemy-die");
+                
+                // Nach 1 Sekunde zerstören
+                this.scene.time.delayedCall(1000, () => {
+                    this.destroy();
+                });
+                break;
+        }
+    }
+    
+    private exitState(state: EnemyState): void {
+        switch (state) {
+            case EnemyState.WANDER_AROUND:
+                // Wander-Timer aufräumen
+                if (this.wanderEvent) {
+                    this.wanderEvent.destroy();
+                    this.wanderEvent = null;
+                }
+                break;
+        }
+    }
+    
+    private updateState(): void {
+        if (this.currentState === EnemyState.DYING) {
+            // Im DYING-Zustand nichts weiter tun
+            return;
+        }
+        
+        const distanceToPlayer = this.distanceToPlayer();
+        
+        // Zustandswechsel basierend auf Spielerentfernung
+        if (distanceToPlayer < this.AGRESSOR_RADIUS && distanceToPlayer > 150) {
+            if (this.currentState !== EnemyState.SEARCH_PLAYER) {
+                this.enterState(EnemyState.SEARCH_PLAYER);
+            }
+        } else {
+            if (this.currentState !== EnemyState.WANDER_AROUND) {
+                this.enterState(EnemyState.WANDER_AROUND);
+            }
         }
     }
 
     private startWandering(): void {
-        this.isWandering = true;
-
         // Nur 45°-Richtungen erlauben
         const directions = [
             { x: 0, y: -1 }, // N
@@ -103,8 +187,6 @@ export class Enemy extends Actor {
     }
 
     private handleWandering(): void {
-        if (!this.isWandering) return;
-
         this.getBody().setVelocityX(this.wanderDirection.x * this.speed);
         this.getBody().setVelocityY(this.wanderDirection.y * this.speed);
 
@@ -156,21 +238,25 @@ export class Enemy extends Actor {
 
     update(time: number, delta: number): void {
         super.update(time, delta);
-        if (this.dead) {
-            this.alpha = 0.5 + Math.abs(Math.sin(time / 100)) * 0.2;
-            this.getBody().setVelocityX(0);
-            this.getBody().setVelocityY(0);
-            return;
-        }
-
-        const distanceToPlayer = this.distanceToPlayer();
-
-        if (distanceToPlayer < this.AGRESSOR_RADIUS && distanceToPlayer > 150) {
-            // Verfolge den Spieler mit 45°-Bewegung
-            this.isWandering = false;
-            this.followPlayerInSteps();
-        } else {
-            this.handleWandering();
+        
+        // Zustandsübergang prüfen
+        this.updateState();
+        
+        // Statusspezifische Updates
+        switch (this.currentState) {
+            case EnemyState.WANDER_AROUND:
+                this.handleWandering();
+                break;
+                
+            case EnemyState.SEARCH_PLAYER:
+                this.followPlayerInSteps();
+                break;
+                
+            case EnemyState.DYING:
+                this.alpha = 0.5 + Math.abs(Math.sin(time / 100)) * 0.2;
+                this.getBody().setVelocityX(0);
+                this.getBody().setVelocityY(0);
+                break;
         }
     }
 
@@ -181,7 +267,10 @@ export class Enemy extends Actor {
             y: -this.wanderDirection.y
         };
         this.wanderDirection = newDirection;
-        this.startWandering();
+        
+        if (this.currentState === EnemyState.WANDER_AROUND) {
+            this.startWandering();
+        }
     }
 
     public setTarget(target: Player): void {
@@ -189,33 +278,12 @@ export class Enemy extends Actor {
     }
 
     public die() {
-        this.dead = true;
-
-        // Wenn tot, alle Timer stoppen
-        if (this.wanderEvent) this.wanderEvent.destroy();
-        if (this.shootTimer) this.shootTimer.destroy();
-
         // Sound abspielen
         (this.scene as Game).soundController.playSound("enemy_die");
-
-        // Kollisionen deaktivieren
-        this.getBody().enable = false;
-
-        // Tod-Animation abspielen
-        this.sprite.anims.play("enemy-die");
-
-        // Nach 1 Sekunde zerstören
-        this.scene.time.delayedCall(1000, () => {
-            this.destroy();
-        });
+        
+        // In DYING-Zustand wechseln
+        this.enterState(EnemyState.DYING);
     }
-
-    // Neues Objekt für Bewegungsrichtung und Dauer
-    private movementPattern = {
-        direction: { x: 0, y: 0 },
-        duration: 0,
-        timer: 0,
-    };
 
     // Methode um den Spieler in 45°-Schritten zu verfolgen
     private followPlayerInSteps(): void {
@@ -274,9 +342,8 @@ export class Enemy extends Actor {
         }
 
         // Bewegung in der aktuellen Richtung
-        const speed = 50;
-        this.getBody().setVelocityX(this.movementPattern.direction.x * speed);
-        this.getBody().setVelocityY(this.movementPattern.direction.y * speed);
+        this.getBody().setVelocityX(this.movementPattern.direction.x * this.speed);
+        this.getBody().setVelocityY(this.movementPattern.direction.y * this.speed);
 
         // Animations-Richtung aktualisieren
         this.currentDirectionX = this.movementPattern.direction.x;
