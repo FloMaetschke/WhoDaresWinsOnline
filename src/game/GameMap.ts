@@ -137,8 +137,12 @@ export class GameMap {
 
         const entities: Entity[] = [];
 
-        // Generiere und platziere Tiles in einem einzigen Durchlauf
+        // Temporärer Array zum Speichern der Tile-Typen
+        const tileTypes: Array<Array<{ floorType: FloorType, noiseValue: number }>> = [];
+
+        // Erste Phase: Generiere und speichere alle Tile-Typen
         for (let y = 0; y < this.chunkSize; y++) {
+            tileTypes[y] = [];
             for (let x = 0; x < this.chunkSize; x++) {
                 // Berechne globale Position für konsistenten Noise
                 const worldX = chunkX * this.chunkSize + x;
@@ -155,6 +159,19 @@ export class GameMap {
                 );
 
                 const floorType = getFloorType(patternNoiseValue);
+                tileTypes[y][x] = { floorType, noiseValue };
+            }
+        }
+
+        // Zweite Phase: Entferne alleinstehende Wassertiles
+        this.removeWaterFringes(tileTypes);
+
+        // Dritte Phase: Platziere Tiles basierend auf bereinigtem Array
+        for (let y = 0; y < this.chunkSize; y++) {
+            for (let x = 0; x < this.chunkSize; x++) {
+                const worldX = chunkX * this.chunkSize + x;
+                const worldY = chunkY * this.chunkSize + y;
+                const { floorType, noiseValue } = tileTypes[y][x];
                 
                 // Wenn es Wasser ist, prüfe die Übergänge
                 if (floorType === "water") {
@@ -199,6 +216,53 @@ export class GameMap {
         // Speichere den Layer
         this.activeChunks.set(`${chunkX},${chunkY}`, layer);
         this.loadedChunks.add(`${chunkX},${chunkY}`);
+    }
+
+    // Neue Methode zum Entfernen von alleinstehenden Wassertiles
+    private removeWaterFringes(tileTypes: Array<Array<{ floorType: FloorType, noiseValue: number }>>) {
+        const chunkSize = this.chunkSize;
+        
+        // Temporäres Array für die Änderungen
+        const tilesToChange: Array<{ x: number, y: number }> = [];
+        
+        for (let y = 0; y < chunkSize; y++) {
+            for (let x = 0; x < chunkSize; x++) {
+                if (tileTypes[y][x].floorType === "water") {
+                    // Zähle direkte Wasser-Nachbarn (oben, rechts, unten, links)
+                    let waterNeighbors = 0;
+                    
+                    // Oben
+                    if (y > 0 && tileTypes[y-1][x].floorType === "water") {
+                        waterNeighbors++;
+                    }
+                    
+                    // Rechts
+                    if (x < chunkSize-1 && tileTypes[y][x+1].floorType === "water") {
+                        waterNeighbors++;
+                    }
+                    
+                    // Unten
+                    if (y < chunkSize-1 && tileTypes[y+1][x].floorType === "water") {
+                        waterNeighbors++;
+                    }
+                    
+                    // Links
+                    if (x > 0 && tileTypes[y][x-1].floorType === "water") {
+                        waterNeighbors++;
+                    }
+                    
+                    // Wenn weniger als 2 Wasser-Nachbarn, markiere zum Ändern
+                    if (waterNeighbors < 2) {
+                        tilesToChange.push({ x, y });
+                    }
+                }
+            }
+        }
+        
+        // Ändere alle markierten Tiles zu "grass"
+        for (const tile of tilesToChange) {
+            tileTypes[tile.y][tile.x].floorType = "grass";
+        }
     }
 
     // Neue Methode zum Prüfen von Nachbartiles für Wasserübergänge
