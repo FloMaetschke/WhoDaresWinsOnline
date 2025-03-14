@@ -5,7 +5,7 @@ export class Entity extends Phaser.GameObjects.Container {
     overlayLayer: Phaser.Tilemaps.TilemapLayer;
     collider: Phaser.Physics.Arcade.Collider;
     map: Phaser.Tilemaps.Tilemap;
-    tiles: any;
+    tiles: Phaser.Tilemaps.Tileset;
     entityType: string; // Hinzugefügt: Speichert den Entity-Typ
 
     constructor(scene: Phaser.Scene, x: number, y: number, templateKey: string) {
@@ -13,7 +13,7 @@ export class Entity extends Phaser.GameObjects.Container {
         scene.add.existing(this);
         this.entityType = templateKey; // Speichere den Entity-Typ
         this.map = this.scene.make.tilemap({ key: templateKey })!;
-        this.tiles = this.map.addTilesetImage('tileset', 'tiles');
+        this.tiles = this.map.addTilesetImage('tileset', 'tiles')!;
         this.blockLayer = this.map.createLayer("Block", this.tiles!, x,y)!;
         this.overlayLayer = this.map.createLayer("Overlay", this.tiles!, x,y)!;
         this.add(this.blockLayer!);
