@@ -1,6 +1,8 @@
-const ground = [4, 5, 6, 7, 8, 9]; // Deine vordefinierten Tile-Indizes
-const ground2 = [8, 9, 13, 14, 64]; // Deine vordefinierten Tile-Indizes
-const water = [91, 92, 93, 94, 95, 110, 110, 110, 110, 110, 110, 111]; // Deine vordefinierten Tile-Indizes
+
+const groundOk = [4, 5, 6, 7, 8, 9,4, 5, 6, 7, 8, 9]
+const ground = [...groundOk,...groundOk,...groundOk,...groundOk,...groundOk,112,113]; // etwas Treibsand
+const ground2 = [8, 9, 13, 14, 64]; 
+const water = [91, 92, 93, 94, 95, 110, 110, 110, 110, 110, 110, 111]; 
 export type FloorType = "water" | "ground1" | "ground2";
 
 export enum TileBorderDirections {

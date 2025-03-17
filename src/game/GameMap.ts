@@ -124,9 +124,9 @@ export class GameMap {
             this.chunkSize
         )!;
 
-        layer.setCollisionBetween(91, 95);
-        layer.setCollisionBetween(110, 111);
-
+        layer.setCollisionBetween(91, 95); // Wasser
+        layer.setCollisionBetween(110, 113); // Wasser
+        layer.setCollisionBetween(112, 113); //Treibsand
         // Kollision für Spieler beibehalten
         const waterPlayerCollider = this.scene.physics.add.collider(
             (this.scene as Game).player,
