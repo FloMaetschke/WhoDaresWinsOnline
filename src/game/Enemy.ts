@@ -108,7 +108,7 @@ export class Enemy extends Actor {
 
     // Zustandsmanagement-Methoden
     private enterState(newState: EnemyState): void {
-        console.log("Enemy state changed to", newState);
+        //console.log("Enemy state changed to", newState);
         const oldState = this.currentState;
         this.currentState = newState;
 

@@ -1,15 +1,19 @@
+import { DimetricMap } from "./DimetricMap";
 import { Game } from "./scenes/Game";
 
 export class Entity extends Phaser.GameObjects.Container {
     backgroundLayer: Phaser.Tilemaps.TilemapLayer;
     blockLayer: Phaser.Tilemaps.TilemapLayer;
-    overlayLayer: Phaser.Tilemaps.TilemapLayer;
+    height1Layer: Phaser.Tilemaps.TilemapLayer;
     collider: Phaser.Physics.Arcade.Collider;
     map: Phaser.Tilemaps.Tilemap;
     tiles: Phaser.Tilemaps.Tileset;
     entityType: string; // Hinzugefügt: Speichert den Entity-Typ
     bulletCollider: Phaser.Physics.Arcade.Collider;
     enemyBulletCollider: Phaser.Physics.Arcade.Collider;
+    dimetricMap: DimetricMap;
+    height2Layer: Phaser.Tilemaps.TilemapLayer;
+    height3Layer: Phaser.Tilemaps.TilemapLayer;
 
     constructor(
         scene: Phaser.Scene,
@@ -29,14 +33,20 @@ export class Entity extends Phaser.GameObjects.Container {
             y
         )!;
         this.blockLayer = this.map.createLayer("Block", this.tiles!, x, y)!;
-        this.overlayLayer = this.map.createLayer("Overlay", this.tiles!, x, y)!;
-        // this.add(this.backgroundLayer!);
-        // this.add(this.blockLayer!);
-        // this.add(this.overlayLayer!);
+        this.height1Layer = this.map.createLayer("Height1", this.tiles!, x, y)!;
+        this.height2Layer = this.map.createLayer("Height2", this.tiles!, x, y)!;
+        this.height3Layer = this.map.createLayer("Height3", this.tiles!, x, y)!;
+        this.add(this.backgroundLayer!);
+        this.add(this.blockLayer!);
+        this.add(this.height1Layer!);
+        this.add(this.height2Layer!);
+        this.add(this.height3Layer!);
 
         this.backgroundLayer?.setDepth(1);
         this.blockLayer?.setDepth(400);
-        this.overlayLayer?.setDepth(400);
+        this.height1Layer?.setDepth(400);
+        this.height2Layer?.setDepth(400);
+        this.height3Layer?.setDepth(400);
         this.blockLayer?.setCollisionBetween(0, 225);
 
         this.collider = this.scene.physics.add.collider(
@@ -50,7 +60,11 @@ export class Entity extends Phaser.GameObjects.Container {
                 2 * this.map.tileHeight
         );
 
-
+        this.backgroundLayer.visible = false;
+        this.blockLayer.visible = false;
+        this.height1Layer.visible = false;
+        this.height2Layer.visible = false;
+        this.height3Layer.visible = false;
 
         this.blockLayer?.setDepth(1);
         this.backgroundLayer?.setDepth(1);
@@ -73,6 +87,22 @@ export class Entity extends Phaser.GameObjects.Container {
             undefined,
             this
         );
+
+        this.dimetricMap = new DimetricMap(
+            this.scene,
+            8,
+            x,
+            y,
+            this.map.width,
+            this.map.height
+        );
+        this.dimetricMap.setSprites(
+            this.backgroundLayer,
+            this.blockLayer,
+            this.height1Layer,
+            this.height2Layer,
+            this.height3Layer
+        );
     }
 
     entityWidth() {
@@ -91,8 +121,8 @@ export class Entity extends Phaser.GameObjects.Container {
     // Verbesserte Methode zum Abrufen eines repräsentativen sichtbaren Tile-Index
     public getFrame(): number {
         // Beginne mit dem Overlay-Layer, da dieser in der Regel die sichtbaren Elemente enthält
-        if (this.overlayLayer) {
-            const overlayTiles = this.overlayLayer.getTilesWithin();
+        if (this.height1Layer) {
+            const overlayTiles = this.height1Layer.getTilesWithin();
             if (overlayTiles && overlayTiles.length > 0) {
                 // Suche nach dem ersten sichtbaren, nicht-leeren Tile im Overlay
                 for (const tile of overlayTiles) {
@@ -134,8 +164,8 @@ export class Entity extends Phaser.GameObjects.Container {
         const tileY = Math.floor(relativeY / 8);
 
         // Prüfe zuerst das Overlay-Layer, da es im Vordergrund liegt
-        if (this.overlayLayer) {
-            const overlayTile = this.overlayLayer.getTileAt(tileX, tileY);
+        if (this.height1Layer) {
+            const overlayTile = this.height1Layer.getTileAt(tileX, tileY);
             if (overlayTile && overlayTile.index !== -1) {
                 // Korrigiere die Tile-ID, indem 1 subtrahiert wird
                 return overlayTile.index - 1;
@@ -167,9 +197,7 @@ export class Entity extends Phaser.GameObjects.Container {
         this.collider?.destroy();
         this.bulletCollider?.destroy();
         this.enemyBulletCollider.destroy();
-        this.backgroundLayer?.destroy();
-        this.blockLayer?.destroy();
-        this.overlayLayer?.destroy();
+        this.dimetricMap.destroy();
         this.removeAll(true);
         super.destroy();
     }

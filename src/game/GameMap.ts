@@ -65,7 +65,7 @@ export class GameMap {
         this.scene.input.on("pointermove", this.handleMouseMove, this);
     }
 
-    getPlayerStartPosition(): { x: number; y: number } {
+    getPlayerStartPosition(): { startX: number; startY: number } {
         return { startX: this.worldWidth / 2, startY: this.worldHeight / 2 };
     }
 
