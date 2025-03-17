@@ -20,6 +20,8 @@ export class Player extends Actor {
         this.getBody().setSize(13, 5);
         this.getBody().setOffset(0, 14);
 
+        this.getSpriteBody().enable = false;
+        //this.getBody().enable = false;
         // Setze das Startframe auf 'up0'
         //this.sprite.setFrame("player-down-right-0");
 

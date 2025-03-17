@@ -43,6 +43,7 @@ export class Preload extends Scene {
 
         this.load.tilemapTiledJSON('tree', 'templates/tree.tmj');
         this.load.tilemapTiledJSON('rock', 'templates/rock.tmj');
+        this.load.tilemapTiledJSON('outpost1', 'templates/outpost.tmj');
     }
 
     create() {

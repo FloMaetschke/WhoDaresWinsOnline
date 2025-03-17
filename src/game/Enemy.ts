@@ -235,7 +235,7 @@ export class Enemy extends Actor {
                         this.hideOut = entity;
                         this.hideOut.enemyBulletCollider.active = false;
 
-                        this.setPosition(entity.x + 5, entity.y - 12);
+                        this.setPosition(entity.x + 5, entity.y - 11);
                         entity.setDepth(0);
                         this.getBody().setVelocityX(0);
                         this.getBody().setVelocityY(0);
