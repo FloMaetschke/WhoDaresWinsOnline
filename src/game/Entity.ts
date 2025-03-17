@@ -44,22 +44,14 @@ export class Entity extends Phaser.GameObjects.Container {
             this.blockLayer!
         );
 
-        //if (this.entityType !== "outpost") {
-            this.overlayLayer.setDepth(
-                this.y +
-                    this.map.height * this.map.tileHeight -
-                    2 * this.map.tileHeight
-            );
+        this.setDepth(
+            this.y +
+                this.map.height * this.map.tileHeight -
+                2 * this.map.tileHeight
+        );
 
-            // this.blockLayer.setDepth(
-            //     this.y +
-            //         this.map.height * this.map.tileHeight -
-            //         2 * this.map.tileHeight
-            // );
-       // }
-        // else {
-        //     this.setDepth(1);
-        // }
+
+
         this.blockLayer?.setDepth(1);
         this.backgroundLayer?.setDepth(1);
         this.bulletCollider = this.scene.physics.add.collider(
