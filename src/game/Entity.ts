@@ -1,6 +1,7 @@
 import { Game } from "./scenes/Game";
 
 export class Entity extends Phaser.GameObjects.Container {
+    backgroundLayer: Phaser.Tilemaps.TilemapLayer;
     blockLayer: Phaser.Tilemaps.TilemapLayer;
     overlayLayer: Phaser.Tilemaps.TilemapLayer;
     collider: Phaser.Physics.Arcade.Collider;
@@ -10,41 +11,83 @@ export class Entity extends Phaser.GameObjects.Container {
     bulletCollider: Phaser.Physics.Arcade.Collider;
     enemyBulletCollider: Phaser.Physics.Arcade.Collider;
 
-    constructor(scene: Phaser.Scene, x: number, y: number, templateKey: string) {
+    constructor(
+        scene: Phaser.Scene,
+        x: number,
+        y: number,
+        templateKey: string
+    ) {
         super(scene, x, y);
         scene.add.existing(this);
         this.entityType = templateKey; // Speichere den Entity-Typ
         this.map = this.scene.make.tilemap({ key: templateKey })!;
-        this.tiles = this.map.addTilesetImage('tileset', 'tiles')!;
-        this.blockLayer = this.map.createLayer("Block", this.tiles!, x,y)!;
-        this.overlayLayer = this.map.createLayer("Overlay", this.tiles!, x,y)!;
-        this.add(this.blockLayer!);
-        this.add(this.overlayLayer!);
+        this.tiles = this.map.addTilesetImage("tileset", "tiles")!;
+        this.backgroundLayer = this.map.createLayer(
+            "Background",
+            this.tiles!,
+            x,
+            y
+        )!;
+        this.blockLayer = this.map.createLayer("Block", this.tiles!, x, y)!;
+        this.overlayLayer = this.map.createLayer("Overlay", this.tiles!, x, y)!;
+        // this.add(this.backgroundLayer!);
+        // this.add(this.blockLayer!);
+        // this.add(this.overlayLayer!);
 
+        this.backgroundLayer?.setDepth(1);
         this.blockLayer?.setDepth(400);
         this.overlayLayer?.setDepth(400);
         this.blockLayer?.setCollisionBetween(0, 225);
+
         this.collider = this.scene.physics.add.collider(
             (this.scene as Game).player,
             this.blockLayer!
         );
 
-        this.setDepth(this.y + this.map.height * this.map.tileHeight - 2* this.map.tileHeight );
+        //if (this.entityType !== "outpost") {
+            this.overlayLayer.setDepth(
+                this.y +
+                    this.map.height * this.map.tileHeight -
+                    2 * this.map.tileHeight
+            );
 
-        this.bulletCollider = this.scene.physics.add.collider((this.scene as Game).shootingController.bullets, this.blockLayer, (bullet) => {
-            bullet.destroy();
-        },undefined,this);
+            // this.blockLayer.setDepth(
+            //     this.y +
+            //         this.map.height * this.map.tileHeight -
+            //         2 * this.map.tileHeight
+            // );
+       // }
+        // else {
+        //     this.setDepth(1);
+        // }
+        this.blockLayer?.setDepth(1);
+        this.backgroundLayer?.setDepth(1);
+        this.bulletCollider = this.scene.physics.add.collider(
+            (this.scene as Game).shootingController.bullets,
+            this.blockLayer,
+            (bullet) => {
+                bullet.destroy();
+            },
+            undefined,
+            this
+        );
 
-        this.enemyBulletCollider = this.scene.physics.add.collider((this.scene as Game).shootingController.enemyBullets, this.blockLayer, (bullet) => {
-            bullet.destroy();
-        },undefined,this);
+        this.enemyBulletCollider = this.scene.physics.add.collider(
+            (this.scene as Game).shootingController.enemyBullets,
+            this.blockLayer,
+            (bullet) => {
+                bullet.destroy();
+            },
+            undefined,
+            this
+        );
     }
 
-    entityWidth() { 
+    entityWidth() {
         return this.map.width;
     }
 
-    entityHeight() { 
+    entityHeight() {
         return this.map.height;
     }
 
@@ -67,7 +110,7 @@ export class Entity extends Phaser.GameObjects.Container {
                 }
             }
         }
-        
+
         // Wenn im Overlay nichts gefunden wurde, prüfe den Block-Layer
         if (this.blockLayer) {
             const blockTiles = this.blockLayer.getTilesWithin();
@@ -78,7 +121,7 @@ export class Entity extends Phaser.GameObjects.Container {
                         return tile.index;
                     }
                 }
-                
+
                 // Wenn kein sichtbares Tile gefunden wurde, nimm das erste nicht-leere
                 for (const tile of blockTiles) {
                     if (tile.index !== -1) {
@@ -87,7 +130,7 @@ export class Entity extends Phaser.GameObjects.Container {
                 }
             }
         }
-        
+
         // Fallback wenn kein Tile gefunden wurde
         return -1;
     }
@@ -97,7 +140,7 @@ export class Entity extends Phaser.GameObjects.Container {
         // Konvertiere zu Layer-Koordinaten (in Tiles)
         const tileX = Math.floor(relativeX / 8);
         const tileY = Math.floor(relativeY / 8);
-        
+
         // Prüfe zuerst das Overlay-Layer, da es im Vordergrund liegt
         if (this.overlayLayer) {
             const overlayTile = this.overlayLayer.getTileAt(tileX, tileY);
@@ -106,7 +149,7 @@ export class Entity extends Phaser.GameObjects.Container {
                 return overlayTile.index - 1;
             }
         }
-        
+
         // Wenn im Overlay nichts gefunden wurde, prüfe den Block-Layer
         if (this.blockLayer) {
             const blockTile = this.blockLayer.getTileAt(tileX, tileY);
@@ -115,7 +158,15 @@ export class Entity extends Phaser.GameObjects.Container {
                 return blockTile.index - 1;
             }
         }
-        
+
+        if (this.backgroundLayer) {
+            const backgroundTile = this.backgroundLayer.getTileAt(tileX, tileY);
+            if (backgroundTile && backgroundTile.index !== -1) {
+                // Korrigiere die Tile-ID, indem 1 subtrahiert wird
+                return backgroundTile.index - 1;
+            }
+        }
+
         // Wenn kein Tile gefunden wurde, gibt -1 zurück (wird als "-" angezeigt)
         return -1;
     }
@@ -124,6 +175,9 @@ export class Entity extends Phaser.GameObjects.Container {
         this.collider?.destroy();
         this.bulletCollider?.destroy();
         this.enemyBulletCollider.destroy();
+        this.backgroundLayer?.destroy();
+        this.blockLayer?.destroy();
+        this.overlayLayer?.destroy();
         this.removeAll(true);
         super.destroy();
     }

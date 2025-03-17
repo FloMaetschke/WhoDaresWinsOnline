@@ -13,18 +13,18 @@
     "fileStates": {
         "public/assets/templates/outpost.tmj": {
             "scale": 3,
-            "selectedLayer": 0,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 202.5,
-                "y": 97.49999999999999
+                "x": 188.16666666666663,
+                "y": 70.16666666666666
             }
         },
         "public/assets/templates/outpost.tmj#tileset": {
-            "scaleInDock": 1
+            "scaleInDock": 5.5
         },
         "public/assets/templates/rock.tmj": {
             "scale": 31.5875,
-            "selectedLayer": 0,
+            "selectedLayer": 1,
             "viewCenter": {
                 "x": 20.656905421448357,
                 "y": 7.993668381480016
@@ -35,9 +35,9 @@
         },
         "public/assets/templates/tree.tmj": {
             "scale": 23.86875,
-            "selectedLayer": 1,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 11.982194291699397,
+                "x": 11.961246399581043,
                 "y": 19.96334118879288
             }
         },
@@ -73,6 +73,7 @@
     ],
     "project": "Templates.tiled-project",
     "recentFiles": [
+        "public/assets/templates/outpost.tmj",
         "public/assets/templates/tree.tmj",
         "public/assets/templates/rock.tmj",
         "tileset.tsx",

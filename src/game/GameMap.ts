@@ -241,6 +241,22 @@ export class GameMap {
                         entities
                     );
                 }
+
+                // Entities platzieren, wenn es sich nicht um Wasser handelt
+                if (
+                    floorType === "ground2" &&
+                    noiseValue > 0.2 &&
+                    noiseValue < 0.21
+                ) {
+                    this.placeEntity(
+                        "outpost",
+                        worldX,
+                        worldY,
+                        floorType,
+                        noiseValue,
+                        entities
+                    );
+                }
             }
         }
 

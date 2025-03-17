@@ -17,6 +17,11 @@ export class KeyboardController {
         this.scene.input.keyboard!.on("keydown-SPACE", () => {
             this.player.shoot();
         });
+
+        this.scene.input.keyboard!.on("keydown-ENTER", () => {
+            this.scene.scene.stop("Game");
+            this.scene.scene.start("Game");
+        });
     }
 
     updateKeyboardMovement() {

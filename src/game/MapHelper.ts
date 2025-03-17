@@ -6,6 +6,7 @@ const TILE_SIZE = 8;
 
 entitySizesInTiles.set("tree", { width: 3, height: 5 });
 entitySizesInTiles.set("rock", { width: 3, height: 2 });
+entitySizesInTiles.set("outpost", { width: 48, height: 16 });
 
 /**
  * Prüft, ob ein Bereich bereits von einem Entity belegt ist oder Wasser enthält
