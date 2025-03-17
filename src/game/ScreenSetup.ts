@@ -1,12 +1,11 @@
-import { Scale } from "phaser";
-import { Game } from "./scenes/Game";
+import { Scale, Scene } from "phaser";
 
 export class ScreenSetup {
     private virtualWidth: number = 304;
     private virtualHeight: number = 192;
-    private scene: Game;
+    private scene: Scene;
 
-    constructor(scene: Game) {
+    constructor(scene: Scene) {
         this.scene = scene;
         this.initialize();
     }
