@@ -34,12 +34,15 @@ export class Preload extends Scene {
         // Ressourcen laden
         this.load.setPath("assets");
         this.load.atlas("sprites", "sprites.png", "sprites.json");
+        this.load.spritesheet('tileset', 'tileset.png', { frameWidth: 8, frameHeight: 8 });
+
+        this.load.image("tiles", "tileset.png");
+        this.load.image("mute", "icons/mute.png");
+        
         this.load.audio("bullet", "audio/shot.wav");
         this.load.audio("enemy_die", "audio/enemy_die.wav");
         this.load.audio("player_die", "audio/player_die.wav");
         this.load.audio("music", "audio/music.mp3");
-        this.load.image("tiles", "tileset.png");
-        this.load.image("mute", "icons/mute.png");
 
         this.load.tilemapTiledJSON('tree', 'templates/tree.tmj');
         this.load.tilemapTiledJSON('rock', 'templates/rock.tmj');
