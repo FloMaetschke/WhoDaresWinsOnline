@@ -8,6 +8,7 @@ enum EnemyState {
     WANDER_AROUND = "WANDER_AROUND",
     DYING = "DYING",
     SNIPER = "SNIPER",
+    LEAVE_SNIPER = "LEAVE_SNIPER",
 }
 
 export class Enemy extends Actor {
@@ -129,6 +130,13 @@ export class Enemy extends Actor {
                 this.movementPattern.timer = 0; // Erzwinge neue Richtungswahl
                 this.sprite.setDepth(50000000000);
                 break;
+            
+            case EnemyState.LEAVE_SNIPER:
+                this.hideOut.setData("is_occupied", undefined);
+                this.sprite.play("enemy-up");
+                this.hideOut.enemyBulletCollider.active = true;
+                this.getBody().setVelocityY(-1 * this.speed);
+                break;
 
             case EnemyState.DYING:
                 // Kollisionen deaktivieren
@@ -180,9 +188,14 @@ export class Enemy extends Actor {
             }
 
             if (this.scene.player.y < this.y + 25) {
-                // leave  hideout
+                this.enterState(EnemyState.LEAVE_SNIPER);
+            }
+            return;
+        }
+
+        if (this.currentState === EnemyState.LEAVE_SNIPER) {
+            if (this.y < this.hideOut.y - 20) {
                 this.enterState(EnemyState.WANDER_AROUND);
-                this.hideOut.setData("is_occupied", undefined);
             }
             return;
         }
@@ -206,6 +219,7 @@ export class Enemy extends Actor {
     }
 
     searchSniperLocaiton() {
+        if(this.y > this.scene.player.y - 20) return false; // Nicht unterhalb vom Player in die Deckung gehen!
         let result = false;
         this.scene.gameMap.allEntities.forEach((entity) => {
             if (entity.getType() === "rock") {
@@ -219,6 +233,7 @@ export class Enemy extends Actor {
                     if (entity.getData("is_occupied") === undefined) {
                         entity.setData("is_occupied", true);
                         this.hideOut = entity;
+                        this.hideOut.enemyBulletCollider.active = false;
 
                         this.setPosition(entity.x + 5, entity.y - 12);
                         entity.setDepth(0);
