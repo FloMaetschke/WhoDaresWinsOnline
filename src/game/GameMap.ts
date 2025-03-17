@@ -14,6 +14,7 @@ import { Game } from "./scenes/Game";
 import { Enemy } from "./Enemy";
 import { InfoTooltip } from "./InfoTooltip";
 import { findEntitiesAtPosition } from "./EntityHelper";
+
 const tileScale = 0.02;
 
 export class GameMap {
@@ -114,6 +115,7 @@ export class GameMap {
 
     // Erstellt einen einzelnen Tilemap-Chunk an der angegebenen Position
     private createChunk(chunkX: number, chunkY: number) {
+
         // Erstelle Layer für den Chunk
         const layer = this.map.createBlankLayer(
             `chunk_${chunkX}_${chunkY}`,

@@ -10,24 +10,33 @@ export class DimetricMap extends Phaser.GameObjects.GameObject {
         tileHeight: number
     ) {
         super(scene, "DimetricMap");
-        for (let y = offsetY; y < tileHeight + offsetY; y++) {
-            for (let x = offsetY; x < tileWidth + offsetX; x++) {
-                this.sprites.set(
-                    `${x}_${y}`,
-                    this.scene.add.sprite(
-                        x * tileSize,
-                        y * tileSize,
-                        "tileset",
-                        0,
-                    )
+
+        console.log(
+            "DimetricMap created",
+            tileWidth,
+            tileHeight,
+            offsetX,
+            offsetY,
+            tileSize
+        );
+
+        for (let y = 0; y < tileHeight; y++) {
+            for (let x = 0; x < tileWidth ; x++) {
+                const sprite = this.scene.add.sprite(
+                    x * tileSize + offsetX,
+                    y * tileSize + offsetY,
+                    "tileset",
+                    0
                 );
+                sprite.setDepth(y * tileSize);
+                this.sprites.set(`${x}_${y}`, sprite);
             }
         }
     }
 
     update() {}
 
-    destroy(){
+    destroy() {
         this.sprites.forEach((sprite) => {
             sprite.destroy();
         });
