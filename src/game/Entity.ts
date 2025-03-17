@@ -47,7 +47,7 @@ export class Entity extends Phaser.GameObjects.Container {
         //if (this.entityType !== "outpost") {
             this.overlayLayer.setDepth(
                 this.y +
-                    this.map.height * this.map.tileHeight -
+                    tdht -
                     2 * this.map.tileHeight
             );
 
