@@ -4,8 +4,8 @@ import { Enemy } from "./Enemy";
 
 export class ShootingController {
     private scene: Scene;
-    private bullets: Phaser.Physics.Arcade.Group;
-    private enemyBullets: Phaser.Physics.Arcade.Group;
+    public bullets: Phaser.Physics.Arcade.Group;
+    public enemyBullets: Phaser.Physics.Arcade.Group;
 
     constructor(scene: Scene) {
         this.scene = scene;
@@ -23,7 +23,6 @@ export class ShootingController {
             maxSize: 10,
         });
         this.enemyBullets.setDepth(11);
-
 
     }
 
@@ -92,6 +91,8 @@ export class ShootingController {
             "sprites",
             "ammo-0"
         );
+
+        
         // Temporarily disabled:
         (this.scene as Game).soundController.playSound("bullet");
 

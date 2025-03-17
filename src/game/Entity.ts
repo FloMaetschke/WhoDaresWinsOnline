@@ -7,6 +7,7 @@ export class Entity extends Phaser.GameObjects.Container {
     map: Phaser.Tilemaps.Tilemap;
     tiles: Phaser.Tilemaps.Tileset;
     entityType: string; // Hinzugefügt: Speichert den Entity-Typ
+    bulletCollider: Phaser.Physics.Arcade.Collider;
 
     constructor(scene: Phaser.Scene, x: number, y: number, templateKey: string) {
         super(scene, x, y);
@@ -28,6 +29,10 @@ export class Entity extends Phaser.GameObjects.Container {
         );
 
         this.setDepth(this.y + this.map.height * this.map.tileHeight - 2* this.map.tileHeight );
+
+        this.bulletCollider = this.scene.physics.add.collider((this.scene as Game).shootingController.bullets, this.blockLayer, (bullet) => {
+            bullet.destroy();
+        },undefined,this);
     }
 
     entityWidth() { 
@@ -112,6 +117,7 @@ export class Entity extends Phaser.GameObjects.Container {
 
     destroy() {
         this.collider?.destroy();
+        this.bulletCollider?.destroy();
         this.removeAll(true);
         super.destroy();
     }
