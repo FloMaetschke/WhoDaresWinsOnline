@@ -47,12 +47,18 @@ export class Preload extends Scene {
         this.load.tilemapTiledJSON('tree', 'templates/tree.tmj');
         this.load.tilemapTiledJSON('rock', 'templates/rock.tmj');
         this.load.tilemapTiledJSON('outpost', 'templates/outpost.tmj');
+
+        this.load.json("treeJson", "templates/tree.tmj");
+        this.load.json("rockJson", "templates/rock.tmj");
+        this.load.json("outpostJson", "templates/outpost.tmj");
     }
 
     create() {
         // Animationen initialisieren
         initAnimations(this);
         
+        console.log(this.cache.json.get("treeJson"));
+
         // Zur Game-Szene wechseln
         EventBus.emit("loading-complete");
         this.scene.start("Game");

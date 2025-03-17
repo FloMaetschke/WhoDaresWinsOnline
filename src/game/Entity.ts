@@ -96,12 +96,16 @@ export class Entity extends Phaser.GameObjects.Container {
             this.map.width,
             this.map.height
         );
+        // this.dimetricMap.setSprites(
+        //     this.backgroundLayer,
+        //     this.blockLayer,
+        //     this.height1Layer,
+        //     this.height2Layer,
+        //     this.height3Layer
+        // );
+
         this.dimetricMap.setSprites(
-            this.backgroundLayer,
-            this.blockLayer,
-            this.height1Layer,
-            this.height2Layer,
-            this.height3Layer
+            this.entityType
         );
     }
 
