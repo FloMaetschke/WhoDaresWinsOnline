@@ -13,14 +13,18 @@ export class DimetricMap extends Phaser.GameObjects.GameObject {
     ) {
         super(scene, "DimetricMap");
         this.blockingTiles = this.scene.physics.add.staticGroup({
-            classType: Phaser.Physics.Arcade.Sprite
+            classType: Phaser.Physics.Arcade.Sprite,
+            
         });
     }
 
     public setTile(x: number, y: number, frame: number, depth: number) {
         if (this.sprites.has(`${x}_${y}`)) {
-            this.sprites.get(`${x}_${y}`)!.setFrame(frame);
-            this.sprites.get(`${x}_${y}`)!.setDepth(depth);
+            const sprite =  this.sprites.get(`${x}_${y}`)!;
+            sprite.setFrame(frame);
+            sprite.setDepth(depth);
+            return sprite;
+
         } else {
             const sprite = this.scene.add.sprite(
                 x * this.tileSize + this.offsetX + 4,
@@ -31,7 +35,9 @@ export class DimetricMap extends Phaser.GameObjects.GameObject {
             sprite.setDepth(depth);
             this.sprites.set(`${x}_${y}`, sprite);
             sprite.ignoreDestroy = true;
+            return sprite;
         }
+    
     }
 
     update() {}
@@ -77,9 +83,10 @@ export class DimetricMap extends Phaser.GameObjects.GameObject {
                         this.setTile(x, y, backgroundTile - 1, 1);
                     }
                     if (blockTile) {
-                        this.setTile(x, y, blockTile - 1, groundHeight);
+                        const sprite = this.setTile(x, y, blockTile - 1, groundHeight);
+                                                   
                         this.blockingTiles.add(
-                            this.sprites.get(`${x}_${y}`)!
+                            sprite
                         );
                         
                     }

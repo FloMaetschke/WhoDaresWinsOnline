@@ -130,7 +130,7 @@ export class Enemy extends Actor {
                 this.movementPattern.timer = 0; // Erzwinge neue Richtungswahl
                 this.sprite.setDepth(50000);
                 this.setDepth(50000);
-                break;s
+                break;
             
             case EnemyState.LEAVE_SNIPER:
                 this.hideOut.setData("is_occupied", undefined);
@@ -236,8 +236,15 @@ export class Enemy extends Actor {
                     if (entity.getData("is_occupied") === undefined) {
                         entity.setData("is_occupied", true);
                         this.hideOut = entity;
+                        console.log("hideout", this.hideOut, this.hideOut.enemyBulletCollider.active);
                         this.hideOut.enemyBulletCollider.active = false;
-
+                        
+                        //this.scene.physics.world.removeCollider(this.hideOut.enemyBulletCollider);
+                        
+                        
+                        // garkeine kollision mehr, auch nciht gegenüber anderen spielerkugeln, da leer:
+                        //this.hideOut.dimetricMap.blockingTiles.clear(false,false);
+                        console.log("hideout", this.hideOut, this.hideOut.enemyBulletCollider);
                         this.setPosition(entity.x + 5, entity.y - 11);
                         //entity.setDepth(0);
                         this.getBody().setVelocityX(0);
