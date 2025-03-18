@@ -53,7 +53,7 @@ export class Enemy extends Actor {
         // Schuss-Timer starten
         this.setupShootTimer();
         console.log("Enemy created");
-        this.scene.gameMap.addEnemyWaterCollision(this);
+        this.scene.gameMap.addEnemyCollisions(this);
     }
 
     // Neue Methode für Schuss-Timer
@@ -128,8 +128,9 @@ export class Enemy extends Actor {
 
             case EnemyState.SNIPER:
                 this.movementPattern.timer = 0; // Erzwinge neue Richtungswahl
-                this.sprite.setDepth(50000000000);
-                break;
+                this.sprite.setDepth(50000);
+                this.setDepth(50000);
+                break;s
             
             case EnemyState.LEAVE_SNIPER:
                 this.hideOut.setData("is_occupied", undefined);
@@ -188,11 +189,13 @@ export class Enemy extends Actor {
             }
 
             if (this.scene.player.y < this.y + 25) {
+                this.setDepth(this.y);
                 this.enterState(EnemyState.LEAVE_SNIPER);
             }
             return;
         }
 
+        this.setDepth(this.y);
         if (this.currentState === EnemyState.LEAVE_SNIPER) {
             if (this.y < this.hideOut.y - 20) {
                 this.enterState(EnemyState.WANDER_AROUND);
@@ -236,7 +239,7 @@ export class Enemy extends Actor {
                         this.hideOut.enemyBulletCollider.active = false;
 
                         this.setPosition(entity.x + 5, entity.y - 11);
-                        entity.setDepth(0);
+                        //entity.setDepth(0);
                         this.getBody().setVelocityX(0);
                         this.getBody().setVelocityY(0);
                         this.enterState(EnemyState.SNIPER);
@@ -350,7 +353,7 @@ export class Enemy extends Actor {
         }
     }
 
-    onWaterCollision(): void {
+    onCollision(): void {
         // Ändere die Wanderrichtung
         const newDirection = {
             x: -this.wanderDirection.x,

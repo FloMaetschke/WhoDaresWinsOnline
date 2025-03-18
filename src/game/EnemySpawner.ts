@@ -1,6 +1,7 @@
 import { Scene } from "phaser";
 import { Player } from "./Player";
 import { Enemy } from "./Enemy";
+import { Game } from "./scenes/Game";
 
 const ENEMY_SPAWN_INTERVAL = 2000;
 
@@ -68,7 +69,7 @@ export class EnemySpawner {
                 break;
         }
 
-        const enemy = new Enemy(this.scene, x, y, this.player);
+        const enemy = new Enemy(this.scene as Game, x, y, this.player);
         enemy.setDepth(10); // Gleiche Tiefe wie Spieler
         this.enemies.add(enemy);
     }

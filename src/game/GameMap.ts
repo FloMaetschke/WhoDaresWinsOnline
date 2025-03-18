@@ -115,7 +115,6 @@ export class GameMap {
 
     // Erstellt einen einzelnen Tilemap-Chunk an der angegebenen Position
     private createChunk(chunkX: number, chunkY: number) {
-
         // Erstelle Layer für den Chunk
         const layer = this.map.createBlankLayer(
             `chunk_${chunkX}_${chunkY}`,
@@ -414,14 +413,23 @@ export class GameMap {
     }
 
     // Neue Methode: Lasse Feinde mit Wasserbereichen kollidieren
-    public addEnemyWaterCollision(enemy: Enemy) {
+    public addEnemyCollisions(enemy: Enemy) {
+        this.allEntities.forEach((entity) => {
+            const collider = this.scene.physics.add.collider(
+                enemy,
+                entity.dimetricMap.blockingTiles,
+                () => enemy.onCollision()
+            );
+            entity.enemyBulletCollider = collider;
+        });
+
         this.activeChunks.forEach((layer) => {
             const waterLayer = layer.getData("water_layer");
             if (waterLayer) {
                 const collider = this.scene.physics.add.collider(
                     enemy,
                     waterLayer,
-                    () => enemy.onWaterCollision()
+                    () => enemy.onCollision()
                 );
                 const colliders: Phaser.Physics.Arcade.Collider[] =
                     waterLayer.getData("colliders") || [];

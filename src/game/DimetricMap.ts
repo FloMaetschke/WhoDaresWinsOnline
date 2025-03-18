@@ -1,5 +1,8 @@
 export class DimetricMap extends Phaser.GameObjects.GameObject {
     sprites = new Map<string, Phaser.GameObjects.Sprite>();
+    blockingTiles: Phaser.Physics.Arcade.StaticGroup;
+    height: number;
+    width: number;
 
     constructor(
         public scene: Phaser.Scene,
@@ -7,10 +10,11 @@ export class DimetricMap extends Phaser.GameObjects.GameObject {
         private tileset: string,
         public offsetX: number,
         public offsetY: number,
-        public width: number,
-        public height: number
     ) {
         super(scene, "DimetricMap");
+        this.blockingTiles = this.scene.physics.add.staticGroup({
+            classType: Phaser.Physics.Arcade.Sprite
+        });
     }
 
     public setTile(x: number, y: number, frame: number, depth: number) {
@@ -33,7 +37,10 @@ export class DimetricMap extends Phaser.GameObjects.GameObject {
     update() {}
 
     setTilesFromEntityType(key: string) {
-        const entityLayers = this.scene.cache.json.get(key + "Json").layers;
+        const entityJson =this.scene.cache.json.get(key + "Json");
+        this.width = entityJson.width;
+        this.height = entityJson.height;
+        const entityLayers = entityJson.layers;
         if (entityLayers) {
             const backgroundLayer = entityLayers.find(
                 (layer: { name: string }) => layer.name === "Background"
@@ -71,6 +78,10 @@ export class DimetricMap extends Phaser.GameObjects.GameObject {
                     }
                     if (blockTile) {
                         this.setTile(x, y, blockTile - 1, groundHeight);
+                        this.blockingTiles.add(
+                            this.sprites.get(`${x}_${y}`)!
+                        );
+                        
                     }
                     if (height1Tile) {
                         this.setTile(
