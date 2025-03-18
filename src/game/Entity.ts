@@ -91,6 +91,7 @@ export class Entity extends Phaser.GameObjects.Container {
         this.dimetricMap = new DimetricMap(
             this.scene,
             8,
+            "tileset",
             x,
             y,
             this.map.width,
@@ -104,9 +105,7 @@ export class Entity extends Phaser.GameObjects.Container {
         //     this.height3Layer
         // );
 
-        this.dimetricMap.setSprites(
-            this.entityType
-        );
+        this.dimetricMap.setTilesFromEntityType(this.entityType);
     }
 
     entityWidth() {
