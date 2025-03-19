@@ -212,6 +212,13 @@ export class GameMap {
                 } else {
                     // Normaler Boden (nicht Wasser)
                     const tileIndex = getTileFromNoise(noiseValue, floorType);
+                    if(tileIndex === 112 || tileIndex === 113){
+                        console.log("Treibsand", tileIndex, noiseValue, floorType);
+                        layer.putTileAt(tileIndex, x < (layer.width -1) ? x+1 :x -2, y);
+                        layer.putTileAt(tileIndex, x > 0 ?x-1 : x+2, y);
+                        layer.putTileAt(tileIndex, x, y > 0 ? y-1 : y+2);
+                        layer.putTileAt(tileIndex, x, y < (layer.height -1) ? y+1 : y-2);
+                    }
                     layer.putTileAt(tileIndex, x, y);
                 }
 

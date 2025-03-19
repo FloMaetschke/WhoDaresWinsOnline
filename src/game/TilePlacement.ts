@@ -1,8 +1,9 @@
+const groundOk = [4, 5, 6, 7, 8, 9, 4, 5, 6, 7, 8, 9];
 
-const groundOk = [4, 5, 6, 7, 8, 9,4, 5, 6, 7, 8, 9]
-const ground = [...groundOk,...groundOk,...groundOk,...groundOk,...groundOk,112,113]; // etwas Treibsand
-const ground2 = [8, 9, 13, 14, 64]; 
-const water = [91, 92, 93, 94, 95, 110, 110, 110, 110, 110, 110, 111]; 
+const treibsand = [112, 113];
+const ground = [...groundFactor(10), ...treibsand]; // etwas Treibsand
+const ground2 = [8, 9, 13, 14, 64];
+const water = [91, 92, 93, 94, 95, 110, 110, 110, 110, 110, 110, 111];
 export type FloorType = "water" | "ground1" | "ground2";
 
 export enum TileBorderDirections {
@@ -20,15 +21,26 @@ export enum TileBorderDirections {
 
 export const waterTiles = new Map<TileBorderDirections, number[]>();
 
-waterTiles.set(TileBorderDirections.None, [91, 92, 93, 94, 95, 110, 110, 110, 110, 110, 110, 111]);
+waterTiles.set(
+    TileBorderDirections.None,
+    [91, 92, 93, 94, 95, 110, 110, 110, 110, 110, 110, 111]
+);
 waterTiles.set(TileBorderDirections.Top, [88, 89, 96, 97, 98, 99]);
-waterTiles.set(TileBorderDirections.Right, [100,102,103]);
-waterTiles.set(TileBorderDirections.Bottom, [105,106,107,108]);
-waterTiles.set(TileBorderDirections.Left, [101,114]);
+waterTiles.set(TileBorderDirections.Right, [100, 102, 103]);
+waterTiles.set(TileBorderDirections.Bottom, [105, 106, 107, 108]);
+waterTiles.set(TileBorderDirections.Left, [101, 114]);
 waterTiles.set(TileBorderDirections.TopRight, [90]);
 waterTiles.set(TileBorderDirections.TopLeft, [87]);
 waterTiles.set(TileBorderDirections.BottomRight, [103]);
 waterTiles.set(TileBorderDirections.BottomLeft, [104]);
+
+function groundFactor(value: number) {
+    let result: number[] = [];
+    for (let i = 0; i < value; i++) {
+        result = result.concat(groundOk);
+    }
+    return result;
+}
 
 // Wählt einen Tile basierend auf dem Noise-Wert aus
 export function getTileFromNoise(
@@ -37,7 +49,12 @@ export function getTileFromNoise(
 ): number {
     switch (floorType) {
         case "water":
-            return water[Math.floor(noiseValue * waterTiles.get(TileBorderDirections.None)!.length)];
+            return water[
+                Math.floor(
+                    noiseValue *
+                        waterTiles.get(TileBorderDirections.None)!.length
+                )
+            ];
         case "ground1":
             return ground[Math.floor(noiseValue * ground.length)];
         case "ground2":
@@ -62,7 +79,9 @@ export function getFloorType(noiseValue: number): FloorType {
  * @param isWater Array von booleans, das angibt, ob die Nachbartiles Wasser sind [center, top, right, bottom, left, topRight, bottomRight, bottomLeft, topLeft]
  * @returns Die passende Randrichtung für den Tile
  */
-export function determineWaterBorderType(isWater: boolean[]): TileBorderDirections {
+export function determineWaterBorderType(
+    isWater: boolean[]
+): TileBorderDirections {
     // Wenn das zentrale Tile kein Wasser ist, benötigen wir keinen Wasserrand
     if (!isWater[0]) return TileBorderDirections.None;
 
@@ -84,15 +103,20 @@ export function determineWaterBorderType(isWater: boolean[]): TileBorderDirectio
  * @param noiseValue Ein Zufallswert für die Auswahl
  * @returns Die Tile-ID für den Wassertile
  */
-export function getWaterBorderTile(borderDirection: TileBorderDirections, noiseValue: number): number {
+export function getWaterBorderTile(
+    borderDirection: TileBorderDirections,
+    noiseValue: number
+): number {
     const borderTiles = waterTiles.get(borderDirection);
-    
+
     // Wenn keine passenden Border-Tiles definiert sind, verwende Standard-Wassertiles
     if (!borderTiles || borderTiles.length === 0) {
         const defaultWaterTiles = waterTiles.get(TileBorderDirections.None);
-        return defaultWaterTiles![Math.floor(noiseValue * defaultWaterTiles!.length)];
+        return defaultWaterTiles![
+            Math.floor(noiseValue * defaultWaterTiles!.length)
+        ];
     }
-    
+
     // Wähle einen zufälligen Tile aus den verfügbaren Border-Tiles
     return borderTiles[Math.floor(noiseValue * borderTiles.length)];
 }
