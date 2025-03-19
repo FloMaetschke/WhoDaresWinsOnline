@@ -419,16 +419,16 @@ export class GameMap {
         return isWater;
     }
 
-    // Neue Methode: Lasse Feinde mit Wasserbereichen kollidieren
+    // Neue Methode: Lasse Feinde mit Wasserbereichen  und den Entities kollidieren
     public addEnemyCollisions(enemy: Enemy) {
-        this.allEntities.forEach((entity) => {
-            const collider = this.scene.physics.add.collider(
-                enemy,
-                entity.dimetricMap.blockingTiles,
-                () => enemy.onCollision()
-            );
-            entity.enemyBulletCollider = collider;
-        });
+        // this.allEntities.forEach((entity) => {
+        //     const collider = this.scene.physics.add.collider(
+        //         enemy,
+        //         entity.dimetricMap.blockingTiles,
+        //         () => enemy.onCollision()
+        //     );
+        //     entity.enemyCollider = collider;
+        // });
 
         this.activeChunks.forEach((layer) => {
             const waterLayer = layer.getData("water_layer");

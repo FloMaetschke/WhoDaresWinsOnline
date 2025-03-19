@@ -8,7 +8,7 @@ const ENEMY_SPAWN_INTERVAL = 2000;
 export class EnemySpawner {
     private scene: Scene;
     private player: Player;
-    private enemies: Phaser.Physics.Arcade.Group;
+    public enemies: Phaser.Physics.Arcade.Group;
 
     constructor(
         scene: Scene,
@@ -26,6 +26,14 @@ export class EnemySpawner {
             callbackScope: this,
             loop: true,
         });
+
+
+        //TODO ; Enemies collider with groups
+        // this.scene.physics.add.collider(
+        //             this.enemies,
+        //             entity.dimetricMap.blockingTiles,
+        //             () => enemy.onCollision()
+        //         );
     }
 
     public spawnEnemy() {

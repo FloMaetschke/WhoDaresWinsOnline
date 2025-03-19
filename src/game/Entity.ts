@@ -14,6 +14,7 @@ export class Entity extends Phaser.GameObjects.Container {
     dimetricMap: DimetricMap;
     height2Layer: Phaser.Tilemaps.TilemapLayer;
     height3Layer: Phaser.Tilemaps.TilemapLayer;
+    enemyCollider: Phaser.Physics.Arcade.Collider;
 
     constructor(
         scene: Phaser.Scene,
