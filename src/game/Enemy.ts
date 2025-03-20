@@ -2,6 +2,9 @@ import { Actor } from "./actor";
 import { Player } from "./Player";
 import { Game } from "./scenes/Game"; // Importiere die Game-Szene
 
+
+
+
 // Definiere die möglichen Zustände des Gegners
 enum EnemyState {
     SEARCH_PLAYER = "SEARCH_PLAYER",
@@ -134,7 +137,7 @@ export class Enemy extends Actor {
                 break;
             
             case EnemyState.LEAVE_SNIPER:
-                this.hideOut.setData("is_occupied", undefined);
+                this.hideOut.setOccupation(undefined);
                 this.sprite.play("enemy-up");
                 this.hideOut.enemyBulletCollider.active = true;
                 this.getBody().setVelocityY(-1 * this.speed);
@@ -237,8 +240,8 @@ export class Enemy extends Actor {
                         { x: entity.x, y: entity.y }
                     ) < 20 // Distanz zur deckung
                 ) {
-                    if (entity.getData("is_occupied") === undefined) {
-                        entity.setData("is_occupied", true);
+                    if (!entity.isOccupied()) {
+                        entity.setOccupation(this);
                         this.hideOut = entity;
                         //this.hideOut.enemyBulletCollider.active = false;
                         this.setPosition(entity.x + 5, entity.y - 11);

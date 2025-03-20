@@ -572,18 +572,7 @@ export class GameMap {
                             const relativeX = pixelX - entity.x;
                             const relativeY = pixelY - entity.y;
 
-                            // Hole den spezifischen Tile-Index an dieser Position
-                            const specificTileIndex = entity.getTileAt(
-                                relativeX,
-                                relativeY
-                            );
 
-                            // Zeige "-" für leere Tiles und den korrigierten Index für vorhandene Tiles
-                            tooltipContent += `Tile: ${
-                                specificTileIndex !== -1
-                                    ? specificTileIndex
-                                    : "-"
-                            }\n`;
                         } catch (error) {
                             console.log("Error getting entity info:", error);
                             tooltipContent += "Error getting entity info\n";

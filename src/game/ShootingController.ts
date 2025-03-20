@@ -2,6 +2,8 @@ import { Scene } from "phaser";
 import { Player } from "./Player";
 import { Enemy } from "./Enemy";
 
+export const SHOOTER = 'SHOOTER';
+
 export class ShootingController {
     private scene: Scene;
     public bullets: Phaser.Physics.Arcade.Group;
@@ -94,12 +96,14 @@ export class ShootingController {
         );
 
         
+        
         // Temporarily disabled:
         //(this.scene as Game).soundController.playSound("bullet");
 
         if (bullet) {
             bullet.setActive(true);
             bullet.setVisible(true);
+            bullet.setData(SHOOTER, shooter);
             bullet.setVelocityX(directionX * speed);
             bullet.setVelocityY(directionY * speed);
 

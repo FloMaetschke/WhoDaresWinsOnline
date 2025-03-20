@@ -1,5 +1,9 @@
 import { DimetricMap } from "./DimetricMap";
 import { Game } from "./scenes/Game";
+import { SHOOTER } from "./ShootingController";
+
+export const OCCUPIED_BY = "occupied_by";
+
 
 export class Entity extends Phaser.GameObjects.Container {
     backgroundLayer: Phaser.Tilemaps.TilemapLayer;
@@ -40,7 +44,7 @@ export class Entity extends Phaser.GameObjects.Container {
         );
 
         this.enemyCollider = this.scene.physics.add.collider(
-            (this.scene as Game).player,
+            (this.scene as Game).enemySpawner.enemies,
             this.dimetricMap.blockingTiles!
         );
 
@@ -56,8 +60,16 @@ export class Entity extends Phaser.GameObjects.Container {
         );
 
         this.enemyBulletCollider = this.scene.physics.add.collider(
-            (this.scene as Game).enemySpawner.enemies,
-            this.dimetricMap.blockingTiles
+            (this.scene as Game).shootingController.enemyBullets,
+            this.dimetricMap.blockingTiles,
+            (bullet) => {
+                bullet.destroy();
+            },
+            (bullet, tile) => {
+                // only deactivate collision for enemy bullets of the shooter who is occupying this tile
+                return !this.checkOccupationIsShooter(bullet as Phaser.GameObjects.Image);
+            },
+            this
         );
 
         this.dimetricMap.setTilesFromEntityType(this.entityType);
@@ -76,80 +88,19 @@ export class Entity extends Phaser.GameObjects.Container {
         return this.entityType;
     }
 
-    // Verbesserte Methode zum Abrufen eines repräsentativen sichtbaren Tile-Index
-    public getFrame(): number {
-        // // Beginne mit dem Overlay-Layer, da dieser in der Regel die sichtbaren Elemente enthält
-        // if (this.height1Layer) {
-        //     const overlayTiles = this.height1Layer.getTilesWithin();
-        //     if (overlayTiles && overlayTiles.length > 0) {
-        //         // Suche nach dem ersten sichtbaren, nicht-leeren Tile im Overlay
-        //         for (const tile of overlayTiles) {
-        //             if (tile.index !== -1 && tile.visible) {
-        //                 return tile.index;
-        //             }
-        //         }
-        //     }
-        // }
-
-        // // Wenn im Overlay nichts gefunden wurde, prüfe den Block-Layer
-        // if (this.blockLayer) {
-        //     const blockTiles = this.blockLayer.getTilesWithin();
-        //     if (blockTiles && blockTiles.length > 0) {
-        //         // Suche nach dem ersten sichtbaren, nicht-leeren Tile im Block-Layer
-        //         for (const tile of blockTiles) {
-        //             if (tile.index !== -1 && tile.visible) {
-        //                 return tile.index;
-        //             }
-        //         }
-
-        //         // Wenn kein sichtbares Tile gefunden wurde, nimm das erste nicht-leere
-        //         for (const tile of blockTiles) {
-        //             if (tile.index !== -1) {
-        //                 return tile.index;
-        //             }
-        //         }
-        //     }
-        // }
-
-        // Fallback wenn kein Tile gefunden wurde
-        return -1;
+    public setOccupation(occupiedBy: Phaser.GameObjects.GameObject | undefined) {
+        this.setData(OCCUPIED_BY, occupiedBy);
     }
 
-    // Neue Methode, die das spezifische Tile an einer bestimmten relativen Position innerhalb des Entities zurückgibt
-    public getTileAt(relativeX: number, relativeY: number): number {
-        // // Konvertiere zu Layer-Koordinaten (in Tiles)
-        // const tileX = Math.floor(relativeX / 8);
-        // const tileY = Math.floor(relativeY / 8);
-
-        // // Prüfe zuerst das Overlay-Layer, da es im Vordergrund liegt
-        // if (this.height1Layer) {
-        //     const overlayTile = this.height1Layer.getTileAt(tileX, tileY);
-        //     if (overlayTile && overlayTile.index !== -1) {
-        //         // Korrigiere die Tile-ID, indem 1 subtrahiert wird
-        //         return overlayTile.index - 1;
-        //     }
-        // }
-
-        // // Wenn im Overlay nichts gefunden wurde, prüfe den Block-Layer
-        // if (this.blockLayer) {
-        //     const blockTile = this.blockLayer.getTileAt(tileX, tileY);
-        //     if (blockTile && blockTile.index !== -1) {
-        //         // Korrigiere die Tile-ID, indem 1 subtrahiert wird
-        //         return blockTile.index - 1;
-        //     }
-        // }
-
-        // if (this.backgroundLayer) {
-        //     const backgroundTile = this.backgroundLayer.getTileAt(tileX, tileY);
-        //     if (backgroundTile && backgroundTile.index !== -1) {
-        //         // Korrigiere die Tile-ID, indem 1 subtrahiert wird
-        //         return backgroundTile.index - 1;
-        //     }
-        // }
-
-        // Wenn kein Tile gefunden wurde, gibt -1 zurück (wird als "-" angezeigt)
-        return -1;
+    public isOccupied(): boolean {
+        return this.getData(OCCUPIED_BY) !== undefined;
     }
+
+    private checkOccupationIsShooter(bullet: Phaser.GameObjects.Image): boolean {
+
+        return this.getData(OCCUPIED_BY) === bullet.getData(SHOOTER);
+    }
+
 
     destroy() {
         this.collider?.destroy();
