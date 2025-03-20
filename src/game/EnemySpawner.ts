@@ -3,7 +3,7 @@ import { Player } from "./Player";
 import { Enemy } from "./Enemy";
 import { Game } from "./scenes/Game";
 
-const ENEMY_SPAWN_INTERVAL = 2000;
+const ENEMY_SPAWN_INTERVAL = 400;
 
 export class EnemySpawner {
 
@@ -24,7 +24,7 @@ export class EnemySpawner {
     }
 
     public spawnEnemy() {
-        if (this.enemies.countActive(true) >= 5) return;
+        if (this.enemies.countActive(true) >= 10) return;
 
         // Gegner um den Spieler herum spawnen, aber außerhalb des Bildschirms
         const camera = this.scene.cameras.main;

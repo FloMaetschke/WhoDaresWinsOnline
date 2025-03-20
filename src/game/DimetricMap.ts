@@ -44,6 +44,8 @@ export class DimetricMap extends Phaser.GameObjects.GameObject {
 
     setTilesFromEntityType(key: string) {
         const entityJson =this.scene.cache.json.get(key + "Json");
+        this.setData('properties', entityJson.properties);
+        
         this.width = entityJson.width;
         this.height = entityJson.height;
         const entityLayers = entityJson.layers;

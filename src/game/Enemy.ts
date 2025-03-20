@@ -2,9 +2,6 @@ import { Actor } from "./actor";
 import { Player } from "./Player";
 import { Game } from "./scenes/Game"; // Importiere die Game-Szene
 
-
-
-
 // Definiere die möglichen Zustände des Gegners
 enum EnemyState {
     SEARCH_PLAYER = "SEARCH_PLAYER",
@@ -50,7 +47,7 @@ export class Enemy extends Actor {
         // Initial animation starten
         this.sprite.anims.play("enemy-down");
 
-        this.sprite.setData('Enemy', this);
+        this.sprite.setData("Enemy", this);
 
         // Starte im Wander-Zustand
         this.enterState(EnemyState.WANDER_AROUND);
@@ -68,11 +65,11 @@ export class Enemy extends Actor {
             return;
         }
         let shootDelay = Phaser.Math.Between(500, 1000);
-        if(this.currentState === EnemyState.SNIPER) {
+        if (this.currentState === EnemyState.SNIPER) {
             shootDelay = Phaser.Math.Between(1000, 3000);
         }
 
-         // Zufällige Zeit zwischen 0.5 und 1 Sekunden
+        // Zufällige Zeit zwischen 0.5 und 1 Sekunden
 
         this.shootTimer = this.scene.time.addEvent({
             delay: shootDelay,
@@ -135,7 +132,7 @@ export class Enemy extends Actor {
                 this.sprite.setDepth(50000);
                 this.setDepth(50000);
                 break;
-            
+
             case EnemyState.LEAVE_SNIPER:
                 this.hideOut.setOccupation(undefined);
                 this.sprite.play("enemy-up");
@@ -145,11 +142,10 @@ export class Enemy extends Actor {
 
             case EnemyState.DYING:
                 // Kollisionen deaktivieren
-                this.setVelocity(0,0);
+                this.setVelocity(0, 0);
                 this.getSpriteBody().enable = false;
                 this.getBody().enable = false;
-                
-                
+
                 // Tod-Animation abspielen
                 this.sprite.anims.play("enemy-die");
 
@@ -204,7 +200,7 @@ export class Enemy extends Actor {
 
         this.setDepth(this.y);
         if (this.currentState === EnemyState.LEAVE_SNIPER) {
-            if (this.y < this.hideOut.y - 20) {
+            if (this.y < this.hideOut.y - 30) {
                 this.enterState(EnemyState.WANDER_AROUND);
             }
             return;
@@ -229,22 +225,23 @@ export class Enemy extends Actor {
     }
 
     searchSniperLocaiton() {
-        if(this.y > this.scene.player.y - 20) return false; // Nicht unterhalb vom Player in die Deckung gehen!
+        if (this.y > this.scene.player.y - 20) return false; // Nicht unterhalb vom Player in die Deckung gehen!
         let result = false;
         this.scene.gameMap.allEntities.forEach((entity) => {
-            if (entity.getType() === "rock") {
+            const hideOutInfo = entity?.getHideOutInfo();
+            if (hideOutInfo?.hideOut) {
                 //filter
                 if (
                     Phaser.Math.Distance.BetweenPoints(
                         { x: this.x, y: this.y },
-                        { x: entity.x, y: entity.y }
+                        { x: entity.x + hideOutInfo.hideOutX, y: entity.y + hideOutInfo.hideOutY }
                     ) < 20 // Distanz zur deckung
                 ) {
                     if (!entity.isOccupied()) {
                         entity.setOccupation(this);
                         this.hideOut = entity;
                         //this.hideOut.enemyBulletCollider.active = false;
-                        this.setPosition(entity.x + 5, entity.y - 11);
+                        this.setPosition(entity.x + hideOutInfo.hideOutX, entity.y + hideOutInfo.hideOutY);
                         this.getBody().setVelocityX(0);
                         this.getBody().setVelocityY(0);
                         this.enterState(EnemyState.SNIPER);
