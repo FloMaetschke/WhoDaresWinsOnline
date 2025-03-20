@@ -134,8 +134,16 @@ export class GameMap {
             layer,
             () => (this.scene as Game).player.die(true)
         );
+
+        const waterEnemyCollider = this.scene.physics.add.collider(
+            (this.scene as Game).enemySpawner.enemies,
+            layer,
+            (enemy) => (enemy as Enemy).onCollision()
+        );
+
         const colliders = layer.getData("colliders") || [];
         colliders.push(waterPlayerCollider);
+        colliders.push(waterEnemyCollider);
         layer.setData("colliders", colliders);
 
         // Die Wasserkollision für spätere Verwendung durch Feinde speichern
@@ -212,12 +220,25 @@ export class GameMap {
                 } else {
                     // Normaler Boden (nicht Wasser)
                     const tileIndex = getTileFromNoise(noiseValue, floorType);
-                    if(tileIndex === 112 || tileIndex === 113){
-                        console.log("Treibsand", tileIndex, noiseValue, floorType);
-                        layer.putTileAt(tileIndex, x < (layer.width -1) ? x+1 :x -2, y);
-                        layer.putTileAt(tileIndex, x > 0 ?x-1 : x+2, y);
-                        layer.putTileAt(tileIndex, x, y > 0 ? y-1 : y+2);
-                        layer.putTileAt(tileIndex, x, y < (layer.height -1) ? y+1 : y-2);
+                    if (tileIndex === 112 || tileIndex === 113) {
+                        console.log(
+                            "Treibsand",
+                            tileIndex,
+                            noiseValue,
+                            floorType
+                        );
+                        layer.putTileAt(
+                            tileIndex,
+                            x < layer.width - 1 ? x + 1 : x - 2,
+                            y
+                        );
+                        layer.putTileAt(tileIndex, x > 0 ? x - 1 : x + 2, y);
+                        layer.putTileAt(tileIndex, x, y > 0 ? y - 1 : y + 2);
+                        layer.putTileAt(
+                            tileIndex,
+                            x,
+                            y < layer.height - 1 ? y + 1 : y - 2
+                        );
                     }
                     layer.putTileAt(tileIndex, x, y);
                 }
@@ -417,33 +438,6 @@ export class GameMap {
         isWater[8] = getFloorType(topLeftNoise) === "water";
 
         return isWater;
-    }
-
-    // Neue Methode: Lasse Feinde mit Wasserbereichen  und den Entities kollidieren
-    public addEnemyCollisions(enemy: Enemy) {
-        // this.allEntities.forEach((entity) => {
-        //     const collider = this.scene.physics.add.collider(
-        //         enemy,
-        //         entity.dimetricMap.blockingTiles,
-        //         () => enemy.onCollision()
-        //     );
-        //     entity.enemyCollider = collider;
-        // });
-
-        this.activeChunks.forEach((layer) => {
-            const waterLayer = layer.getData("water_layer");
-            if (waterLayer) {
-                const collider = this.scene.physics.add.collider(
-                    enemy,
-                    waterLayer,
-                    () => enemy.onCollision()
-                );
-                const colliders: Phaser.Physics.Arcade.Collider[] =
-                    waterLayer.getData("colliders") || [];
-                colliders.push(collider);
-                layer.setData("colliders", colliders);
-            }
-        });
     }
 
     // Erzeugt einen Perlin-Noise-Wert für die gegebenen Koordinaten

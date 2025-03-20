@@ -23,6 +23,7 @@ export class Game extends Scene {
     keyboardController: KeyboardController;
     touchController: TouchController;
     soundController: SoundController;
+    enemiesBody: Phaser.Physics.Arcade.Group;
 
     constructor() {
         super("Game");
@@ -47,20 +48,24 @@ export class Game extends Scene {
         this.enemies = this.physics.add.group({
             classType: Phaser.Physics.Arcade.Sprite,
         });
+        this.enemiesBody = this.physics.add.group({
+            classType: Phaser.Physics.Arcade.Sprite,
+        });
+
         this.enemies.setDepth(10);
 
         // ShootingController initialisieren
         this.shootingController = new ShootingController(this);
         
         // Kollisionen einrichten
-        this.shootingController.setupCollisions(this.player, this.enemies);
+        this.shootingController.setupCollisions(this.player, this.enemiesBody);
 
         // Kamera folgt dem Spieler in der Mitte des Bildschirms
         this.cameras.main.startFollow(this.player, true, 0.09, 0.09);
         this.cameras.main.setFollowOffset(0, 0);
 
         // Gegner-Spawner initialisieren
-        this.enemySpawner = new EnemySpawner(this, this.player, this.enemies);
+        this.enemySpawner = new EnemySpawner(this, this.player, this.enemies, this.enemiesBody);
 
         this.soundController = new SoundController(this);
 

@@ -39,6 +39,11 @@ export class Entity extends Phaser.GameObjects.Container {
             this.dimetricMap.blockingTiles!
         );
 
+        this.enemyCollider = this.scene.physics.add.collider(
+            (this.scene as Game).player,
+            this.dimetricMap.blockingTiles!
+        );
+
 
         this.bulletCollider = this.scene.physics.add.collider(
             (this.scene as Game).shootingController.bullets,
@@ -51,13 +56,8 @@ export class Entity extends Phaser.GameObjects.Container {
         );
 
         this.enemyBulletCollider = this.scene.physics.add.collider(
-            (this.scene as Game).shootingController.enemyBullets,
-            this.dimetricMap.blockingTiles,
-            (bullet) => {
-                bullet.destroy();
-            },
-            undefined,
-            this
+            (this.scene as Game).enemySpawner.enemies,
+            this.dimetricMap.blockingTiles
         );
 
         this.dimetricMap.setTilesFromEntityType(this.entityType);

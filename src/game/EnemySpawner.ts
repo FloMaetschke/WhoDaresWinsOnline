@@ -6,18 +6,13 @@ import { Game } from "./scenes/Game";
 const ENEMY_SPAWN_INTERVAL = 2000;
 
 export class EnemySpawner {
-    private scene: Scene;
-    private player: Player;
-    public enemies: Phaser.Physics.Arcade.Group;
 
     constructor(
-        scene: Scene,
-        player: Player,
-        enemies: Phaser.Physics.Arcade.Group
+        public scene: Scene,
+        public player: Player,
+        public enemies: Phaser.Physics.Arcade.Group,
+        public enemiesBody: Phaser.Physics.Arcade.Group
     ) {
-        this.scene = scene;
-        this.player = player;
-        this.enemies = enemies;
 
         //Gegner spawnen
         this.scene.time.addEvent({
@@ -26,14 +21,6 @@ export class EnemySpawner {
             callbackScope: this,
             loop: true,
         });
-
-
-        //TODO ; Enemies collider with groups
-        // this.scene.physics.add.collider(
-        //             this.enemies,
-        //             entity.dimetricMap.blockingTiles,
-        //             () => enemy.onCollision()
-        //         );
     }
 
     public spawnEnemy() {
@@ -80,5 +67,6 @@ export class EnemySpawner {
         const enemy = new Enemy(this.scene as Game, x, y, this.player);
         enemy.setDepth(10); // Gleiche Tiefe wie Spieler
         this.enemies.add(enemy);
+        this.enemiesBody.add(enemy.sprite);
     }
 }

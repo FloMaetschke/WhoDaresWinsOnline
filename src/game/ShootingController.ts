@@ -61,9 +61,10 @@ export class ShootingController {
 
     private handleBulletEnemyCollision(
         bullet: Phaser.Physics.Arcade.Image,
-        enemy: Enemy
+        enemySprite: Enemy
     ): void {
         bullet.destroy();
+        const enemy =enemySprite.getData('Enemy') as Enemy;
         enemy.die();
     }
 

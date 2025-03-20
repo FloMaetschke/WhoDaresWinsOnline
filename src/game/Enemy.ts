@@ -38,8 +38,8 @@ export class Enemy extends Actor {
         super(scene, x, y, "enemy-down-right-0");
         this.target = target;
 
-        this.getBody().setSize(13, 20);
-        this.getBody().setOffset(1, 0);
+        this.getBody().setSize(13, 5);
+        this.getBody().setOffset(0, 14);
 
         // Physik aktivieren
         this.getBody().enable = true;
@@ -47,13 +47,14 @@ export class Enemy extends Actor {
         // Initial animation starten
         this.sprite.anims.play("enemy-down");
 
+        this.sprite.setData('Enemy', this);
+
         // Starte im Wander-Zustand
         this.enterState(EnemyState.WANDER_AROUND);
 
         // Schuss-Timer starten
         this.setupShootTimer();
         console.log("Enemy created");
-        this.scene.gameMap.addEnemyCollisions(this);
     }
 
     // Neue Methode für Schuss-Timer
@@ -141,8 +142,11 @@ export class Enemy extends Actor {
 
             case EnemyState.DYING:
                 // Kollisionen deaktivieren
+                this.setVelocity(0,0);
+                this.getSpriteBody().enable = false;
                 this.getBody().enable = false;
-
+                
+                
                 // Tod-Animation abspielen
                 this.sprite.anims.play("enemy-die");
 
@@ -236,17 +240,8 @@ export class Enemy extends Actor {
                     if (entity.getData("is_occupied") === undefined) {
                         entity.setData("is_occupied", true);
                         this.hideOut = entity;
-                        console.log("hideout", this.hideOut, this.hideOut.enemyBulletCollider.active);
-                        this.hideOut.enemyBulletCollider.active = false;
-                        
-                        //this.scene.physics.world.removeCollider(this.hideOut.enemyBulletCollider);
-                        
-                        
-                        // garkeine kollision mehr, auch nciht gegenüber anderen spielerkugeln, da leer:
-                        //this.hideOut.dimetricMap.blockingTiles.clear(false,false);
-                        console.log("hideout", this.hideOut, this.hideOut.enemyBulletCollider);
+                        //this.hideOut.enemyBulletCollider.active = false;
                         this.setPosition(entity.x + 5, entity.y - 11);
-                        //entity.setDepth(0);
                         this.getBody().setVelocityX(0);
                         this.getBody().setVelocityY(0);
                         this.enterState(EnemyState.SNIPER);
