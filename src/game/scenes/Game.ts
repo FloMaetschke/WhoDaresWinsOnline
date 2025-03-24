@@ -24,6 +24,7 @@ export class Game extends Scene {
     touchController: TouchController;
     soundController: SoundController;
     enemiesBody: Phaser.Physics.Arcade.Group;
+    fontTest: Phaser.GameObjects.BitmapText;
 
     constructor() {
         super("Game");
@@ -77,6 +78,24 @@ export class Game extends Scene {
 
         // Rest des Codes wie zuvor
         EventBus.emit("current-scene-ready", this);
+
+
+        // const config = {
+        //     image: 'font',
+        //     width: 8,
+        //     height: 8,
+        //     chars: Phaser.GameObjects.RetroFont.TEXT_SET3,
+        //     charsPerRow: 13,
+        //     spacing: { x: 0, y: 0 }
+        // } as unknown as Phaser.Types.GameObjects.BitmapText.RetroFontConfig;
+
+        // this.cache.bitmapFont.add('font', Phaser.GameObjects.RetroFont.Parse(this, config));
+
+        // this.fontTest = this.add.bitmapText(0, 0, 'font', 'WHO DARES WINS');
+
+        // this.fontTest.setScale(1);
+        // this.fontTest.setDepth(1000000000000);
+
     }
 
     update(time: number, delta: number) {
@@ -85,6 +104,7 @@ export class Game extends Scene {
         });
         this.player.update();
         this.gameMap.updateChunks(this.player);
+       // this.fontTest.setPosition(this.cameras.main.scrollX + this.screenSetup.getVirtualWidth()/2 - this.fontTest.width/2, this.cameras.main.scrollY + this.screenSetup.getVirtualHeight()/2);
     }
 
     destroy() {

@@ -1,3 +1,5 @@
+const DEBUG = true;
+
 export class DimetricMap extends Phaser.GameObjects.GameObject {
     sprites = new Map<string, Phaser.GameObjects.Sprite>();
     blockingTiles: Phaser.Physics.Arcade.StaticGroup;
@@ -9,22 +11,20 @@ export class DimetricMap extends Phaser.GameObjects.GameObject {
         public tileSize: 8,
         private tileset: string,
         public offsetX: number,
-        public offsetY: number,
+        public offsetY: number
     ) {
         super(scene, "DimetricMap");
         this.blockingTiles = this.scene.physics.add.staticGroup({
             classType: Phaser.Physics.Arcade.Sprite,
-            
         });
     }
 
     public setTile(x: number, y: number, frame: number, depth: number) {
         if (this.sprites.has(`${x}_${y}`)) {
-            const sprite =  this.sprites.get(`${x}_${y}`)!;
+            const sprite = this.sprites.get(`${x}_${y}`)!;
             sprite.setFrame(frame);
             sprite.setDepth(depth);
             return sprite;
-
         } else {
             const sprite = this.scene.add.sprite(
                 x * this.tileSize + this.offsetX + 4,
@@ -37,17 +37,62 @@ export class DimetricMap extends Phaser.GameObjects.GameObject {
             sprite.ignoreDestroy = true;
             return sprite;
         }
-    
     }
 
     update() {}
 
     setTilesFromEntityType(key: string) {
-        const entityJson =this.scene.cache.json.get(key + "Json");
-        this.setData('properties', entityJson.properties);
-        
+        const entityJson = this.scene.cache.json.get(key + "Json");
+        this.setData("properties", entityJson.properties);
+
         this.width = entityJson.width;
         this.height = entityJson.height;
+
+        if (DEBUG) {
+            const rect = this.scene.add
+                .rectangle(
+                    this.offsetX + this.width * this.tileSize * 0.5,
+                    this.offsetY + this.height * this.tileSize * 0.5,
+                    this.width * this.tileSize,
+                    this.height * this.tileSize,
+                    0x0000ff,
+                    0.3
+                )
+                .setDepth(10000);
+
+            const hideOutX = entityJson.properties?.find(
+                (x) => x.name === "hideOutX"
+            ).value;
+            const hideOutY = entityJson.properties?.find(
+                (x) => x.name === "hideOutY"
+            ).value;
+            const hideOut = entityJson.properties?.find(
+                (x) => x.name === "hideOut"
+            ).value;
+
+            if (hideOut) {
+                const posX =
+                    this.offsetX + this.width * this.tileSize * 0.5 + hideOutX;
+                const posY =
+                    this.offsetY + this.height * this.tileSize * 0.5 + hideOutY;
+
+                    this.scene.add
+                    .rectangle(posX, posY, 1, 16, 0xffff00)
+                    .setDepth(1000000);
+                    this.scene.add
+                    .rectangle(posX, posY, 16, 1, 0xffff00)
+                    .setDepth(1000000);
+
+                // this.scene.add
+                //     .rectangle(posX - 10, posY, 40, 2, 0xffff00)
+                //     .setDepth(1000000);
+                // this.scene.add
+                //     .rectangle(posX, posY - 10, 2, 40, 0xffff00)
+                //     .setDepth(1000000);
+            }
+
+            //console.log(key, this.width, this.height);
+        }
         const entityLayers = entityJson.layers;
         if (entityLayers) {
             const backgroundLayer = entityLayers.find(
@@ -78,19 +123,21 @@ export class DimetricMap extends Phaser.GameObjects.GameObject {
                     const height3Tile =
                         height3Layer.data[x + y * height3Layer.width];
 
-                        const groundHeight =
+                    const groundHeight =
                         y * this.tileSize + this.offsetY - 8 - 4;
 
                     if (backgroundTile) {
                         this.setTile(x, y, backgroundTile - 1, 1);
                     }
                     if (blockTile) {
-                        const sprite = this.setTile(x, y, blockTile - 1, groundHeight);
-                                                   
-                        this.blockingTiles.add(
-                            sprite
+                        const sprite = this.setTile(
+                            x,
+                            y,
+                            blockTile - 1,
+                            groundHeight
                         );
-                        
+
+                        this.blockingTiles.add(sprite);
                     }
                     if (height1Tile) {
                         this.setTile(

@@ -38,6 +38,7 @@ export class Preload extends Scene {
 
         this.load.image("tiles", "tileset.png");
         this.load.image("mute", "icons/mute.png");
+        this.load.image('font', 'font.png');
         
         this.load.audio("bullet", "audio/shot.wav");
         this.load.audio("enemy_die", "audio/enemy_die.wav");

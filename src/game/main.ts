@@ -1,6 +1,7 @@
 import { Game as MainGame } from './scenes/Game';
 import { Preload } from './scenes/Preload';
 import { AUTO, Game, Types } from 'phaser';
+import { Sandbox } from './scenes/Sandbox';
 
 // Debug-Konfiguration als globale Variable
 export const DEBUG_CONFIG = {
@@ -32,7 +33,8 @@ const config: Types.Core.GameConfig = {
     },
     scene: [
         Preload,
-        MainGame
+        MainGame,
+        Sandbox
     ]
 };
 

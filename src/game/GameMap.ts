@@ -17,6 +17,8 @@ import { findEntitiesAtPosition } from "./EntityHelper";
 
 const tileScale = 0.02;
 
+const DEBUG = true;
+
 export class GameMap {
     noise: (x: number, y: number) => number;
     chunkSize = 16; // Größe eines Chunks in Tiles
@@ -115,6 +117,23 @@ export class GameMap {
 
     // Erstellt einen einzelnen Tilemap-Chunk an der angegebenen Position
     private createChunk(chunkX: number, chunkY: number) {
+        
+        if(DEBUG) {
+            const rect = this.scene.add.rectangle(
+                chunkX * this.chunkSize * 8,
+                chunkY * this.chunkSize * 8,
+                this.chunkSize * 8,
+                this.chunkSize * 8,
+                0x0000ff,
+                0.0
+            );
+            rect.setDepth(222222222);
+            // r
+
+        }
+
+
+        
         // Erstelle Layer für den Chunk
         const layer = this.map.createBlankLayer(
             `chunk_${chunkX}_${chunkY}`,
@@ -124,6 +143,8 @@ export class GameMap {
             this.chunkSize,
             this.chunkSize
         )!;
+
+        
 
         layer.setCollisionBetween(91, 95); // Wasser
         layer.setCollisionBetween(110, 113); // Wasser
@@ -221,12 +242,7 @@ export class GameMap {
                     // Normaler Boden (nicht Wasser)
                     const tileIndex = getTileFromNoise(noiseValue, floorType);
                     if (tileIndex === 112 || tileIndex === 113) {
-                        console.log(
-                            "Treibsand",
-                            tileIndex,
-                            noiseValue,
-                            floorType
-                        );
+                        // Treibsand
                         layer.putTileAt(
                             tileIndex,
                             x < layer.width - 1 ? x + 1 : x - 2,
