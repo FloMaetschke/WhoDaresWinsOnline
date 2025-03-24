@@ -72,12 +72,13 @@ export class Entity extends Phaser.GameObjects.Container {
     getHideOutInfo():
         | { hideOutX: number; hideOutY: number; hideOut: boolean }
         | undefined {
-        const props = this.dimetricMap.getData("properties");
-        if (props) {
+        const hideOut = this.dimetricMap.objects.find(x => x.type.toLowerCase() === 'hideout');
+        
+        if (hideOut) {
             return {
-                hideOutX: props.find((x) => x.name === "hideOutX").value,
-                hideOutY: props.find((x) => x.name === "hideOutY").value,
-                hideOut: props.find((x) => x.name === "hideOut").value,
+                hideOutX: hideOut.x,
+                hideOutY: hideOut.y,
+                hideOut: true,
             };
         }
         return undefined;

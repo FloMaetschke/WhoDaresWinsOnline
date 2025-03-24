@@ -241,11 +241,12 @@ export class Enemy extends Actor {
                         entity.setOccupation(this);
                         this.hideOut = entity;
                         //this.hideOut.enemyBulletCollider.active = false;
-                        this.setPosition(entity.x + hideOutInfo.hideOutX, entity.y + hideOutInfo.hideOutY);
+                        this.setPosition(entity.x + hideOutInfo.hideOutX -this.sprite.width /2, entity.y + hideOutInfo.hideOutY - 11);
                         this.getBody().setVelocityX(0);
                         this.getBody().setVelocityY(0);
                         this.enterState(EnemyState.SNIPER);
                         result = true;
+                        console.log("enemy found a hideout!")
                         return;
                     }
                 }

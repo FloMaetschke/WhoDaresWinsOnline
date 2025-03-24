@@ -67,26 +67,33 @@
          "width":3,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":6,
+         "name":"Objects",
+         "objects":[
+                {
+                 "height":0,
+                 "id":1,
+                 "name":"Rock Hideout",
+                 "point":true,
+                 "rotation":0,
+                 "type":"Hideout",
+                 "visible":true,
+                 "width":0,
+                 "x":12,
+                 "y":0
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":6,
- "nextobjectid":1,
+ "nextlayerid":7,
+ "nextobjectid":2,
  "orientation":"orthogonal",
- "properties":[
-        {
-         "name":"hideOut",
-         "type":"bool",
-         "value":true
-        }, 
-        {
-         "name":"hideOutX",
-         "type":"int",
-         "value":5
-        }, 
-        {
-         "name":"hideOutY",
-         "type":"int",
-         "value":-11
-        }],
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
  "tileheight":8,

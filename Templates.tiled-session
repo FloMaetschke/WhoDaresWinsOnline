@@ -16,7 +16,7 @@
         },
         "public/assets/templates/outpost.tmj": {
             "scale": 3,
-            "selectedLayer": 1,
+            "selectedLayer": 0,
             "viewCenter": {
                 "x": 188.16666666666663,
                 "y": 70.16666666666666
