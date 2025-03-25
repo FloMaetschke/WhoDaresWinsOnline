@@ -225,6 +225,29 @@
                  "width":0,
                  "x":250,
                  "y":72
+                }, 
+                {
+                 "height":0,
+                 "id":4,
+                 "name":"Outpost Spawn",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"maxAmount",
+                         "type":"int",
+                         "value":15
+                        }, 
+                        {
+                         "name":"minAmount",
+                         "type":"int",
+                         "value":3
+                        }],
+                 "rotation":0,
+                 "type":"Spawner",
+                 "visible":true,
+                 "width":0,
+                 "x":125.5,
+                 "y":66.75
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -233,7 +256,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":4,
+ "nextobjectid":6,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

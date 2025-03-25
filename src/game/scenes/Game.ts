@@ -104,6 +104,7 @@ export class Game extends Scene {
         });
         this.player.update();
         this.gameMap.updateChunks(this.player);
+        this.enemySpawner.update();
        // this.fontTest.setPosition(this.cameras.main.scrollX + this.screenSetup.getVirtualWidth()/2 - this.fontTest.width/2, this.cameras.main.scrollY + this.screenSetup.getVirtualHeight()/2);
     }
 

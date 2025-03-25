@@ -1,4 +1,4 @@
-const DEBUG = false;
+const DEBUG = true;
 
 export interface MapObject {
     height: number;
@@ -11,6 +11,7 @@ export interface MapObject {
     width: number;
     x: number;
     y: number;
+    properties?: { name: string; type: string; value: any }[];
 }
 
 export class DimetricMap extends Phaser.GameObjects.GameObject {
@@ -63,27 +64,32 @@ export class DimetricMap extends Phaser.GameObjects.GameObject {
         this.width = entityJson.width;
         this.height = entityJson.height;
 
-        
         const entityLayers = entityJson.layers;
         if (entityLayers) {
             const backgroundLayer = entityLayers.find(
-                (layer: { name: string }) => layer.name?.toLowerCase() === "background"
+                (layer: { name: string }) =>
+                    layer.name?.toLowerCase() === "background"
             );
             const blockLayer = entityLayers.find(
-                (layer: { name: string }) => layer.name?.toLowerCase() === "block"
+                (layer: { name: string }) =>
+                    layer.name?.toLowerCase() === "block"
             );
             const height1Layer = entityLayers.find(
-                (layer: { name: string }) => layer.name?.toLowerCase() === "height1"
+                (layer: { name: string }) =>
+                    layer.name?.toLowerCase() === "height1"
             );
             const height2Layer = entityLayers.find(
-                (layer: { name: string }) => layer.name?.toLowerCase() === "height2"
+                (layer: { name: string }) =>
+                    layer.name?.toLowerCase() === "height2"
             );
             const height3Layer = entityLayers.find(
-                (layer: { name: string }) => layer.name?.toLowerCase() === "height3"
+                (layer: { name: string }) =>
+                    layer.name?.toLowerCase() === "height3"
             );
 
             const objectsLayer = entityLayers.find(
-                (layer: { name: string }) => layer.name?.toLowerCase() === "objects"
+                (layer: { name: string }) =>
+                    layer.name?.toLowerCase() === "objects"
             );
 
             this.objects = objectsLayer?.objects || [];
@@ -144,7 +150,6 @@ export class DimetricMap extends Phaser.GameObjects.GameObject {
             }
         }
 
-
         if (DEBUG) {
             const rect = this.scene.add
                 .rectangle(
@@ -157,15 +162,9 @@ export class DimetricMap extends Phaser.GameObjects.GameObject {
                 )
                 .setDepth(10000);
 
-            const hideOut= this.objects.find(
-                (x) => x.type.toLowerCase() === "hideout"
-            );
-
-            if (hideOut) {
-                const posX =
-                    this.offsetX  + hideOut.x;
-                const posY =
-                    this.offsetY  + hideOut.y;
+            for (const o of this.objects) {
+                const posX = this.offsetX + o.x;
+                const posY = this.offsetY + o.y;
 
                 this.scene.add
                     .rectangle(posX, posY, 1, 16, 0xffff00)
@@ -184,7 +183,6 @@ export class DimetricMap extends Phaser.GameObjects.GameObject {
 
             //console.log(key, this.width, this.height);
         }
-
     }
 
     destroy() {

@@ -494,6 +494,7 @@ export class GameMap {
                 );
                 entities.push(entity);
                 this.allEntities.add(entity);
+                entity.applySpawnLocations((this.scene as Game)?.enemySpawner.spawnLocations);
             }
         }
     }

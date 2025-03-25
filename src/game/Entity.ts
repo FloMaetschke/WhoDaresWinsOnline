@@ -131,6 +131,41 @@ export class Entity extends Phaser.GameObjects.Container {
         return false;
     }
 
+    applySpawnLocations(
+        spawnLocations:
+            | Map<string, { x: number; y: number; count: number }>
+            | undefined
+    ) {
+        if (spawnLocations) {
+            this.dimetricMap.objects
+                .filter((o) => o.type.toLowerCase() === "spawner")
+                .forEach((o) => {
+                    if (spawnLocations.has(`${this.x + o.x}_${this.y + o.y}`))
+                        return;
+                    const newSpawnPoint = {
+                        x: this.x + o.x,
+                        y: this.y + o.y,
+                        count: Phaser.Math.Between(
+                            o.properties?.find((p) => p.name.toLowerCase() === "minamount")
+                                ?.value as number,
+                            o.properties?.find((p) => p.name.toLowerCase() === "maxamount")
+                                ?.value as number
+                        ),
+                    };
+                    spawnLocations.set(
+                        `${this.x + o.x}_${this.y + o.y}`,
+                        newSpawnPoint
+                    );
+                    console.log(
+                        "Spawner added at: ",
+                        this.x + o.x,
+                        this.y + o.y,
+                        newSpawnPoint
+                    );
+                });
+        }
+    }
+
     destroy() {
         this.collider?.destroy();
         this.bulletCollider?.destroy();
