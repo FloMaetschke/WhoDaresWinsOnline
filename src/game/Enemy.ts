@@ -33,6 +33,7 @@ export class Enemy extends Actor {
         timer: 0,
     };
     hideOut: import("d:/Who Dares Wins Online/src/game/Entity").Entity;
+    hideOutId: number;
 
     constructor(public scene: Game, x: number, y: number, target: Player) {
         super(scene, x, y, "enemy-down-right-0");
@@ -134,7 +135,8 @@ export class Enemy extends Actor {
                 break;
 
             case EnemyState.LEAVE_SNIPER:
-                this.hideOut.setOccupation(undefined);
+                this.hideOut.setOccupation(undefined, this.hideOutId);
+                this.hideOutId = 0;
                 this.sprite.play("enemy-up");
                 this.hideOut.enemyBulletCollider.active = true;
                 this.getBody().setVelocityY(-1 * this.speed);
@@ -228,26 +230,38 @@ export class Enemy extends Actor {
         if (this.y > this.scene.player.y - 20) return false; // Nicht unterhalb vom Player in die Deckung gehen!
         let result = false;
         this.scene.gameMap.allEntities.forEach((entity) => {
-            const hideOutInfo = entity?.getHideOutInfo();
-            if (hideOutInfo?.hideOut) {
-                //filter
-                if (
-                    Phaser.Math.Distance.BetweenPoints(
-                        { x: this.x, y: this.y },
-                        { x: entity.x + hideOutInfo.hideOutX, y: entity.y + hideOutInfo.hideOutY }
-                    ) < 20 // Distanz zur deckung
-                ) {
-                    if (!entity.isOccupied()) {
-                        entity.setOccupation(this);
-                        this.hideOut = entity;
-                        //this.hideOut.enemyBulletCollider.active = false;
-                        this.setPosition(entity.x + hideOutInfo.hideOutX -this.sprite.width /2, entity.y + hideOutInfo.hideOutY - 11);
-                        this.getBody().setVelocityX(0);
-                        this.getBody().setVelocityY(0);
-                        this.enterState(EnemyState.SNIPER);
-                        result = true;
-                        console.log("enemy found a hideout!")
-                        return;
+            const hideOutInfos = entity?.getHideOutInfos();
+
+            for (const hideOutInfo of hideOutInfos) {
+                if (hideOutInfo?.hideOut) {
+                    //filter
+                    if (
+                        Phaser.Math.Distance.BetweenPoints(
+                            { x: this.x, y: this.y },
+                            {
+                                x: entity.x + hideOutInfo.hideOutX,
+                                y: entity.y + hideOutInfo.hideOutY,
+                            }
+                        ) < 20 // Distanz zur deckung
+                    ) {
+                        if (!entity.isOccupied(hideOutInfo.id)) {
+                            entity.setOccupation(this, hideOutInfo.id);
+                            this.hideOut = entity;
+                            this.hideOutId= hideOutInfo.id;
+                            //this.hideOut.enemyBulletCollider.active = false;
+                            this.setPosition(
+                                entity.x +
+                                    hideOutInfo.hideOutX -
+                                    this.sprite.width / 2,
+                                entity.y + hideOutInfo.hideOutY - 11
+                            );
+                            this.getBody().setVelocityX(0);
+                            this.getBody().setVelocityY(0);
+                            this.enterState(EnemyState.SNIPER);
+                            result = true;
+                            console.log("enemy found a hideout!");
+                            return;
+                        }
                     }
                 }
             }

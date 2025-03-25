@@ -69,19 +69,26 @@ export class Entity extends Phaser.GameObjects.Container {
         this.dimetricMap.setTilesFromEntityType(this.entityType);
     }
 
-    getHideOutInfo():
-        | { hideOutX: number; hideOutY: number; hideOut: boolean }
-        | undefined {
-        const hideOut = this.dimetricMap.objects.find(x => x.type.toLowerCase() === 'hideout');
-        
-        if (hideOut) {
-            return {
-                hideOutX: hideOut.x,
-                hideOutY: hideOut.y,
-                hideOut: true,
-            };
+    getHideOutInfos():
+        | {
+              hideOutX: number;
+              hideOutY: number;
+              hideOut: boolean;
+              id: number;
+          }[] {
+        const result = [];
+        for (let i = 0; i < this.dimetricMap.objects.length; i++) {
+            const object = this.dimetricMap.objects[i];
+            if (object.type.toLowerCase() === "hideout") {
+                result.push({
+                    hideOutX: object.x,
+                    hideOutY: object.y,
+                    hideOut: true,
+                    id: i,
+                });
+            }
         }
-        return undefined;
+        return result;
     }
 
     entityWidth() {
@@ -98,19 +105,30 @@ export class Entity extends Phaser.GameObjects.Container {
     }
 
     public setOccupation(
-        occupiedBy: Phaser.GameObjects.GameObject | undefined
+        occupiedBy: Phaser.GameObjects.GameObject | undefined,
+        id: number
     ) {
-        this.setData(OCCUPIED_BY, occupiedBy);
+        //this.setData(OCCUPIED_BY, occupiedBy);
+        this.setData(OCCUPIED_BY + "_" + id, occupiedBy);
     }
 
-    public isOccupied(): boolean {
-        return this.getData(OCCUPIED_BY) !== undefined;
+    public isOccupied(id: number): boolean {
+        return this.getData(OCCUPIED_BY + "_" + id) !== undefined;
     }
 
     private checkOccupationIsShooter(
         bullet: Phaser.GameObjects.Image
     ): boolean {
-        return this.getData(OCCUPIED_BY) === bullet.getData(SHOOTER);
+        const infos = this.getHideOutInfos();
+        for (const info of infos) {
+            if (
+                this.getData(OCCUPIED_BY + "_" + info.id) ===
+                bullet.getData(SHOOTER)
+            ) {
+                return true;
+            }
+        }
+        return false;
     }
 
     destroy() {
